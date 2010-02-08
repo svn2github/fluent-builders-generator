@@ -133,12 +133,12 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
     }
 
     public void addFieldBuilder(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
-        String fieldClassQName = getClassQName(fieldTypeDescriptor);
+        String fieldTypeName = getType(fieldTypeDescriptor);
         String methodName = prefixed(setterPrefix, fieldName);
         String innerBuilderName = getClassName(fieldTypeDescriptor) + BUILDER_SUFFIX;
         String fieldBuilderName = capitalize(fieldName + innerBuilderName);
 
-        generateBuilderSetter(fieldName, fieldClassQName, methodName, exceptions, fieldBuilderName,
+        generateBuilderSetter(fieldName, fieldTypeName, methodName, exceptions, fieldBuilderName,
                 innerBuilderName, builderClassName, builderClassName, false);
     }
 
@@ -288,7 +288,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
                 getterName(collectionFieldName));
         addEmptyLine();
         if (castBuilderType) {
-            endMethod("(%s)this", builderType);
+            endMethod("(%s) this", builderType);
         } else {
             endMethod("this");
         }
@@ -300,7 +300,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         addCodeLine("instance.%s(aValue);", setterName(fieldName));
         addEmptyLine();
         if (castBuilderType) {
-            endMethod("(%s)this", builderType);
+            endMethod("(%s) this", builderType);
         } else {
             endMethod("this");
         }

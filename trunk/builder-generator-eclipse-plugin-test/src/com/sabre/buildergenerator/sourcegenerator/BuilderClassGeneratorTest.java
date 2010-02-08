@@ -143,7 +143,7 @@ public class BuilderClassGeneratorTest extends TestCase {
         assertEquals("Builder source mismatch", expectedBuilderSource, builderSource);
     }
 
-    public void testGenerateSimpleObjectSetterWithForignPackage() throws Exception {
+    public void testGenerateSimpleObjectSetterWithForeignPackage() throws Exception {
         IType buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
@@ -434,7 +434,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("        public T withDataField(java.lang.String aValue) {")
             .withSourceLine("            instance.setDataField(aValue);")
             .withSourceLine("")
-            .withSourceLine("            return (T)this;")
+            .withSourceLine("            return (T) this;")
             .withSourceLine("        }")
             .withSourceLine("    }")
             .buildSource();
@@ -511,7 +511,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("        public T withDataFields(java.util.List<java.lang.String> aValue) {")
             .withSourceLine("            instance.setDataFields(aValue);")
             .withSourceLine("")
-            .withSourceLine("            return (T)this;")
+            .withSourceLine("            return (T) this;")
             .withSourceLine("        }")
             .withSourceLine("")
             .withSourceLine("        public T withAddedDataField(java.lang.String aValue) {")
@@ -521,7 +521,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("")
             .withSourceLine("            ((java.util.ArrayList<java.lang.String>)instance.getDataFields()).add(aValue);")
             .withSourceLine("")
-            .withSourceLine("            return (T)this;")
+            .withSourceLine("            return (T) this;")
             .withSourceLine("        }")
             .withSourceLine("    }")
             .buildSource();
@@ -612,7 +612,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("        public T withDataField(testpkg.MyData2 aValue) {")
             .withSourceLine("            instance.setDataField(aValue);")
             .withSourceLine("")
-            .withSourceLine("            return (T)this;")
+            .withSourceLine("            return (T) this;")
             .withSourceLine("        }")
             .withSourceLine("")
             .withSourceLine("        public DataFieldMyData2Builder withDataField() {")
@@ -627,7 +627,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("            }")
             .withSourceLine("")
             .withSourceLine("            public T endDataField() {")
-            .withSourceLine("                return (T)MyDataBuilder.this;")
+            .withSourceLine("                return (T) MyDataBuilder.this;")
             .withSourceLine("            }")
             .withSourceLine("        }")
             .withSourceLine("    }")
@@ -642,7 +642,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("        public T withData2Field(java.lang.String aValue) {")
             .withSourceLine("            instance.setData2Field(aValue);")
             .withSourceLine("")
-            .withSourceLine("            return (T)this;")
+            .withSourceLine("            return (T) this;")
             .withSourceLine("        }")
             .withSourceLine("    }")
             .buildSource();
@@ -734,7 +734,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("        public T withDataFields(java.util.List<testpkg.MyData2> aValue) {")
             .withSourceLine("            instance.setDataFields(aValue);")
             .withSourceLine("")
-            .withSourceLine("            return (T)this;")
+            .withSourceLine("            return (T) this;")
             .withSourceLine("        }")
             .withSourceLine("")
             .withSourceLine("        public T withAddedDataField(testpkg.MyData2 aValue) {")
@@ -744,7 +744,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("")
             .withSourceLine("            ((java.util.ArrayList<testpkg.MyData2>)instance.getDataFields()).add(aValue);")
             .withSourceLine("")
-            .withSourceLine("            return (T)this;")
+            .withSourceLine("            return (T) this;")
             .withSourceLine("        }")
             .withSourceLine("")
             .withSourceLine("        public DataFieldMyData2Builder withAddedDataField() {")
@@ -759,7 +759,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("            }")
             .withSourceLine("")
             .withSourceLine("            public T endDataField() {")
-            .withSourceLine("                return (T)MyDataBuilder.this;")
+            .withSourceLine("                return (T) MyDataBuilder.this;")
             .withSourceLine("            }")
             .withSourceLine("        }")
             .withSourceLine("    }")
@@ -774,7 +774,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("        public T withData2Field(java.lang.String aValue) {")
             .withSourceLine("            instance.setData2Field(aValue);")
             .withSourceLine("")
-            .withSourceLine("            return (T)this;")
+            .withSourceLine("            return (T) this;")
             .withSourceLine("        }")
             .withSourceLine("    }")
             .buildSource();
@@ -812,6 +812,67 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("        instance.setField(aValue);")
             .withSourceLine("")
             .withSourceLine("        return this;")
+            .withSourceLine("    }")
+            .buildSource();
+        assertEquals("Builder source mismatch", expectedBuilderSource, builderSource);
+    }
+
+    public void testGenerateParametrizedTypeFieldSetter() throws Exception {
+        buildJavaSource().forPackage("testpkg").forClassName("A")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class A<T> {")
+            .withSourceLine("}")
+            .buildFile();
+        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class MyClass {")
+            .withSourceLine("    private A<String> field;")
+            .withSourceLine("")
+            .withSourceLine("    public A<String> getField() {")
+            .withSourceLine("        return field;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setField(A<String> aField) {")
+            .withSourceLine("        field = aField;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+
+        // when
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+
+        // then
+        String expectedBuilderSource = buildBuilderSource("builderpkg", "GeneratedBuilder")
+            .withSourceLine("    public GeneratedBuilder withField(testpkg.A<java.lang.String> aValue) {")
+            .withSourceLine("        instance.setField(aValue);")
+            .withSourceLine("")
+            .withSourceLine("        return this;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public FieldABuilder withField() {")
+            .withSourceLine("        testpkg.A<java.lang.String> field = new testpkg.A<java.lang.String>();")
+            .withSourceLine("")
+            .withSourceLine("        return withField(field).new FieldABuilder(field);")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public class FieldABuilder extends ABuilder<FieldABuilder> {")
+            .withSourceLine("        public FieldABuilder(testpkg.A<java.lang.String> aInstance) {")
+            .withSourceLine("            super(aInstance);")
+            .withSourceLine("        }")
+            .withSourceLine("")
+            .withSourceLine("        public GeneratedBuilder endField() {")
+            .withSourceLine("            return GeneratedBuilder.this;")
+            .withSourceLine("        }")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public static class ABuilder<T extends ABuilder> {")
+            .withSourceLine("        private testpkg.A instance;")
+            .withSourceLine("")
+            .withSourceLine("        private ABuilder(testpkg.A aInstance) {")
+            .withSourceLine("            instance = aInstance;")
+            .withSourceLine("        }")
             .withSourceLine("    }")
             .buildSource();
         assertEquals("Builder source mismatch", expectedBuilderSource, builderSource);

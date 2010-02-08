@@ -108,7 +108,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         out.println("public class " + builderClassName + " {");
         out.println("    private " + buildClassType + " instance;");
         out.println();
-        out.println("    public static " + builderClassName + " build" + buildClassName + "() {");
+        out.println("    public static " + builderClassName + " " + toLowerCaseStart(buildClassName) + "() {");
         out.println("        return new " + builderClassName + "();");
         out.println("    }");
         out.println();
@@ -136,7 +136,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         String fieldTypeName = getType(fieldTypeDescriptor);
         String methodName = prefixed(setterPrefix, fieldName);
         String innerBuilderName = getClassName(fieldTypeDescriptor) + BUILDER_SUFFIX;
-        String fieldBuilderName = capitalize(fieldName + innerBuilderName);
+        String fieldBuilderName = toUpperCaseStart(fieldName + innerBuilderName);
 
         generateBuilderSetter(fieldName, fieldTypeName, methodName, exceptions, fieldBuilderName,
                 innerBuilderName, builderClassName, builderClassName, false);
@@ -157,7 +157,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         String elementType = getType(elementTypeDescriptor);
         String fieldClassName = getClassName(elementTypeDescriptor);
         String innerBuilderName = fieldClassName + BUILDER_SUFFIX;
-        String fieldBuilderName = capitalize(elementName + innerBuilderName);
+        String fieldBuilderName = toUpperCaseStart(elementName + innerBuilderName);
         String methodName = prefixed(collectionElementSetterPrefix, elementName);
 
         generateBuilderSetter(elementName, elementType, methodName, exceptions, fieldBuilderName,
@@ -193,7 +193,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         String fieldClassName = getClassName(fieldTypeDescriptor);
         String fieldClassQName = getClassQName(fieldTypeDescriptor);
         String innerBuilderName = fieldClassName + BUILDER_SUFFIX;
-        String fieldBuilderName = capitalize(fieldName + innerBuilderName);
+        String fieldBuilderName = toUpperCaseStart(fieldName + innerBuilderName);
         String methodName = prefixed(setterPrefix, fieldName);
 
         generateBuilderSetter(fieldName, fieldClassQName, methodName, exceptions, fieldBuilderName,
@@ -215,7 +215,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         String elementType = getType(elementTypeDescriptor);
         String fieldClassName = getClassName(elementTypeDescriptor);
         String innerBuilderName = fieldClassName + BUILDER_SUFFIX;
-        String fieldBuilderName = capitalize(elementName + innerBuilderName);
+        String fieldBuilderName = toUpperCaseStart(elementName + innerBuilderName);
         String methodName = prefixed(collectionElementSetterPrefix, elementName);
 
         generateBuilderSetter(elementName, elementType, methodName, exceptions, fieldBuilderName,
@@ -246,10 +246,18 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         }
     }
 
-    private String capitalize(String name) {
+    private String toUpperCaseStart(String name) {
         StringBuilder buf = new StringBuilder(name);
 
         buf.setCharAt(0, Character.toUpperCase(buf.charAt(0)));
+
+        return buf.toString();
+    }
+
+    private String toLowerCaseStart(String name) {
+        StringBuilder buf = new StringBuilder(name);
+
+        buf.setCharAt(0, Character.toLowerCase(buf.charAt(0)));
 
         return buf.toString();
     }

@@ -12,9 +12,14 @@
 
 package com.sabre.buildergenerator.ui.wizard;
 
+import com.sabre.buildergenerator.Activator;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.Wizard;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 
 /**
@@ -28,6 +33,7 @@ import org.eclipse.jface.wizard.Wizard;
  */
 
 public class GenerateBuilderWizard extends Wizard {
+    private static final String IMAGE_URL_STRING = "images/logo.png";
     private final GenerateBuilderWizardPage generateBuilderWizardPage;
 
     public GenerateBuilderWizard(BuilderGenerationProperties properties) {
@@ -35,11 +41,28 @@ public class GenerateBuilderWizard extends Wizard {
 
         this.addPage(generateBuilderWizardPage);
         this.setWindowTitle("Generate builder");
+        this.setDefaultPageImageDescriptor(createLogoDescriptor());
     }
 
     /**
      * @return
      */
+    private ImageDescriptor createLogoDescriptor() {
+        URL url = null;
+
+        try {
+            url = new URL(Activator.getDefault().getBundle().getEntry("/"), IMAGE_URL_STRING);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        return ImageDescriptor.createFromURL(url);
+    }
+
+    /**
+    * @return
+    */
     public BuilderGenerationProperties getBuilderGenerationProperties() {
         return generateBuilderWizardPage.getBuilderGenerationProperties();
     }

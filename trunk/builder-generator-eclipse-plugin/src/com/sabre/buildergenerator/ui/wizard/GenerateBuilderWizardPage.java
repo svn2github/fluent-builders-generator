@@ -1,14 +1,13 @@
-/*
-* Copyright (c) 2009 by Sabre Holdings Corp.
-* 3150 Sabre Drive, Southlake, TX 76092 USA
-* All rights reserved.
-*
-* This software is the confidential and proprietary information
-* of Sabre Holdings Corporation ("Confidential Information").
-* You shall not disclose such Confidential Information and shall
-* use it only in accordance with the terms of the license agreement
-* you entered into with Sabre Holdings Corporation.
-*/
+/**
+ * Copyright (c) 2009-2010 fluent-builder-generator for Eclipse commiters.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Sabre Polska sp. z o.o. - initial implementation during Hackday
+ */
 
 package com.sabre.buildergenerator.ui.wizard;
 

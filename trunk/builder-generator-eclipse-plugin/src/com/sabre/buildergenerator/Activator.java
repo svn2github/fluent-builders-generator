@@ -6,8 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Sabre Polska sp. z o.o. - initial implementation on Hackday
- *
+ *    Sabre Polska sp. z o.o. - initial implementation during Hackday
  */
 
 package com.sabre.buildergenerator;

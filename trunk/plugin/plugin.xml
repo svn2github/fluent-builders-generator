@@ -9,7 +9,7 @@
          <action 
                class="com.sabre.buildergenerator.ui.actions.GenerateBuilderCompilationUnitEditorAction"
                id="builder-generator-eclipse-plugin.generateBuilderCompliationUnitEditorPopupMenuAction"
-               label="Generate builder.."
+               label="Generate Fluent Builder..."
                menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup">
          </action>
       </viewerContribution>
@@ -20,7 +20,7 @@
          <action
                class="com.sabre.buildergenerator.ui.actions.GenerateBuilderForITypeAction"
                id="builder-generator-eclipse-plugin.itypeGenerateAction"
-               label="Generate builder.."
+               label="Generate Fluent Builder..."
                menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup">
          </action>
       </objectContribution>
@@ -30,8 +30,8 @@
       <menuContribution
             locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
          <command
-               commandId="com.sabre.hackday.buildergenerator.generateBuilder"
-               label="Generate Builder for top level type"
+               commandId="com.sabre.buildergenerator.generateBuilder"
+               label="Generate Fluent Builder..."
                style="push">
             <visibleWhen
                   checkEnabled="false">
@@ -51,15 +51,15 @@
          point="org.eclipse.ui.handlers">
       <handler
             class="com.sabre.buildergenerator.ui.handler.GenerateBuilder"
-            commandId="com.sabre.hackday.buildergenerator.generateBuilder">
+            commandId="com.sabre.buildergenerator.generateBuilder">
       </handler>
    </extension>
    <extension
-         id="com.sabre.hackday.buildergenerator.generateBuilder"
+         id="com.sabre.buildergenerator.generateBuilder"
          name="Generate Builder"
          point="org.eclipse.ui.commands">
       <command
-            id="com.sabre.hackday.buildergenerator.generateBuilder"
+            id="com.sabre.buildergenerator.generateBuilder"
             name="Generate Fluent Builder">
       </command>
    </extension>

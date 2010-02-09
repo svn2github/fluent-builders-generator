@@ -200,9 +200,13 @@ public class BuilderGenerator {
                 concreteListType = "java.util.HashSet";
             }
 
-            String collectionQName = SignatureResolver.resolveSignature(enclosingType, fieldTypeSignature);
-            String elementTypeSignature = collectionQName.substring(collectionQName.indexOf('<') + 1,
-                    collectionQName.lastIndexOf('>'));
+            String resolvedFieldTypeSignature = SignatureResolver.resolveSignature(enclosingType, fieldTypeSignature);
+            String fieldTypeArgumentSignature = Signature.getTypeArguments(resolvedFieldTypeSignature)[0];
+            String elementTypeSignature =
+                fieldTypeArgumentSignature.startsWith("+") || fieldTypeArgumentSignature.startsWith("-")
+                ? fieldTypeArgumentSignature.substring(1)
+                : fieldTypeArgumentSignature.equals("*") ? "Qjava.lang.Object;" : fieldTypeArgumentSignature;
+
             IType resolveElementType = SignatureResolver.resolveType(enclosingType, elementTypeSignature);
 
             if (resolveElementType.isClass() && resolveElementType.isStructureKnown()

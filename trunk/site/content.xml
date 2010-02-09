@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<?metadataRepository version='1.1.0'?>
+<?metadataRepository class='org.eclipse.equinox.internal.p2.metadata.repository.LocalMetadataRepository' version='1.0.0'?>
 <repository name='${p2.metadata.repo.name}' type='org.eclipse.equinox.internal.p2.metadata.repository.LocalMetadataRepository' version='1.0.0'>
   <properties size='2'>
     <property name='p2.compressed' value='false'/>
-    <property name='p2.timestamp' value='1265669201973'/>
+    <property name='p2.timestamp' value='1265712585522'/>
   </properties>
   <units size='9'>
     <unit id='tooling.org.eclipse.update.feature.default' version='1.0.0' singleton='false'>
@@ -142,11 +142,11 @@
         </instructions>
       </touchpointData>
       <licenses size='1'>
-        <license uri='http://www.example.com/license' url='http://www.example.com/license'>
+        <license url='http://www.example.com/license'>
           [Enter License Description here.]
         </license>
       </licenses>
-      <copyright uri='http://www.example.com/copyright' url='http://www.example.com/copyright'>
+      <copyright url='http://www.example.com/copyright'>
         [Enter Copyright Description here.]
       </copyright>
     </unit>
@@ -185,11 +185,11 @@
       </requires>
       <touchpoint id='null' version='0.0.0'/>
       <licenses size='1'>
-        <license uri='http://www.example.com/license' url='http://www.example.com/license'>
+        <license url='http://www.example.com/license'>
           [Enter License Description here.]
         </license>
       </licenses>
-      <copyright uri='http://www.example.com/copyright' url='http://www.example.com/copyright'>
+      <copyright url='http://www.example.com/copyright'>
         [Enter Copyright Description here.]
       </copyright>
     </unit>

@@ -11,6 +11,9 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
+import com.sabre.buildergenerator.signatureutils.SignatureResolver;
+import com.sabre.buildergenerator.sourcegenerator.TypeHelper.MethodInspector;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -23,9 +26,6 @@ import org.eclipse.jface.text.Document;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-
-import com.sabre.buildergenerator.signatureutils.SignatureResolver;
-import com.sabre.buildergenerator.sourcegenerator.TypeHelper.MethodInspector;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -54,8 +54,7 @@ public class BuilderGenerator {
     }
 
     public String generateSource(final IType type, String packageName, String builderName, String[] fieldNames,
-        String setterPrefix, String collectionSetterPrefix, String endPrefix, boolean doFormat)
-        throws Exception {
+        String setterPrefix, String collectionSetterPrefix, String endPrefix, boolean doFormat) throws Exception {
         final BuilderSourceGenerator generator = new BuilderSourceGenerator();
 
         generator.setSetterPrefix(setterPrefix);
@@ -68,36 +67,39 @@ public class BuilderGenerator {
 
         generator.startBuilderClass(getFullyQualifiedTypeName(type), packageName, builderName);
 
-        final Set<String> fieldNamesSet = fieldNames != null && fieldNames.length > 0 ?
-                new HashSet<String>(Arrays.asList(fieldNames)) : null;
+        final Set<String> fieldNamesSet = fieldNames != null && fieldNames.length > 0
+            ? new HashSet<String>(Arrays.asList(fieldNames)) : null;
 
         TypeHelper.findSetterMethods(type, new MethodInspector() {
-            public void nextMethod(IMethod method, Map<String, String> parameterSubstitution) throws Exception {
-                String fieldName = fieldNameFromSetterName(method.getElementName());
+                public void nextMethod(IMethod method, Map<String, String> parameterSubstitution) throws Exception {
+                    String fieldName = fieldNameFromSetterName(method.getElementName());
 
-                if (fieldNamesSet == null || fieldNamesSet.contains(fieldName)) {
-                    try {
-                        String parameterTypeSignature = method.getParameterTypes()[0];
-                        String resolveTypeSignature = SignatureResolver.resolveTypeWithParameterMapping(type, parameterTypeSignature, parameterSubstitution);
-                        String parameterType = SignatureResolver.signatureToTypeName(resolveTypeSignature);
+                    if (fieldNamesSet == null || fieldNamesSet.contains(fieldName)) {
+                        try {
+                            String parameterTypeSignature = method.getParameterTypes()[0];
+                            String resolveTypeSignature = SignatureResolver.resolveTypeWithParameterMapping(type,
+                                    parameterTypeSignature, parameterSubstitution);
+                            String parameterType = SignatureResolver.signatureToTypeName(resolveTypeSignature);
 
-                        String[] exceptionTypes = method.getExceptionTypes();
+                            String[] exceptionTypes = method.getExceptionTypes();
 
-                        for (int i = 0; i < exceptionTypes.length; i++) {
-                            exceptionTypes[i] = SignatureResolver.resolveTypeWithParameterMapping(type, exceptionTypes[i], parameterSubstitution);
-                            exceptionTypes[i] = SignatureResolver.signatureToTypeName(exceptionTypes[i]);
-                        }
+                            for (int i = 0; i < exceptionTypes.length; i++) {
+                                exceptionTypes[i] = SignatureResolver.resolveTypeWithParameterMapping(type,
+                                        exceptionTypes[i], parameterSubstitution);
+                                exceptionTypes[i] = SignatureResolver.signatureToTypeName(exceptionTypes[i]);
+                            }
 
-                        generateSimpleSetter(generator, exceptionTypes, fieldName, parameterType);
-                        generateCollectionAdder(generator, exceptionTypes, fieldName, parameterType);
-                        generateCollectionBuilder(generator, type, exceptionTypes, fieldName, parameterType,
+                            generateSimpleSetter(generator, exceptionTypes, fieldName, parameterType);
+                            generateCollectionAdder(generator, exceptionTypes, fieldName, parameterType);
+                            generateCollectionBuilder(generator, type, exceptionTypes, fieldName, parameterType,
                                 resolveTypeSignature);
-                        generateClassSetter(generator, type, exceptionTypes, fieldName, parameterType, resolveTypeSignature);
-                    } catch (JavaModelException e) {
+                            generateClassSetter(generator, type, exceptionTypes, fieldName, parameterType,
+                                resolveTypeSignature);
+                        } catch (JavaModelException e) {
+                        }
                     }
                 }
-            }
-        });
+            });
 
         generateInnerBuilders(generator, type);
 
@@ -173,8 +175,7 @@ public class BuilderGenerator {
     }
 
     private void generateCollectionBuilder(BuilderSourceGenerator generator, IType enclosingType,
-        String[] exceptionTypes, String fieldName, String fieldType, String fieldTypeSignature)
-        throws Exception {
+        String[] exceptionTypes, String fieldName, String fieldType, String fieldTypeSignature) throws Exception {
         boolean isCollection = fieldType.startsWith("java.util.Collection<");
         boolean isList = fieldType.startsWith("java.util.List<");
         boolean isArrayList = fieldType.startsWith("java.util.ArrayList<");
@@ -208,7 +209,8 @@ public class BuilderGenerator {
                     && !resolveElementType.isBinary()) {
                 generator.addCollectionElementBuilder(fieldName, fieldType, elementName, concreteListType,
                     exceptionTypes);
-                addTypeToGenerateInnerBuilder(Signature.createTypeSignature(resolveElementType.getFullyQualifiedName(), true));
+                addTypeToGenerateInnerBuilder(Signature.createTypeSignature(resolveElementType.getFullyQualifiedName(),
+                        true));
             }
         }
     }
@@ -233,7 +235,8 @@ public class BuilderGenerator {
         throws Exception {
         while (!typesToGenerateInnerBuilders.isEmpty()) {
             String typeSignature = typesToGenerateInnerBuilders.iterator().next();
-            String type = SignatureResolver.signatureToTypeName(SignatureResolver.resolveSignature(enclosingType, typeSignature));
+            String type = SignatureResolver.signatureToTypeName(SignatureResolver.resolveSignature(enclosingType,
+                        typeSignature));
 
             generator.startInnerBuilderClass(type); // following methods might add elements to typesUsed
 
@@ -242,35 +245,38 @@ public class BuilderGenerator {
             final Set<String> fieldNamesSet = null; //fieldNames != null && fieldNames.length > 0 ? new HashSet<String>(Arrays.asList(fieldNames)) : null;
 
             TypeHelper.findSetterMethods(resolvedType, new MethodInspector() {
+                    public void nextMethod(IMethod method, Map<String, String> parameterSubstitution) throws Exception {
+                        String fieldName = fieldnameFromSetter(method);
 
-                public void nextMethod(IMethod method, Map<String, String> parameterSubstitution) throws Exception {
-                    String fieldName = fieldnameFromSetter(method);
+                        if (fieldNamesSet == null || fieldNamesSet.contains(fieldName)) {
+                            try {
+                                String parameterTypeSignature = method.getParameterTypes()[0];
+                                String qualifiedParameterTypeSignature = SignatureResolver.resolveSignature(
+                                        resolvedType, parameterTypeSignature);
+                                String parameterType1 = SignatureResolver.signatureToTypeName(
+                                        qualifiedParameterTypeSignature);
+                                //IType parameterIType = TypeHelper.resolveType(enclosingType, qualifiedParameterTypeSignature);
 
-                    if (fieldNamesSet == null || fieldNamesSet.contains(fieldName)) {
-                        try {
-                            String parameterTypeSignature = method.getParameterTypes()[0];
-                            String qualifiedParameterTypeSignature = SignatureResolver.resolveSignature(resolvedType, parameterTypeSignature);
-                            String parameterType1 = SignatureResolver.signatureToTypeName(qualifiedParameterTypeSignature);
-                            //IType parameterIType = TypeHelper.resolveType(enclosingType, qualifiedParameterTypeSignature);
+                                String[] exceptionTypes;
 
-                            String[] exceptionTypes;
-                            exceptionTypes = method.getExceptionTypes();
+                                exceptionTypes = method.getExceptionTypes();
 
-                            for (int i = 0; i < exceptionTypes.length; i++) {
-                                exceptionTypes[i] = SignatureResolver.signatureToTypeName(SignatureResolver.resolveSignature(enclosingType, exceptionTypes[i]));
+                                for (int i = 0; i < exceptionTypes.length; i++) {
+                                    exceptionTypes[i] = SignatureResolver.signatureToTypeName(
+                                            SignatureResolver.resolveSignature(enclosingType, exceptionTypes[i]));
+                                }
+
+                                generateSimpleInnerSetter(generator, exceptionTypes, fieldName, parameterType1);
+                                generateInnerCollectionAdder(generator, exceptionTypes, fieldName, parameterType1);
+                                generateInnerCollectionBuilder(generator, resolvedType, exceptionTypes, fieldName,
+                                    parameterType1, qualifiedParameterTypeSignature);
+                                generateInnerClassSetter(generator, resolvedType, exceptionTypes, fieldName,
+                                    parameterType1, qualifiedParameterTypeSignature);
+                            } catch (JavaModelException e) {
                             }
-
-                            generateSimpleInnerSetter(generator, exceptionTypes, fieldName, parameterType1);
-                            generateInnerCollectionAdder(generator, exceptionTypes, fieldName, parameterType1);
-                            generateInnerCollectionBuilder(generator, resolvedType, exceptionTypes, fieldName, parameterType1,
-                                    qualifiedParameterTypeSignature);
-                            generateInnerClassSetter(generator, resolvedType, exceptionTypes, fieldName, parameterType1,
-                                    qualifiedParameterTypeSignature);
-                        } catch (JavaModelException e) {
                         }
                     }
-                }
-            });
+                });
 
             generator.endInnerBuilderClass();
             typesToGenerateInnerBuilders.remove(typeSignature);
@@ -315,8 +321,7 @@ public class BuilderGenerator {
     }
 
     private void generateInnerCollectionBuilder(BuilderSourceGenerator generator, IType enclosingType,
-        String[] exceptionTypes, String fieldName, String fieldType, String fieldTypeSignature)
-        throws Exception {
+        String[] exceptionTypes, String fieldName, String fieldType, String fieldTypeSignature) throws Exception {
         boolean isCollection = fieldType.startsWith("java.util.Collection<");
         boolean isList = fieldType.startsWith("java.util.List<");
         boolean isArrayList = fieldType.startsWith("java.util.ArrayList<");
@@ -350,7 +355,8 @@ public class BuilderGenerator {
                     && !resolveElementType.isBinary()) {
                 generator.addInnerCollectionElementBuilder(fieldName, fieldType, elementName, concreteListType,
                     exceptionTypes);
-                addTypeToGenerateInnerBuilder(Signature.createTypeSignature(resolveElementType.getFullyQualifiedName(), true));
+                addTypeToGenerateInnerBuilder(Signature.createTypeSignature(resolveElementType.getFullyQualifiedName(),
+                        true));
             }
         }
     }
@@ -378,6 +384,7 @@ public class BuilderGenerator {
 
     private String pluralToSingle(String name) {
         String elementName;
+
         if (name.endsWith("Houses")) {
             elementName = name.substring(0, name.length() - 1);
         } else if (name.endsWith("ses")) {
@@ -393,7 +400,7 @@ public class BuilderGenerator {
         } else {
             elementName = name + "Element";
         }
+
         return elementName;
     }
-
 }

@@ -72,7 +72,7 @@ public class TypeHelper {
     public static String[] findFieldNames(IType type) throws Exception {
         final List<String> fieldNames = new ArrayList<String>();
         findSetterMethods(type, new MethodInspector() {
-            public void nextMethod(IMethod method, Map<String, String> typeParameterMapping) {
+            public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> typeParameterMapping) {
                 fieldNames.add(getFieldName(method));
             }
         });
@@ -92,6 +92,7 @@ public class TypeHelper {
         return buf.toString();
     }
 
+    @SuppressWarnings("unused")
     private static List<IMethod> findSetterMethods(IType type) throws JavaModelException {
         List<IMethod> methods = findAllMethods(type);
         List<IMethod> setterMethods = filterSetterMethods(methods);
@@ -136,35 +137,36 @@ public class TypeHelper {
     }
 
     static interface TypeInspector {
-        public void nextSuperType(String fullSignature, IType type, Map<String, String> parameterSubstitution) throws Exception;
+        public void nextSuperType(String fullSignature, IType superType, Map<String, String> parameterSubstitution) throws Exception;
     }
 
     public static void walkHierarchyTree(IType type, TypeInspector inspector) throws Exception {
         Map<String, String> typeParameterMapping = new HashMap<String, String>();
         inspector.nextSuperType(Signature.createTypeSignature(type.getFullyQualifiedParameterizedName(), true), type, typeParameterMapping);
         String superclassTypeSignature;
-        while((superclassTypeSignature = type.getSuperclassTypeSignature()) != null) {
-            String resolvedTypeSignature = SignatureResolver.resolveSignature(type, superclassTypeSignature);
-            type = SignatureResolver.resolveType(type, Signature.getTypeErasure(resolvedTypeSignature));
-            if (type == null) {
+        IType superType = type;
+        while((superclassTypeSignature = superType.getSuperclassTypeSignature()) != null) {
+            String resolvedTypeSignature = SignatureResolver.resolveSignature(superType, superclassTypeSignature);
+            superType = SignatureResolver.resolveType(superType, Signature.getTypeErasure(resolvedTypeSignature));
+            if (superType == null) {
                 break;
             }
-            typeParameterMapping = addParameterMappings(typeParameterMapping, type, resolvedTypeSignature);
-            inspector.nextSuperType(resolvedTypeSignature, type, typeParameterMapping);
+            typeParameterMapping = addParameterMappings(typeParameterMapping, superType, resolvedTypeSignature);
+            inspector.nextSuperType(resolvedTypeSignature, superType, typeParameterMapping);
         }
     }
 
     static interface MethodInspector {
-        public void nextMethod(IMethod method, Map<String, String> parameterSubstitution) throws Exception;
+        public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution) throws Exception;
     }
 
     public static void findSetterMethods(IType type, final MethodInspector inspector) throws Exception {
         walkHierarchyTree(type, new TypeInspector() {
-            public void nextSuperType(String fullSignature, IType type, Map<String, String> typeParameterMapping) throws Exception {
+            public void nextSuperType(String fullSignature, IType superType, Map<String, String> typeParameterMapping) throws Exception {
                 try {
-                    for (IMethod method : type.getMethods()) {
+                    for (IMethod method : superType.getMethods()) {
                         if (isSetterMethod(method)) {
-                            inspector.nextMethod(method, typeParameterMapping);
+                            inspector.nextMethod(superType, method, typeParameterMapping);
                         }
                     }
                 } catch (JavaModelException e) {

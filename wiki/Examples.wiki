@@ -1,7 +1,5 @@
 #summary more advanced examples
 
-== Advanced examples ==
-
 {{{
 @Test
 public void shouldFindByAddress {

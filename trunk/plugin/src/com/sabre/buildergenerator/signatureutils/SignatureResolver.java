@@ -11,12 +11,12 @@
 
 package com.sabre.buildergenerator.signatureutils;
 
-import java.util.Map;
-
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+
+import java.util.Map;
 
 
 public class SignatureResolver {
@@ -45,42 +45,43 @@ public class SignatureResolver {
      * @throws SignatureParserException
      * @throws JavaModelException
      */
-    public static String resolveSignature(final IType owningType, String signature) throws SignatureParserException, JavaModelException {
+    public static String resolveSignature(final IType owningType, String signature) throws SignatureParserException,
+        JavaModelException {
         final StringBuilder out = new StringBuilder();
 
         // create parser that resolves all unresolved types names encountered
         SignatureParser parser = new SignatureParser(signature, new SignatureBuilder(out) {
-            boolean isResolved = false;
+                    boolean isResolved = false;
 
-            @Override
-            public void startResolvedType(String identifier) throws ExceptionWrapper {
-                isResolved = true;
-                super.startResolvedType(identifier);
-            }
-
-            @Override
-            public void startUnresolvedType(String identifier) throws ExceptionWrapper {
-                isResolved = false;
-                try {
-                    identifier = resolveTypeName(owningType, identifier);
-                } catch (JavaModelException e) {
-                    throw new ExceptionWrapper(e);
-                }
-                super.startUnresolvedType(identifier);
-            }
-
-            @Override
-            public void innerType(String identifier) throws ExceptionWrapper {
-                if (!isResolved) {
-                    try {
-                        identifier = resolveTypeName(owningType, identifier);
-                    } catch (JavaModelException e) {
-                        throw new ExceptionWrapper(e);
+                    @Override public void startResolvedType(String identifier) throws ExceptionWrapper {
+                        isResolved = true;
+                        super.startResolvedType(identifier);
                     }
-                }
-                super.innerType(identifier);
-            }
-        });
+
+                    @Override public void startUnresolvedType(String identifier) throws ExceptionWrapper {
+                        isResolved = false;
+
+                        try {
+                            identifier = resolveTypeName(owningType, identifier);
+                        } catch (JavaModelException e) {
+                            throw new ExceptionWrapper(e);
+                        }
+
+                        super.startUnresolvedType(identifier);
+                    }
+
+                    @Override public void innerType(String identifier) throws ExceptionWrapper {
+                        if (!isResolved) {
+                            try {
+                                identifier = resolveTypeName(owningType, identifier);
+                            } catch (JavaModelException e) {
+                                throw new ExceptionWrapper(e);
+                            }
+                        }
+
+                        super.innerType(identifier);
+                    }
+                });
 
         // run parser
         try {
@@ -100,11 +101,14 @@ public class SignatureResolver {
      * @throws SignatureParserException
      * @throws JavaModelException
      */
-    public static IType resolveType(final IType owningType, String signature) throws JavaModelException, SignatureParserException {
+    public static IType resolveType(final IType owningType, String signature) throws JavaModelException,
+        SignatureParserException {
         // resolve signature
         String resolvedSignature = getTypeErasure(signature);
+
         // convert to type name
         String typeName = signatureToTypeName(resolvedSignature);
+
         // find type
         return findRelativeToHierarchy(owningType, typeName);
     }
@@ -118,12 +122,15 @@ public class SignatureResolver {
      * @throws JavaModelException
      */
     public static String resolveTypeWithParameterMapping(IType owningType, String typeSignature,
-            Map<String, String> typeParameterMapping) throws JavaModelException, SignatureParserException {
+        Map<String, String> typeParameterMapping) throws JavaModelException, SignatureParserException {
         typeSignature = SignatureResolver.resolveSignature(owningType, typeSignature);
+
         for (String key : typeParameterMapping.keySet()) {
             String keySignature = Signature.createTypeSignature(key, false);
+
             typeSignature = typeSignature.replaceAll(keySignature, typeParameterMapping.get(key));
         }
+
         return typeSignature;
     }
 
@@ -139,15 +146,19 @@ public class SignatureResolver {
 
     private static IType findRelativeToHierarchy(final IType owningType, String identifier) throws JavaModelException {
         IType t = findRelativeToType(owningType, identifier);
+
         if (t == null) {
             ITypeHierarchy typeHierarchy;
+
             typeHierarchy = owningType.newSupertypeHierarchy(null);
+
             for (IType supertype : typeHierarchy.getAllSupertypes(owningType)) {
                 if ((t = findRelativeToType(supertype, identifier)) != null) {
                     break;
                 }
             }
         }
+
         return t;
     }
 

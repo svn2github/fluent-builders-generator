@@ -71,14 +71,15 @@ public class BuilderGenerator {
             ? new HashSet<String>(Arrays.asList(fieldNames)) : null;
 
         TypeHelper.findSetterMethods(type, new MethodInspector() {
-                public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution) throws Exception {
+                public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution)
+                    throws Exception {
                     String fieldName = fieldNameFromSetterName(method.getElementName());
 
                     if (fieldNamesSet == null || fieldNamesSet.contains(fieldName)) {
                         try {
                             String parameterTypeSignature = method.getParameterTypes()[0];
-                            String resolveTypeSignature = SignatureResolver.resolveTypeWithParameterMapping(methodOwnerType,
-                                    parameterTypeSignature, parameterSubstitution);
+                            String resolveTypeSignature = SignatureResolver.resolveTypeWithParameterMapping(
+                                    methodOwnerType, parameterTypeSignature, parameterSubstitution);
                             String parameterType = SignatureResolver.signatureToTypeName(resolveTypeSignature);
 
                             String[] exceptionTypes = method.getExceptionTypes();
@@ -91,8 +92,8 @@ public class BuilderGenerator {
 
                             generateSimpleSetter(generator, exceptionTypes, fieldName, parameterType);
                             generateCollectionAdder(generator, exceptionTypes, fieldName, parameterType);
-                            generateCollectionBuilder(generator, methodOwnerType, exceptionTypes, fieldName, parameterType,
-                                resolveTypeSignature);
+                            generateCollectionBuilder(generator, methodOwnerType, exceptionTypes, fieldName,
+                                parameterType, resolveTypeSignature);
                             generateClassSetter(generator, methodOwnerType, exceptionTypes, fieldName, parameterType,
                                 resolveTypeSignature);
                         } catch (JavaModelException e) {
@@ -249,7 +250,8 @@ public class BuilderGenerator {
             final Set<String> fieldNamesSet = null; //fieldNames != null && fieldNames.length > 0 ? new HashSet<String>(Arrays.asList(fieldNames)) : null;
 
             TypeHelper.findSetterMethods(resolvedType, new MethodInspector() {
-                    public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution) throws Exception {
+                    public void nextMethod(IType methodOwnerType, IMethod method,
+                        Map<String, String> parameterSubstitution) throws Exception {
                         String fieldName = fieldnameFromSetter(method);
 
                         if (fieldNamesSet == null || fieldNamesSet.contains(fieldName)) {

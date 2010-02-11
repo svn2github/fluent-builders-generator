@@ -1,0 +1,31 @@
+#summary more advanced examples
+
+== Advanced examples ==
+
+{{{
+@Test
+public void shouldFindByAddress {
+    // given
+    Company company = CompanyBuilder
+        .company().withName("CTU")
+        .withAddress().withCity("Los Angeles").withStreet("Underground").withNumber(1)
+        .endAddress()
+        .withAddedEmployee().withFirstName("Jack").withLastName("Bauer")
+            .withAddress().withCity("Los Angeles").withStreet("Scary Neighborhood St").withNumber(66)
+            .endAddress()
+        .endEmployee()
+        .withAddedEmployee().withFirstName("Cloe").withLastName("O'Brian")
+            .withAddress().withCity("Los Angeles").withStreet("Lucky Blvd").withNumber(13)
+            .endAddress()
+        .endEmployee()
+        .build();
+
+    // when
+    Person person = employeeFinder.findByAddress(company, "Los Angeles", "Scary Neighborhood St", 66);
+
+    // then
+    assertNotNull("Employee not found", person);
+    assertEquals("Wrong employee found", "Jack", person.getFirstName());
+    assertEquals("Wrong employee found", "Bauer", person.getLastName());
+}
+}}}

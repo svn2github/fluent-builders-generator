@@ -11,6 +11,11 @@
 
 package com.sabre.buildergenerator.signatureutils;
 
+import com.sabre.buildergenerator.Activator;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -141,6 +146,9 @@ public class SignatureResolver {
             return resolvedType[0][0] + "." + resolvedType[0][1];
         }
 
+        Activator.getDefault().getLog().log(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
+                "Can not resolve type name '" + typeName + "' for owner type " + owningType.getElementName()));
+
         return typeName;
     }
 
@@ -168,6 +176,9 @@ public class SignatureResolver {
         if (resolvedType != null && resolvedType.length > 0) {
             return owningType.getJavaProject().findType(resolvedType[0][0], resolvedType[0][1]);
         }
+
+        Activator.getDefault().getLog().log(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
+                "Can not resolve type name '" + identifier + "' for owner type " + owningType.getElementName()));
 
         return null;
     }

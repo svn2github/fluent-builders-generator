@@ -660,7 +660,8 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
             return notError(typeNameStatus) && notError(prefixStatus) && notError(collectionAddPrefixStatus);
         } catch (NullPointerException ex) {
-            System.err.println(ex);
+            Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+                    "Exception during GenerateBuilderWizardPage.isValid()", ex));
             throw new RuntimeException(ex);
         }
     }

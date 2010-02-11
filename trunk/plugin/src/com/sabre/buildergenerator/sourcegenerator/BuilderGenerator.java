@@ -210,7 +210,7 @@ public class BuilderGenerator {
 
             IType resolveElementType = SignatureResolver.resolveType(enclosingType, elementTypeSignature);
 
-            if (resolveElementType.isClass() && resolveElementType.isStructureKnown()
+            if (resolveElementType != null && resolveElementType.isClass() && resolveElementType.isStructureKnown()
                     && !resolveElementType.isBinary()) {
                 generator.addCollectionElementBuilder(fieldName, fieldType, elementName, concreteListType,
                     exceptionTypes);
@@ -258,7 +258,7 @@ public class BuilderGenerator {
                             try {
                                 String parameterTypeSignature = method.getParameterTypes()[0];
                                 String qualifiedParameterTypeSignature = SignatureResolver.resolveSignature(
-                                        resolvedType, parameterTypeSignature);
+                                        methodOwnerType, parameterTypeSignature);
                                 String parameterType1 = SignatureResolver.signatureToTypeName(
                                         qualifiedParameterTypeSignature);
                                 //IType parameterIType = TypeHelper.resolveType(enclosingType, qualifiedParameterTypeSignature);
@@ -274,9 +274,9 @@ public class BuilderGenerator {
 
                                 generateSimpleInnerSetter(generator, exceptionTypes, fieldName, parameterType1);
                                 generateInnerCollectionAdder(generator, exceptionTypes, fieldName, parameterType1);
-                                generateInnerCollectionBuilder(generator, resolvedType, exceptionTypes, fieldName,
+                                generateInnerCollectionBuilder(generator, methodOwnerType, exceptionTypes, fieldName,
                                     parameterType1, qualifiedParameterTypeSignature);
-                                generateInnerClassSetter(generator, resolvedType, exceptionTypes, fieldName,
+                                generateInnerClassSetter(generator, methodOwnerType, exceptionTypes, fieldName,
                                     parameterType1, qualifiedParameterTypeSignature);
                             } catch (JavaModelException e) {
                             }

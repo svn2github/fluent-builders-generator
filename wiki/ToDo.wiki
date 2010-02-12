@@ -1,5 +1,5 @@
-#summary To-Do list.
+#summary List of planned features.
 
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+  * generate imports and strip packages from class names
+  * generate inner builders for parametrized types
+  * withParentXxxx()

@@ -1,4 +1,5 @@
 #summary List of planned features.
+#labels Featured
 
   * generate imports and strip packages from class names
   * generate inner builders for parametrized types

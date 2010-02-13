@@ -29,7 +29,7 @@ public void shouldFindByAddress {
 }}}
 
 
-= Farm example = 
+=== Farm example ===
 You can even sing with fluent builders :) :
 {{{
 		OldMacdonaldBuilder.oldMacdonald()

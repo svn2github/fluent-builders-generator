@@ -27,3 +27,19 @@ public void shouldFindByAddress {
     assertEquals("Wrong employee found", "Bauer", person.getLastName());
 }
 }}}
+
+
+= Farm example = 
+You can even sing with fluent builders :) :
+{{{
+		OldMacdonaldBuilder.oldMacdonald()
+			.hasFarm()
+			// eeeeyaaa eyyyaaaaaaaaa oooooooo
+				.hasCow().hasSound("Mooo").endCow()
+			// eeeeyaaa eyyyaaaaaaaaa oooooooo
+				.hasDog().hasSound("Bark").endDog()
+			// eeeeyaaa eyyyaaaaaaaaa oooooooo
+				.hasSheep().hasSound("Beee").endSheep()
+			.endFarm()
+		.build();
+}}}

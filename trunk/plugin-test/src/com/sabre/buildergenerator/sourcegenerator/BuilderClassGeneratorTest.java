@@ -34,7 +34,7 @@ public class BuilderClassGeneratorTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        javaProject = createJavaProject("test-project-" + System.currentTimeMillis(), "src", null, JavaCore.VERSION_1_5);
+        javaProject = createJavaProject("test-project", "src", null, JavaCore.VERSION_1_5);
         javaProject.open(null);
 
         generator = new BuilderGenerator();
@@ -43,7 +43,7 @@ public class BuilderClassGeneratorTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         javaProject.close();
-        //javaProject.getProject().delete(true, null);
+        TestHelper.deleteJavaProject(javaProject);
     }
 
     public void testGenerateEmptyBuilder() throws Exception {

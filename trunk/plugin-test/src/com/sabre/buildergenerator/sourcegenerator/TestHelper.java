@@ -130,6 +130,12 @@ public class TestHelper {
         return javaProject;
     }
 
+    public static void deleteJavaProject(IJavaProject javaProject) throws CoreException {
+        WaitingProgressMonitor progressMonitor = new WaitingProgressMonitor();
+        javaProject.getProject().delete(true, progressMonitor);
+        progressMonitor.waitTillDone(5000);
+    }
+
     public static IPackageFragmentRoot getSourceRoot(IJavaProject javaProject) throws JavaModelException {
         IPackageFragmentRoot sourceRoot = null;
         for (IPackageFragmentRoot pfr : javaProject.getPackageFragmentRoots()) {

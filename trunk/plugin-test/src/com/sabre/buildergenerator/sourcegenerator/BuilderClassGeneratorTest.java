@@ -25,6 +25,7 @@ import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import static com.sabre.buildergenerator.sourcegenerator.TestHelper.*;
 
@@ -249,24 +250,33 @@ public class BuilderClassGeneratorTest extends TestCase {
         String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
 
         // then
-        String expectedBuilderSource = buildBuilderSource("builderpkg", "GeneratedBuilder")
-            .withSourceLine("    public GeneratedBuilder withFields(java.util.List<java.lang.String> aValue) {")
-            .withSourceLine("        instance.setFields(aValue);")
+        buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
+            .withSourceLine(builderSource)
+            .buildType();
+
+        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+            .withSourceLine("package test;")
             .withSourceLine("")
-            .withSourceLine("        return this;")
+            .withSourceLine("import testpkg.MyClass;")
+            .withSourceLine("import builderpkg.GeneratedBuilder;")
+            .withSourceLine("import java.util.Arrays;")
+            .withSourceLine("")
+            .withSourceLine("public class MainClass {")
+            .withSourceLine("    public static void main(String[] args) {")
+            .withSourceLine("        MyClass obj1 = GeneratedBuilder.myClass().withFields(Arrays.asList(\"field1\", \"field2\")).build();")
+            .withSourceLine("        MyClass obj2 = GeneratedBuilder.myClass().withAddedField(\"field1\").withAddedField(\"field2\").build();")
+            .withSourceLine("        assert obj1.getFields().size() == 2;")
+            .withSourceLine("        assert obj1.getFields().get(0).equals(\"field1\");")
+            .withSourceLine("        assert obj1.getFields().get(1).equals(\"field2\");")
+            .withSourceLine("        assert obj2.getFields().size() == 2;")
+            .withSourceLine("        assert obj2.getFields().get(0).equals(\"field1\");")
+            .withSourceLine("        assert obj2.getFields().get(1).equals(\"field2\");")
             .withSourceLine("    }")
-            .withSourceLine("")
-            .withSourceLine("    public GeneratedBuilder withAddedField(java.lang.String aValue) {")
-            .withSourceLine("        if (instance.getFields() == null) {")
-            .withSourceLine("            instance.setFields(new java.util.ArrayList<java.lang.String>());")
-            .withSourceLine("        }")
-            .withSourceLine("")
-            .withSourceLine("        ((java.util.ArrayList<java.lang.String>)instance.getFields()).add(aValue);")
-            .withSourceLine("")
-            .withSourceLine("        return this;")
-            .withSourceLine("    }")
-            .buildSource();
-        assertEquals("Builder source mismatch", expectedBuilderSource, builderSource);
+            .withSourceLine("}")
+            .buildType();
+
+        Arrays.asList("");
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
     }
 
     public void testGenerateFieldBuilder() throws Exception {

@@ -236,16 +236,13 @@ public class TestHelper {
         boolean isDone = false;
 
         public void beginTask(String name, int totalWork) {
-//            System.out.println("Task " + name + " started (totalWork: " + totalWork + ")");
         }
 
         public void done() {
             isDone = true;
-//            System.out.println("Done!");
         }
 
         public void internalWorked(double work) {
-//            System.out.println("internalWorked: " + work);
         }
 
         public boolean isCanceled() {
@@ -254,7 +251,6 @@ public class TestHelper {
 
         public void setCanceled(boolean value) {
             isDone = true;
-//            System.out.println("Canceled!");
         }
 
         public void setTaskName(String name) {
@@ -264,7 +260,6 @@ public class TestHelper {
         }
 
         public void worked(int work) {
-//            System.out.println("worked: " + work);
         }
 
         public void waitTillDone(long timeout) {
@@ -273,9 +268,6 @@ public class TestHelper {
                     Thread.sleep(100);
                     timeout -= 100;
                 }
-//                if (timeout <= 0) {
-//                    System.out.println("Timed out");
-//                }
             } catch (InterruptedException e) {
             }
         }

@@ -48,7 +48,7 @@ public class BuilderClassGeneratorTest extends TestCase {
 
     public void testGenerateEmptyBuilder() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        IType buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -56,7 +56,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -66,7 +66,6 @@ public class BuilderClassGeneratorTest extends TestCase {
         IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
-            .withSourceLine("import java.io.FileWriter;")
             .withSourceLine("import testpkg.MyClass;")
             .withSourceLine("import builderpkg.GeneratedBuilder;")
             .withSourceLine("")
@@ -78,12 +77,12 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        int retVal = TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null);
-        assertEquals("Internal test failed " + (retVal < 0 ? "(process terminated), " : "(runtime error " + retVal + "), "), 0, retVal);
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
     }
 
     public void testGenerateSimplePrimitiveSetter() throws Exception {
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        // given
+        IType buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -100,21 +99,33 @@ public class BuilderClassGeneratorTest extends TestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
 
         // then
-        String expectedBuilderSource = buildBuilderSource("builderpkg", "GeneratedBuilder")
-            .withSourceLine("    public GeneratedBuilder withField(int aValue) {")
-            .withSourceLine("        instance.setField(aValue);")
+        buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
+            .withSourceLine(builderSource)
+            .buildType();
+
+        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+            .withSourceLine("package test;")
             .withSourceLine("")
-            .withSourceLine("        return this;")
+            .withSourceLine("import testpkg.MyClass;")
+            .withSourceLine("import builderpkg.GeneratedBuilder;")
+            .withSourceLine("")
+            .withSourceLine("public class MainClass {")
+            .withSourceLine("    public static void main(String[] args) {")
+            .withSourceLine("        MyClass obj = GeneratedBuilder.myClass().withField(5).build();")
+            .withSourceLine("        assert obj.getField() == 5;")
             .withSourceLine("    }")
-            .buildSource();
-        assertEquals("Builder source mismatch", expectedBuilderSource, builderSource);
+            .withSourceLine("}")
+            .buildType();
+
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
     }
 
     public void testGenerateSimpleObjectSetter() throws Exception {
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        // given
+        IType buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -131,20 +142,32 @@ public class BuilderClassGeneratorTest extends TestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
 
         // then
-        String expectedBuilderSource = buildBuilderSource("builderpkg", "GeneratedBuilder")
-            .withSourceLine("    public GeneratedBuilder withField(java.lang.String aValue) {")
-            .withSourceLine("        instance.setField(aValue);")
+        buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
+            .withSourceLine(builderSource)
+            .buildType();
+
+        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+            .withSourceLine("package test;")
             .withSourceLine("")
-            .withSourceLine("        return this;")
+            .withSourceLine("import testpkg.MyClass;")
+            .withSourceLine("import builderpkg.GeneratedBuilder;")
+            .withSourceLine("")
+            .withSourceLine("public class MainClass {")
+            .withSourceLine("    public static void main(String[] args) {")
+            .withSourceLine("        MyClass obj = GeneratedBuilder.myClass().withField(\"string\").build();")
+            .withSourceLine("        assert obj.getField().equals(\"string\");")
             .withSourceLine("    }")
-            .buildSource();
-        assertEquals("Builder source mismatch", expectedBuilderSource, builderSource);
+            .withSourceLine("}")
+            .buildType();
+
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
     }
 
     public void testGenerateSimpleObjectSetterWithForeignPackage() throws Exception {
+        // given
         IType buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
@@ -167,28 +190,41 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("    private String dataField;")
             .withSourceLine("")
             .withSourceLine("    public String getDataField() {")
-            .withSourceLine("        return field;")
+            .withSourceLine("        return dataField;")
             .withSourceLine("    }")
             .withSourceLine("")
             .withSourceLine("    public void setDataField(String aField) {")
-            .withSourceLine("        field = aField;")
+            .withSourceLine("        dataField = aField;")
             .withSourceLine("    }")
             .withSourceLine("}")
             .buildFile();
 
         // when
-        IType builderClass = generateBuilder(generator, buildClass, "builderpkg", "GeneratedBuilder");
+        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
 
         // then
-        String methodSource = getMethodSource(builderClass, "withField", new String[]{"testpkg2.MyData"});
-        String expectedBuilderSource = buildJavaSource()
-            .withSourceLine("    public GeneratedBuilder withField(testpkg2.MyData aValue) {")
-            .withSourceLine("        instance.setField(aValue);")
+        buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
+            .withSourceLine(builderSource)
+            .buildType();
+
+        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+            .withSourceLine("package test;")
             .withSourceLine("")
-            .withSourceLine("        return this;")
+            .withSourceLine("import testpkg.MyClass;")
+            .withSourceLine("import testpkg2.MyData;")
+            .withSourceLine("import builderpkg.GeneratedBuilder;")
+            .withSourceLine("")
+            .withSourceLine("public class MainClass {")
+            .withSourceLine("    public static void main(String[] args) {")
+            .withSourceLine("        MyData data = new MyData();")
+            .withSourceLine("        data.setDataField(\"dataField\");")
+            .withSourceLine("        MyClass obj = GeneratedBuilder.myClass().withField(data).build();")
+            .withSourceLine("        assert obj.getField().getDataField().equals(\"dataField\");")
             .withSourceLine("    }")
-            .buildSource().trim();
-        assertEquals("Builder source mismatch", expectedBuilderSource, methodSource);
+            .withSourceLine("}")
+            .buildType();
+
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
     }
 
     public void testGenerateCollectionSetter() throws Exception {

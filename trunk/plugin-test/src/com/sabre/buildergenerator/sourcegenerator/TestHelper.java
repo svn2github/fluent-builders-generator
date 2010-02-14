@@ -11,7 +11,9 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
+import java.io.IOException;
 import java.io.StringBufferInputStream;
+import java.io.Writer;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +27,17 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.IStreamListener;
+import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,6 +46,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.AbstractVMInstall;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -155,6 +168,54 @@ public class TestHelper {
         return ((ICompilationUnit) JavaCore.create(javaFile)).getWorkingCopy(null);
     }
 
+    public static int runJavaFile(IJavaProject javaProject, String mainClassQName, String[] args, final Writer output) throws CoreException, InterruptedException {
+      ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+      ILaunchConfigurationType type = manager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
+      ILaunchConfigurationWorkingCopy wc = type.newInstance(null, "TestConfig-" + javaProject.getElementName());
+      wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, javaProject.getElementName());
+      wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, mainClassQName);
+      StringBuffer argsLine = new StringBuffer();
+      if (args != null) {
+          for (String arg : args) {
+              if (argsLine.length() > 0) {
+                  argsLine.append(" ");
+              }
+              argsLine.append(arg);
+          }
+      }
+      wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, argsLine.toString());
+      wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-ea");
+
+      ILaunchConfiguration config = wc.doSave();
+      WaitingProgressMonitor progressMonitor = new WaitingProgressMonitor();
+      ILaunch launch = config.launch(ILaunchManager.RUN_MODE, progressMonitor, true, false);
+      progressMonitor.waitTillDone(5000);
+      int exitValue = -1;
+      if (launch.getProcesses().length == 1) {
+          IProcess iProcess = launch.getProcesses()[0];
+          iProcess.getStreamsProxy().getOutputStreamMonitor().addListener(new IStreamListener() {
+              public void streamAppended(String text, IStreamMonitor monitor) {
+                  if (output != null) {
+                      try {
+                          output.write(text);
+                      } catch (IOException e) { }
+                  }
+              }
+          });
+
+          while(!iProcess.isTerminated()) {
+              Thread.sleep(100);
+          }
+          exitValue = iProcess.getExitValue();
+      }
+
+      return exitValue;
+    }
+
+    public static int runTestCase(IJavaProject javaProject, String testClassQName) throws CoreException, InterruptedException {
+        return runJavaFile(javaProject, "junit.textui.TestRunner", new String[]{testClassQName}, null);
+    }
+
     @SuppressWarnings("unchecked")
     private static <T> T[] merge(T[]... arrays) {
         ArrayList<T> list = new ArrayList<T>();
@@ -165,4 +226,52 @@ public class TestHelper {
         return list.toArray(mergedArray);
     }
 
+    static class WaitingProgressMonitor implements IProgressMonitor {
+        boolean isDone = false;
+
+        public void beginTask(String name, int totalWork) {
+//            System.out.println("Task " + name + " started (totalWork: " + totalWork + ")");
+        }
+
+        public void done() {
+            isDone = true;
+//            System.out.println("Done!");
+        }
+
+        public void internalWorked(double work) {
+//            System.out.println("internalWorked: " + work);
+        }
+
+        public boolean isCanceled() {
+            return false;
+        }
+
+        public void setCanceled(boolean value) {
+            isDone = true;
+//            System.out.println("Canceled!");
+        }
+
+        public void setTaskName(String name) {
+        }
+
+        public void subTask(String name) {
+        }
+
+        public void worked(int work) {
+//            System.out.println("worked: " + work);
+        }
+
+        public void waitTillDone(long timeout) {
+            try {
+                while (!isDone && timeout > 0) {
+                    Thread.sleep(100);
+                    timeout -= 100;
+                }
+//                if (timeout <= 0) {
+//                    System.out.println("Timed out");
+//                }
+            } catch (InterruptedException e) {
+            }
+        }
+    }
 }

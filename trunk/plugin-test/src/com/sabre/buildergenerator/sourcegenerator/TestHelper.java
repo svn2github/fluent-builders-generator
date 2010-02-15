@@ -174,7 +174,7 @@ public class TestHelper {
         return ((ICompilationUnit) JavaCore.create(javaFile)).getWorkingCopy(null);
     }
 
-    public static int runJavaFile(IJavaProject javaProject, String mainClassQName, String[] args, final Writer output) throws CoreException, InterruptedException {
+    public static int runJavaFile(IJavaProject javaProject, String mainClassQName, String[] args, final Writer out, final Writer err) throws CoreException, InterruptedException {
       ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
       ILaunchConfigurationType type = manager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
       ILaunchConfigurationWorkingCopy wc = type.newInstance(null, "TestConfig-" + javaProject.getElementName());
@@ -199,15 +199,26 @@ public class TestHelper {
       int exitValue = -1;
       if (launch.getProcesses().length == 1) {
           IProcess iProcess = launch.getProcesses()[0];
-          iProcess.getStreamsProxy().getOutputStreamMonitor().addListener(new IStreamListener() {
-              public void streamAppended(String text, IStreamMonitor monitor) {
-                  if (output != null) {
+          if (out != null) {
+              iProcess.getStreamsProxy().getOutputStreamMonitor().addListener(new IStreamListener() {
+                  public void streamAppended(String text, IStreamMonitor monitor) {
                       try {
-                          output.write(text);
+                          out.write(text);
+                          out.flush();
                       } catch (IOException e) { }
                   }
-              }
-          });
+              });
+          }
+          if (err != null) {
+              iProcess.getStreamsProxy().getErrorStreamMonitor().addListener(new IStreamListener() {
+                  public void streamAppended(String text, IStreamMonitor monitor) {
+                      try {
+                          err.write(text);
+                          err.flush();
+                      } catch (IOException e) { }
+                  }
+              });
+          }
 
           while(!iProcess.isTerminated()) {
               Thread.sleep(100);
@@ -219,7 +230,7 @@ public class TestHelper {
     }
 
     public static int runTestCase(IJavaProject javaProject, String testClassQName) throws CoreException, InterruptedException {
-        return runJavaFile(javaProject, "junit.textui.TestRunner", new String[]{testClassQName}, null);
+        return runJavaFile(javaProject, "junit.textui.TestRunner", new String[]{testClassQName}, null, null);
     }
 
     @SuppressWarnings("unchecked")

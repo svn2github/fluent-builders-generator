@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.Signature;
 
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -77,7 +78,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateSimplePrimitiveSetter() throws Exception {
@@ -120,7 +122,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateSimpleObjectSetter() throws Exception {
@@ -163,7 +166,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateSimpleObjectSetterWithForeignPackage() throws Exception {
@@ -214,7 +218,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateCollectionSetter() throws Exception {
@@ -265,7 +270,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateFieldBuilder() throws Exception {
@@ -315,7 +321,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateCollectionFieldBuilder() throws Exception {
@@ -387,7 +394,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateInnerBuilderWithSimpleSetter() throws Exception {
@@ -446,7 +454,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateInnerBuilderWithCollectionSetter() throws Exception {
@@ -518,7 +527,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateInnerBuilderWithFieldBuilder() throws Exception {
@@ -600,7 +610,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateInnerBuilderWithCollectionFieldBuilder() throws Exception {
@@ -690,7 +701,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     public void testGenerateBuilderForClassExtendingGeneric() throws Exception {
@@ -787,7 +799,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(), null, null));
+        assertEquals("Internal test failed", 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
     private static IType generateBuilder(BuilderGenerator generator, IType buildClass, String packageName, String builderName)

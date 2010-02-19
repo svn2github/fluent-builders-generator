@@ -234,8 +234,7 @@ public class BuilderGenerator {
             }
 
             String collectionQName = SignatureResolver.resolveSignature(enclosingType, fieldTypeSignature);
-            String elementTypeSignature = collectionQName.substring(collectionQName.indexOf('<') + 1,
-                    collectionQName.lastIndexOf('>'));
+            String elementTypeSignature = getElementTypeSignature(collectionQName);
             IType resolveElementType = SignatureResolver.resolveType(enclosingType, elementTypeSignature);
 
             if (resolveElementType != null && resolveElementType.isClass() && resolveElementType.isStructureKnown()
@@ -246,6 +245,13 @@ public class BuilderGenerator {
                         true));
             }
         }
+    }
+
+    private String getElementTypeSignature(String resolvedFieldTypeSignature) {
+        String fieldTypeArgumentSignature = Signature.getTypeArguments(resolvedFieldTypeSignature)[0];
+        return fieldTypeArgumentSignature.startsWith("+") || fieldTypeArgumentSignature.startsWith("-") ? fieldTypeArgumentSignature
+                .substring(1)
+                : fieldTypeArgumentSignature.equals("*") ? "Qjava.lang.Object;" : fieldTypeArgumentSignature;
     }
 
     private void generateFieldBuilder(BuilderSourceGenerator generator, IType enclosingType,

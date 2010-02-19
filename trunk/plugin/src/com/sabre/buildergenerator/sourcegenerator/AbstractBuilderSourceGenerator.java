@@ -106,7 +106,6 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
             out.println();
         }
 
-        out.println("@SuppressWarnings(\"unchecked\")");
         out.println("public class " + builderClassName + " extends " + buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName + "> {");
         out.println("    public static " + builderClassName + " " + toLowerCaseStart(buildClassName) + "() {");
         out.println("        return new " + builderClassName + "();");
@@ -134,6 +133,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         innerBuilderClassName = innerBuildClassName + BUILDER_BASE_SUFFIX;
 
         out.println();
+        out.println("@SuppressWarnings(\"unchecked\")");
         out.println("class " + innerBuilderClassName + "<" + BUILDER_TYPE_ARG_NAME + " extends " + innerBuilderClassName + "> {");
         out.println("    private " + innerBuildClassType + " instance;");
         out.println();

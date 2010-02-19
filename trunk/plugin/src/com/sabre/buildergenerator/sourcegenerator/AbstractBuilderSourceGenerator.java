@@ -17,7 +17,8 @@ import java.io.PrintWriter;
 public abstract class AbstractBuilderSourceGenerator<TClassType> {
     private static final String GETTER_PREFIX = "get";
     private static final String SETTER_PREFIX = "set";
-    private static final String BUILDER_SUFFIX = "Builder";
+    private static final String BUILDER_BASE_SUFFIX = "BuilderBase";
+    private static final String FIELD_BUILDER_SUFFIX = "Builder";
 
     private static final int MODIFIER_PUBLIC = 1;
     private static final int MODIFIER_PRIVATE = 2;
@@ -105,102 +106,68 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         }
 
         out.println("@SuppressWarnings(\"unchecked\")");
-        out.println("public class " + builderClassName + " {");
-        out.println("    private " + buildClassType + " instance;");
-        out.println();
+        out.println("public class " + builderClassName + " extends " + buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName + "> {");
         out.println("    public static " + builderClassName + " " + toLowerCaseStart(buildClassName) + "() {");
         out.println("        return new " + builderClassName + "();");
         out.println("    }");
         out.println();
         out.println("    public " + builderClassName + "() {");
-        out.println("        instance = new " + buildClassType + "();");
+        out.println("        super(new " + buildClassType + "());");
         out.println("    }");
         out.println();
         out.println("    public " + buildClassType + " build() {");
-        out.println("        return instance;");
+        out.println("        return getInstance();");
         out.println("    }");
 
         increseIndent();
     }
 
     public void endBuilderClass() {
+        decreaseIndent();
         out.println("}");
-        out.flush();
     }
 
-    public void addFieldSetter(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
-        generateSimpleSetter(fieldName, getType(fieldTypeDescriptor), exceptions, builderClassName, false);
-    }
-
-    public void addFieldBuilder(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
-        String fieldTypeName = getType(fieldTypeDescriptor);
-        String methodName = prefixed(setterPrefix, fieldName);
-        String innerBuilderName = getClassName(fieldTypeDescriptor) + BUILDER_SUFFIX;
-        String fieldBuilderName = toUpperCaseStart(fieldName + innerBuilderName);
-
-        generateBuilderSetter(fieldName, fieldTypeName, methodName, exceptions, fieldBuilderName,
-                innerBuilderName, builderClassName, builderClassName, false);
-    }
-
-    public void addCollectionElementSetter(String collectionFieldName, TClassType collectionFieldTypeDescriptor, String elementName,
-            TClassType collectionContainerTypeDecriptor, TClassType[] exceptions) {
-        TClassType elementTypeDescriptor = getInnerType(collectionFieldTypeDescriptor);
-        String elementType = getType(elementTypeDescriptor);
-
-        generateCollectionElementSetter(collectionFieldName, getType(collectionContainerTypeDecriptor), elementName, elementType,
-                exceptions, builderClassName, false);
-    }
-
-    public void addCollectionElementBuilder(String fieldName, TClassType fieldTypeDescriptor, String elementName,
-            TClassType collectionConcreteTypeDecriptor, TClassType[] exceptions) {
-        TClassType elementTypeDescriptor = getInnerType(fieldTypeDescriptor);
-        String elementType = getType(elementTypeDescriptor);
-        String fieldClassName = getClassName(elementTypeDescriptor);
-        String innerBuilderName = fieldClassName + BUILDER_SUFFIX;
-        String fieldBuilderName = toUpperCaseStart(elementName + innerBuilderName);
-        String methodName = prefixed(collectionElementSetterPrefix, elementName);
-
-        generateBuilderSetter(elementName, elementType, methodName, exceptions, fieldBuilderName,
-                innerBuilderName, builderClassName, builderClassName, false);
-    }
-
-    public void startInnerBuilderClass(TClassType buildClassDescriptor) {
+    public void startBuilderBaseClass(TClassType buildClassDescriptor) {
         innerBuildClassName = getClassName(buildClassDescriptor);
         innerBuildClassType = getType(buildClassDescriptor);
-        innerBuilderClassName = innerBuildClassName + BUILDER_SUFFIX;
+        innerBuilderClassName = innerBuildClassName + BUILDER_BASE_SUFFIX;
 
         out.println();
-        out.println("    public static class " + innerBuilderClassName + "<T extends " + innerBuilderClassName + "> {");
-        out.println("        private " + innerBuildClassType + " instance;");
+        out.println("class " + innerBuilderClassName + "<T extends " + innerBuilderClassName + "> {");
+        out.println("    private " + innerBuildClassType + " instance;");
         out.println();
-        out.println("        private " + innerBuilderClassName + "(" + innerBuildClassType + " aInstance) {");
-        out.println("            instance = aInstance;");
-        out.println("        }");
+        out.println("    protected " + innerBuilderClassName + "(" + innerBuildClassType + " aInstance) {");
+        out.println("        instance = aInstance;");
+        out.println("    }");
+        out.println();
+        out.println("    protected " + innerBuildClassType + " getInstance() {");
+        out.println("        return instance;");
+        out.println("    }");
 
         increseIndent();
     }
 
-    public void endInnerBuilderClass() {
+    public void endBuilderBaseClass() {
         decreaseIndent();
-        out.println("    }");
+        out.println("}");
     }
 
-    public void addInnerFieldSetter(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
+    public void addFieldSetter(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
         generateSimpleSetter(fieldName, getType(fieldTypeDescriptor), exceptions, "T", true);
     }
 
-    public void addInnerFieldBuilder(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
+    public void addFieldBuilder(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
         String fieldClassName = getClassName(fieldTypeDescriptor);
         String fieldClassQName = getClassQName(fieldTypeDescriptor);
-        String innerBuilderName = fieldClassName + BUILDER_SUFFIX;
-        String fieldBuilderName = toUpperCaseStart(fieldName + innerBuilderName);
+        String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
+        String fieldBuilderName = toUpperCaseStart(fieldName + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(setterPrefix, fieldName);
 
         generateBuilderSetter(fieldName, fieldClassQName, methodName, exceptions, fieldBuilderName,
                 innerBuilderName, innerBuilderClassName, "T", true);
     }
 
-    public void addInnerCollectionElementSetter(String fieldName, TClassType fieldTypeDescriptor, String elementName,
+    public void addCollectionElementSetter(String fieldName, TClassType fieldTypeDescriptor, String elementName,
             TClassType collectionContainerTypeDecriptor, TClassType[] exceptions) {
         TClassType elementTypeDescriptor = getInnerType(fieldTypeDescriptor);
         String elementType = getType(elementTypeDescriptor);
@@ -209,13 +176,13 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
                 elementType, exceptions, "T", true);
     }
 
-    public void addInnerCollectionElementBuilder(String fieldName, TClassType fieldTypeDescriptor, String elementName,
+    public void addCollectionElementBuilder(String fieldName, TClassType fieldTypeDescriptor, String elementName,
             TClassType collectionConcreteTypeDecriptor, TClassType[] exceptions) {
         TClassType elementTypeDescriptor = getInnerType(fieldTypeDescriptor);
         String elementType = getType(elementTypeDescriptor);
         String fieldClassName = getClassName(elementTypeDescriptor);
-        String innerBuilderName = fieldClassName + BUILDER_SUFFIX;
-        String fieldBuilderName = toUpperCaseStart(elementName + innerBuilderName);
+        String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
+        String fieldBuilderName = toUpperCaseStart(elementName + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(collectionElementSetterPrefix, elementName);
 
         generateBuilderSetter(elementName, elementType, methodName, exceptions, fieldBuilderName,

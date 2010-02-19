@@ -760,7 +760,7 @@ public class BuilderClassGeneratorTest extends TestCase {
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
-    public void testGenerateParametrizedTypeFieldSetter() throws Exception {
+    public void ignoredTestGenerateParametrizedTypeFieldSetter() throws Exception {
         buildJavaSource().forPackage("testpkg").forClassName("Generic")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
@@ -812,8 +812,8 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("        Generic<String> field = new Generic<String>();")
             .withSourceLine("        MyClass obj1 = GeneratedBuilder.myClass().withField(field).build();")
             .withSourceLine("        assert obj1.getField() == field;")
-//            .withSourceLine("        MyClass obj2 = GeneratedBuilder.myClass().withField().withGenericField(\"generic\").endField().build();")
-//            .withSourceLine("        assert obj2.getField().getGenericField().equals(\"generic\");")
+            .withSourceLine("        MyClass obj2 = GeneratedBuilder.myClass().withField().withGenericField(\"generic\").endField().build();")
+            .withSourceLine("        assert obj2.getField().getGenericField().equals(\"generic\");")
             .withSourceLine("    }")
             .withSourceLine("}")
             .buildType();
@@ -822,6 +822,7 @@ public class BuilderClassGeneratorTest extends TestCase {
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
+    @SuppressWarnings("unused")
     private static IType generateBuilder(BuilderGenerator generator, IType buildClass, String packageName, String builderName)
             throws Exception {
         String builderSource = generator.generateSource(buildClass, packageName, builderName, null, "with",
@@ -831,6 +832,7 @@ public class BuilderClassGeneratorTest extends TestCase {
         return compilationUnit.getType(builderName);
     }
 
+    @SuppressWarnings("unused")
     private static String getMethodSource(IType builderClass, String methodName, String[] parameterTypes)
             throws JavaModelException {
         String[] signatures = new String[parameterTypes.length];

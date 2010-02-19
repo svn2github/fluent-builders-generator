@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 
 
 public abstract class AbstractBuilderSourceGenerator<TClassType> {
+    private static final String BUILDER_TYPE_ARG_NAME = "GeneratorT";
     private static final String GETTER_PREFIX = "get";
     private static final String SETTER_PREFIX = "set";
     private static final String BUILDER_BASE_SUFFIX = "BuilderBase";
@@ -133,7 +134,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         innerBuilderClassName = innerBuildClassName + BUILDER_BASE_SUFFIX;
 
         out.println();
-        out.println("class " + innerBuilderClassName + "<T extends " + innerBuilderClassName + "> {");
+        out.println("class " + innerBuilderClassName + "<" + BUILDER_TYPE_ARG_NAME + " extends " + innerBuilderClassName + "> {");
         out.println("    private " + innerBuildClassType + " instance;");
         out.println();
         out.println("    protected " + innerBuilderClassName + "(" + innerBuildClassType + " aInstance) {");
@@ -153,7 +154,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
     }
 
     public void addFieldSetter(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
-        generateSimpleSetter(fieldName, getType(fieldTypeDescriptor), exceptions, "T", true);
+        generateSimpleSetter(fieldName, getType(fieldTypeDescriptor), exceptions, BUILDER_TYPE_ARG_NAME, true);
     }
 
     public void addFieldBuilder(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
@@ -164,7 +165,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         String methodName = prefixed(setterPrefix, fieldName);
 
         generateBuilderSetter(fieldName, fieldClassQName, methodName, exceptions, fieldBuilderName,
-                innerBuilderName, innerBuilderClassName, "T", true);
+                innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, true);
     }
 
     public void addCollectionElementSetter(String fieldName, TClassType fieldTypeDescriptor, String elementName,
@@ -173,7 +174,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         String elementType = getType(elementTypeDescriptor);
 
         generateCollectionElementSetter(fieldName, getType(collectionContainerTypeDecriptor), elementName,
-                elementType, exceptions, "T", true);
+                elementType, exceptions, BUILDER_TYPE_ARG_NAME, true);
     }
 
     public void addCollectionElementBuilder(String fieldName, TClassType fieldTypeDescriptor, String elementName,
@@ -186,7 +187,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         String methodName = prefixed(collectionElementSetterPrefix, elementName);
 
         generateBuilderSetter(elementName, elementType, methodName, exceptions, fieldBuilderName,
-                innerBuilderName, innerBuilderClassName, "T", true);
+                innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, true);
     }
 
     private String setterName(String fieldName) {

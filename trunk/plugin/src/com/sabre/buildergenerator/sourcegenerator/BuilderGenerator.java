@@ -287,8 +287,6 @@ public class BuilderGenerator {
             elementName = name.substring(0, name.length() - 3) + "f";
         } else if (name.endsWith("ees")) {
             elementName = name.substring(0, name.length() - 1);
-        } else if (name.endsWith("es")) {
-            elementName = name.substring(0, name.length() - 2);
         } else if (name.endsWith("s")) {
             elementName = name.substring(0, name.length() - 1);
         } else {

@@ -11,8 +11,15 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
+import java.io.PrintWriter;
+import java.util.Arrays;
 
-public abstract class AbstractBuilderSourceGenerator<TClassType> extends SourceGenerator {
+import com.sabre.buildergenerator.sourcegenerator.java.IndentWriter;
+import com.sabre.buildergenerator.sourcegenerator.java.JavaSource;
+import com.sabre.buildergenerator.sourcegenerator.java.JavaSourceBuilder;
+
+
+public abstract class AbstractBuilderSourceGenerator<TClassType> {
     private static final String BUILDER_TYPE_ARG_NAME = "GeneratorT";
     private static final String GETTER_PREFIX = "get";
     private static final String SETTER_PREFIX = "set";
@@ -31,6 +38,14 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> extends SourceG
     private String innerBuildClassType;
     private String innerBuilderClassName;
 
+    private PrintWriter out;
+
+    private JavaSourceBuilder javaSourceBuilder;
+    private JavaSourceBuilder.ClazzClazzBuilder classBuilder;
+
+    public AbstractBuilderSourceGenerator() {
+        javaSourceBuilder = JavaSourceBuilder.javaSource();
+    }
     /**
      * @return the collectionElementSetterPrefix
      */
@@ -73,29 +88,30 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> extends SourceG
         setterPrefix = aSetterPrefix;
     }
 
+    public void setOut(PrintWriter printWriter) {
+        out = printWriter;
+    }
+
     public void addBuilderClass(TClassType aBuildClassDescriptor, String aPackageForBuilder, String aBuilderClassName) {
         buildClassName = getClassName(aBuildClassDescriptor);
         buildClassType = getType(aBuildClassDescriptor);
         builderClassName = aBuilderClassName;
 
-        if (aPackageForBuilder.length() > 0) {
-            addLine("package %s;", aPackageForBuilder);
-            addLine();
+        String baseClass = buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName + ">";
+        if (aPackageForBuilder != null && aPackageForBuilder.length() > 0) {
+            javaSourceBuilder.withPackge(aPackageForBuilder);
         }
-
-        addLine("public class %s extends %s%s<%s> {", builderClassName, buildClassName, BUILDER_BASE_SUFFIX, builderClassName);
-        increseIndent();
-        startMethod(MODIFIER_PUBLIC + MODIFIER_STATIC, builderClassName, toLowerCaseStart(buildClassName), null);
-        endMethod("new %s()", builderClassName);
-        addLine();
-        startMethod(MODIFIER_PUBLIC, null, builderClassName, null);
-        addLine("super(new %s());", buildClassType);
-        endMethod();
-        addLine();
-        startMethod(MODIFIER_PUBLIC, buildClassType, "build", null);
-        endMethod("getInstance()");
-        closeBlock();
-
+        javaSourceBuilder.withClazz().withModifiers(JavaSource.MODIFIER_PUBLIC).withName(builderClassName).withBaseClazz(baseClass)
+            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC + JavaSource.MODIFIER_STATIC).withName(toLowerCaseStart(buildClassName)).withReturnType(builderClassName)
+                .withReturnValue().withStatement("new %s()").withParam(builderClassName).endReturnValue()
+            .endMethod()
+            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName(builderClassName)
+                .withInstruction().withStatement("super(new %s());").withParam(buildClassType).endInstruction()
+            .endMethod()
+            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName("build").withReturnType(buildClassType)
+                .withReturnValue().withStatement("getInstance()").endReturnValue()
+            .endMethod()
+        .endClazz();
     }
 
     public void startBuilderBaseClass(TClassType buildClassDescriptor) {
@@ -103,22 +119,22 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> extends SourceG
         innerBuildClassType = getType(buildClassDescriptor);
         innerBuilderClassName = innerBuildClassName + BUILDER_BASE_SUFFIX;
 
-        addLine();
-        addLine("@SuppressWarnings(\"unchecked\")");
-        addLine("class %s<%s extends %s> {", innerBuilderClassName, BUILDER_TYPE_ARG_NAME,innerBuilderClassName);
-        increseIndent();
-        addLine("private %s instance;", innerBuildClassType);
-        addLine();
-        startMethod(MODIFIER_PROTECTED, null, innerBuilderClassName, innerBuildClassType, "aInstance", null);
-        addLine("instance = aInstance;");
-        endMethod();
-        addLine();
-        startMethod(MODIFIER_PROTECTED, innerBuildClassType, "getInstance", null);
-        endMethod("instance");
+        String typeArg = BUILDER_TYPE_ARG_NAME + " extends " + innerBuilderClassName;
+        classBuilder = javaSourceBuilder.withClazz()
+            .withAnnotation("@SuppressWarnings(\"unchecked\")")
+            .withName(innerBuilderClassName).withTypeArg(typeArg)
+            .withDeclaration().withStatement("private %s instance;").withParam(innerBuildClassType).endDeclaration()
+            .withMethod().withModifiers(JavaSource.MODIFIER_PROTECTED).withName(innerBuilderClassName)
+                .withParameter().withType(innerBuildClassType).withName("aInstance").endParameter()
+                .withInstruction().withStatement("instance = aInstance;").endInstruction()
+            .endMethod()
+                .withMethod().withModifiers(JavaSource.MODIFIER_PROTECTED).withReturnType(innerBuildClassType).withName("getInstance")
+                .withReturnValue().withStatement("instance").endReturnValue()
+            .endMethod();
     }
 
     public void endBuilderBaseClass() {
-        closeBlock();
+        javaSourceBuilder = classBuilder.endClazz();
     }
 
     public void addFieldSetter(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
@@ -214,53 +230,55 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> extends SourceG
     private void generateBuilderSetter(String fieldName, String fieldType, String methodName,
             String[] exceptions, String fieldBuilderName, String baseBuilderName, String builderClassName2,
             String builderType, boolean castBuilderType) {
-        startMethod(MODIFIER_PUBLIC, fieldBuilderName, methodName, exceptions);
-        addLine("%s %s = new %s();", fieldType, fieldName, fieldType);
-        addLine();
-        endMethod("%s(%s).new %s(%s)", methodName, fieldName, fieldBuilderName, fieldName);
-        addLine();
-        addLine("public class %s extends %s<%s> {", fieldBuilderName, baseBuilderName, fieldBuilderName);
-        increseIndent();
-        addLine("public %s(%s aInstance) {", fieldBuilderName, fieldType);
-        increseIndent();
-        addLine("super(aInstance);");
-        closeBlock();
-        addLine();
-        addLine("public %s %s() {", builderType, prefixed(endPrefix, fieldName));
-        increseIndent();
-        endMethod("%s%s.this", (castBuilderType ? "(" + builderType + ") " : ""), builderClassName2);
-        endMethod();
+        classBuilder
+            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withReturnType(fieldBuilderName).withName(methodName).withExceptions(Arrays.asList(exceptions))
+                .withInstruction().withStatement("%s %s = new %s();").withParam(fieldType).withParam(fieldName).withParam(fieldType).endInstruction()
+                .withInstruction().endInstruction()
+                .withReturnValue().withStatement("%s(%s).new %s(%s)").withParam(methodName).withParam(fieldName).withParam(fieldBuilderName).withParam(fieldName).endReturnValue()
+            .endMethod()
+            .withInnerClass().withModifiers(JavaSource.MODIFIER_PUBLIC).withName(fieldBuilderName).withBaseClazz(baseBuilderName + "<" + fieldBuilderName + ">")
+                .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName(fieldBuilderName)
+                    .withParameter().withType(fieldType).withName("aInstance").endParameter()
+                    .withInstruction().withStatement("super(aInstance);").endInstruction()
+                .endMethod()
+                .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withReturnType(builderType).withName(prefixed(endPrefix, fieldName))
+                    .withReturnValue().withStatement(castBuilderType ? "(%s) %s.this" : "this").withParam(builderType).withParam(builderClassName2).endReturnValue()
+                .endMethod()
+            .endInnerClass();
     }
 
     private void generateCollectionElementSetter(String collectionFieldName, String collectionContainerType,
             String elementName, String elementType, String[] exceptions, String builderType, boolean castBuilderType) {
         String methodName = prefixed(collectionElementSetterPrefix, elementName);
-        startMethod(MODIFIER_PUBLIC, builderType, methodName, elementType, "aValue", exceptions);
-        addLine("if (instance.%s() == null) {", getterName(collectionFieldName));
-        increseIndent();
-        addLine("instance.%s(new %s<%s>());", setterName(collectionFieldName), collectionContainerType, elementType);
-        closeBlock();
-        addLine();
-        addLine("((%s<%s>)instance.%s()).add(aValue);", collectionContainerType, elementType,
-                getterName(collectionFieldName));
-        addLine();
-        if (castBuilderType) {
-            endMethod("(%s) this", builderType);
-        } else {
-            endMethod("this");
-        }
+        classBuilder
+            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withReturnType(builderType).withName(methodName).withExceptions(Arrays.asList(exceptions))
+                .withParameter().withType(elementType).withName("aValue").endParameter()
+                .withInstruction().withStatement("if (instance.%s() == null) {").withParam(getterName(collectionFieldName)).endInstruction()
+                .withInstruction().withStatement("    instance.%s(new %s<%s>());").withParam(setterName(collectionFieldName)).withParam(collectionContainerType).withParam(elementType).endInstruction()
+                .withInstruction().withStatement("}").endInstruction()
+                .withInstruction().endInstruction()
+                .withInstruction().withStatement("((%s<%s>)instance.%s()).add(aValue);").withParam(collectionContainerType).withParam(elementType).withParam(getterName(collectionFieldName)).endInstruction()
+                .withInstruction().endInstruction()
+                .withReturnValue().withStatement(castBuilderType ? "(%s) this" : "this").withParam(builderType).endReturnValue()
+            .endMethod();
     }
 
     private void generateSimpleSetter(String fieldName, String fieldType, String[] exceptions, String builderType,
             boolean castBuilderType) {
-        startMethod(MODIFIER_PUBLIC, builderType, prefixed(setterPrefix, fieldName), fieldType, "aValue", exceptions);
-        addLine("instance.%s(aValue);", setterName(fieldName));
-        addLine();
-        if (castBuilderType) {
-            endMethod("(%s) this", builderType);
-        } else {
-            endMethod("this");
-        }
+        classBuilder.withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withReturnType(builderType)
+                .withName(prefixed(setterPrefix, fieldName))
+                .withParameter().withType(fieldType).withName("aValue").endParameter()
+                .withExceptions(Arrays.asList(exceptions))
+                .withInstruction().withStatement("instance.%s(aValue);").withParam(setterName(fieldName)).endInstruction()
+                .withInstruction().endInstruction()
+                .withReturnValue().withStatement(castBuilderType ? "(%s) this" : "this").withParam(builderType).endReturnValue()
+            .endMethod();
+    }
+
+    public void finish() {
+        IndentWriter w = new IndentWriter();
+        w.out = out;
+        javaSourceBuilder.build().print(w);
     }
 
     public abstract String getClassName(TClassType t);
@@ -274,5 +292,4 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> extends SourceG
     public abstract String getType(TClassType t);
 
     public abstract String getTypeWithParams(TClassType t);
-
 }

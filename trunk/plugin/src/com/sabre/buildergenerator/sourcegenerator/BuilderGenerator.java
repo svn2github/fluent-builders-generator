@@ -58,7 +58,7 @@ public class BuilderGenerator {
     public String generateSource(final IType type, String packageName, String builderName, String[] fieldNames,
         String setterPrefix, String collectionSetterPrefix, String endPrefix, boolean doFormat) throws Exception {
 
-        final BuilderSourceGenerator generator = new BuilderSourceGenerator();
+        final AbstractBuilderSourceGenerator<String> generator = new BuilderSourceGenerator();
 
         generator.setSetterPrefix(setterPrefix);
         generator.setCollectionElementSetterPrefix(collectionSetterPrefix);
@@ -72,6 +72,7 @@ public class BuilderGenerator {
         typesToGenerateInnerBuilders.add(Signature.createTypeSignature(type.getFullyQualifiedName(), true));
 
         generateBuilderBaseClasses(generator, type);
+        generator.finish();
         sw.flush();
 
         String builderSource = sw.toString();
@@ -113,7 +114,7 @@ public class BuilderGenerator {
         }
     }
 
-    private void generateBuilderBaseClasses(final BuilderSourceGenerator generator, final IType enclosingType)
+    private void generateBuilderBaseClasses(final AbstractBuilderSourceGenerator<String> generator, final IType enclosingType)
         throws Exception {
         while (!typesToGenerateInnerBuilders.isEmpty()) {
             String typeSignature = typesToGenerateInnerBuilders.iterator().next();
@@ -169,12 +170,12 @@ public class BuilderGenerator {
         }
     }
 
-    private void generateSimpleSetter(BuilderSourceGenerator generator, String[] exceptionTypes, String fieldName,
+    private void generateSimpleSetter(AbstractBuilderSourceGenerator<String> generator, String[] exceptionTypes, String fieldName,
         String parameterType) {
         generator.addFieldSetter(fieldName, parameterType, exceptionTypes);
     }
 
-    private void generateCollectionAdder(BuilderSourceGenerator generator, String[] exceptionTypes,
+    private void generateCollectionAdder(AbstractBuilderSourceGenerator<String> generator, String[] exceptionTypes,
         String fieldName, String elementType) {
         boolean isCollection = elementType.startsWith("java.util.Collection<");
         boolean isList = elementType.startsWith("java.util.List<");
@@ -205,7 +206,7 @@ public class BuilderGenerator {
         }
     }
 
-    private void generateCollectionBuilder(BuilderSourceGenerator generator, IType enclosingType,
+    private void generateCollectionBuilder(AbstractBuilderSourceGenerator<String> generator, IType enclosingType,
         String[] exceptionTypes, String fieldName, String fieldType, String fieldTypeSignature) throws Exception {
         boolean isCollection = fieldType.startsWith("java.util.Collection<");
         boolean isList = fieldType.startsWith("java.util.List<");
@@ -252,7 +253,7 @@ public class BuilderGenerator {
                 : fieldTypeArgumentSignature.equals("*") ? "Qjava.lang.Object;" : fieldTypeArgumentSignature;
     }
 
-    private void generateFieldBuilder(BuilderSourceGenerator generator, IType enclosingType,
+    private void generateFieldBuilder(AbstractBuilderSourceGenerator<String> generator, IType enclosingType,
         String[] exceptionTypes, String fieldName, String parameterType, String parameterTypeSignature)
         throws Exception {
         IType resolveType = SignatureResolver.resolveType(enclosingType, parameterTypeSignature);

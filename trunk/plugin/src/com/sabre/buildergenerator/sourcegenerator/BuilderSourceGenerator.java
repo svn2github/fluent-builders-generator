@@ -12,6 +12,7 @@
 package com.sabre.buildergenerator.sourcegenerator;
 
 
+
 public class BuilderSourceGenerator extends AbstractBuilderSourceGenerator<String> {
     @Override public String getClassQName(String aT) {
         int i = aT.indexOf('<');

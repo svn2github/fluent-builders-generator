@@ -14,6 +14,7 @@ package com.sabre.buildergenerator.sourcegenerator;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
+import com.sabre.buildergenerator.sourcegenerator.java.Imports;
 import com.sabre.buildergenerator.sourcegenerator.java.IndentWriter;
 import com.sabre.buildergenerator.sourcegenerator.java.JavaSource;
 import com.sabre.buildergenerator.sourcegenerator.java.JavaSourceBuilder;
@@ -40,6 +41,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
 
     private PrintWriter out;
 
+    private final Imports imports = new Imports();
     private JavaSourceBuilder javaSourceBuilder;
     private JavaSourceBuilder.ClazzClazzBuilder classBuilder;
 
@@ -94,7 +96,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
 
     public void addBuilderClass(TClassType aBuildClassDescriptor, String aPackageForBuilder, String aBuilderClassName) {
         buildClassName = getClassName(aBuildClassDescriptor);
-        buildClassType = getType(aBuildClassDescriptor);
+        buildClassType = imports.getClassname(getType(aBuildClassDescriptor));
         builderClassName = aBuilderClassName;
 
         String baseClass = buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName + ">";
@@ -116,7 +118,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
 
     public void startBuilderBaseClass(TClassType buildClassDescriptor) {
         innerBuildClassName = getClassName(buildClassDescriptor);
-        innerBuildClassType = getType(buildClassDescriptor);
+        innerBuildClassType = imports.getClassname(getType(buildClassDescriptor));
         innerBuilderClassName = innerBuildClassName + BUILDER_BASE_SUFFIX;
 
         String typeArg = BUILDER_TYPE_ARG_NAME + " extends " + innerBuilderClassName;
@@ -167,7 +169,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
             TClassType collectionContainerTypeDecriptor, TClassType[] exceptions) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
         TClassType elementTypeDescriptor = getInnerType(fieldTypeDescriptor);
-        String elementType = getType(elementTypeDescriptor);
+        String elementType = imports.getClassname(getType(elementTypeDescriptor));
 
         generateCollectionElementSetter(fieldName, getType(collectionContainerTypeDecriptor), elementName,
                 elementType, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
@@ -177,7 +179,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
             TClassType collectionConcreteTypeDecriptor, TClassType[] exceptions) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
         TClassType elementTypeDescriptor = getInnerType(fieldTypeDescriptor);
-        String elementType = getType(elementTypeDescriptor);
+        String elementType = imports.getClassname(getType(elementTypeDescriptor));
         String fieldClassName = getClassName(elementTypeDescriptor);
         String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
         String fieldBuilderName = toUpperCaseStart(elementName + fieldClassName + FIELD_BUILDER_SUFFIX);
@@ -232,9 +234,9 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
             String builderType, boolean castBuilderType) {
         classBuilder
             .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withReturnType(fieldBuilderName).withName(methodName).withExceptions(Arrays.asList(exceptions))
-                .withInstruction().withStatement("%s %s = new %s();").withParam(fieldType).withParam(fieldName).withParam(fieldType).endInstruction()
+                .withInstruction().withStatement("%s obj = new %s();").withParam(fieldType).withParam(fieldType).endInstruction()
                 .withInstruction().endInstruction()
-                .withReturnValue().withStatement("%s(%s).new %s(%s)").withParam(methodName).withParam(fieldName).withParam(fieldBuilderName).withParam(fieldName).endReturnValue()
+                .withReturnValue().withStatement("%s(obj).new %s(obj)").withParam(methodName).withParam(fieldBuilderName).endReturnValue()
             .endMethod()
             .withInnerClass().withModifiers(JavaSource.MODIFIER_PUBLIC).withName(fieldBuilderName).withBaseClazz(baseBuilderName + "<" + fieldBuilderName + ">")
                 .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName(fieldBuilderName)
@@ -278,7 +280,9 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
     public void finish() {
         IndentWriter w = new IndentWriter();
         w.out = out;
-        javaSourceBuilder.build().print(w);
+        JavaSource javaSource = javaSourceBuilder.build();
+        javaSource.addImports(imports);
+        javaSource.print(w);
     }
 
     public abstract String getClassName(TClassType t);

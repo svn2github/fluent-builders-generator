@@ -130,7 +130,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
                 .withParameter().withType(innerBuildClassType).withName("aInstance").endParameter()
                 .withInstruction().withStatement("instance = aInstance;").endInstruction()
             .endMethod()
-                .withMethod().withModifiers(JavaSource.MODIFIER_PROTECTED).withReturnType(innerBuildClassType).withName("getInstance")
+            .withMethod().withModifiers(JavaSource.MODIFIER_PROTECTED).withReturnType(innerBuildClassType).withName("getInstance")
                 .withReturnValue().withStatement("instance").endReturnValue()
             .endMethod();
     }
@@ -142,15 +142,6 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
     public void addFieldSetter(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
         generateSimpleSetter(fieldName, getType(fieldTypeDescriptor), exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
-    }
-
-    private String[] getExceptionTypes(TClassType[] exceptions) {
-        String exceptionTypes[] = new String[exceptions.length];
-        int i = 0;
-        for (TClassType exception : exceptions) {
-            exceptionTypes[i++] = getType(exception);
-        }
-        return exceptionTypes;
     }
 
     public void addFieldBuilder(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
@@ -187,46 +178,6 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
 
         generateBuilderSetter(elementName, elementType, methodName, exceptionTypes, fieldBuilderName,
                 innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, true);
-    }
-
-    private String setterName(String fieldName) {
-        return prefixed(SETTER_PREFIX, fieldName);
-    }
-
-    private String getterName(String fieldName) {
-        return prefixed(GETTER_PREFIX, fieldName);
-    }
-
-    private String prefixed(String prefix, String fieldName) {
-        if (prefix != null && prefix.length() > 0) {
-            int prefixLen = prefix.length();
-            StringBuilder buf = new StringBuilder(prefixLen + fieldName.length());
-
-            buf.append(prefix);
-            buf.append(fieldName);
-
-            buf.setCharAt(prefixLen, Character.toUpperCase(buf.charAt(prefixLen)));
-
-            return buf.toString();
-        } else {
-            return fieldName;
-        }
-    }
-
-    private String toUpperCaseStart(String name) {
-        StringBuilder buf = new StringBuilder(name);
-
-        buf.setCharAt(0, Character.toUpperCase(buf.charAt(0)));
-
-        return buf.toString();
-    }
-
-    private String toLowerCaseStart(String name) {
-        StringBuilder buf = new StringBuilder(name);
-
-        buf.setCharAt(0, Character.toLowerCase(buf.charAt(0)));
-
-        return buf.toString();
     }
 
     private void generateBuilderSetter(String fieldName, String fieldType, String methodName,
@@ -289,6 +240,55 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         w.out.println(" */");
         w.out.println();
         javaSource.print(w);
+    }
+
+    private String[] getExceptionTypes(TClassType[] exceptions) {
+        String exceptionTypes[] = new String[exceptions.length];
+        int i = 0;
+        for (TClassType exception : exceptions) {
+            exceptionTypes[i++] = getType(exception);
+        }
+        return exceptionTypes;
+    }
+
+    private String setterName(String fieldName) {
+        return prefixed(SETTER_PREFIX, fieldName);
+    }
+
+    private String getterName(String fieldName) {
+        return prefixed(GETTER_PREFIX, fieldName);
+    }
+
+    private String prefixed(String prefix, String fieldName) {
+        if (prefix != null && prefix.length() > 0) {
+            int prefixLen = prefix.length();
+            StringBuilder buf = new StringBuilder(prefixLen + fieldName.length());
+
+            buf.append(prefix);
+            buf.append(fieldName);
+
+            buf.setCharAt(prefixLen, Character.toUpperCase(buf.charAt(prefixLen)));
+
+            return buf.toString();
+        } else {
+            return fieldName;
+        }
+    }
+
+    private String toUpperCaseStart(String name) {
+        StringBuilder buf = new StringBuilder(name);
+
+        buf.setCharAt(0, Character.toUpperCase(buf.charAt(0)));
+
+        return buf.toString();
+    }
+
+    private String toLowerCaseStart(String name) {
+        StringBuilder buf = new StringBuilder(name);
+
+        buf.setCharAt(0, Character.toLowerCase(buf.charAt(0)));
+
+        return buf.toString();
     }
 
     public abstract String getClassName(TClassType t);

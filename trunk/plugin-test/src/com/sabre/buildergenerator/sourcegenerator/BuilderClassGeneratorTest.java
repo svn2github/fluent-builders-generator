@@ -760,7 +760,7 @@ public class BuilderClassGeneratorTest extends TestCase {
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
-    public void ignoredTestGenerateParametrizedTypeFieldSetter() throws Exception {
+    public void testGenerateParametrizedTypeFieldSetter() throws Exception {
         buildJavaSource().forPackage("testpkg").forClassName("Generic")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
@@ -814,6 +814,97 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("        assert obj1.getField() == field;")
             .withSourceLine("        MyClass obj2 = GeneratedBuilder.myClass().withField().withGenericField(\"generic\").endField().build();")
             .withSourceLine("        assert obj2.getField().getGenericField().equals(\"generic\");")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+    }
+
+    public void testGenerateBuilderForGenerics() throws Exception {
+        // given
+        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class MyClass {")
+            .withSourceLine("    private MyData field;")
+            .withSourceLine("")
+            .withSourceLine("    public MyData getField() {")
+            .withSourceLine("        return field;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setField(MyData aField) {")
+            .withSourceLine("        field = aField;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+        buildJavaSource().forPackage("testpkg").forClassName("MyData")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("import java.util.List;")
+            .withSourceLine("")
+            .withSourceLine("public class MyData {")
+            .withSourceLine("    private List<MyData2<String>> dataFields;")
+            .withSourceLine("")
+            .withSourceLine("    public List<MyData2<String>> getDataFields() {")
+            .withSourceLine("        return dataFields;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setDataFields(List<MyData2<String>> aFields) {")
+            .withSourceLine("        dataFields = aFields;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildFile();
+        buildJavaSource().forPackage("testpkg").forClassName("MyData2")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class MyData2<C extends CharSequence> {")
+            .withSourceLine("    private C data2Field;")
+            .withSourceLine("")
+            .withSourceLine("    public C getData2Field() {")
+            .withSourceLine("        return data2Field;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setData2Field(C aField) {")
+            .withSourceLine("        data2Field = aField;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildFile();
+
+        // when
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+
+        // then
+        buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
+            .withSourceLine(builderSource)
+            .buildType();
+
+        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+            .withSourceLine("package test;")
+            .withSourceLine("")
+            .withSourceLine("import testpkg.MyClass;")
+            .withSourceLine("import testpkg.MyData;")
+            .withSourceLine("import testpkg.MyData2;")
+            .withSourceLine("import builderpkg.GeneratedBuilder;")
+            .withSourceLine("")
+            .withSourceLine("public class MainClass {")
+            .withSourceLine("    public static void main(String[] args) {")
+            .withSourceLine("        MyData2 data1 = new MyData2();")
+            .withSourceLine("        MyData2 data2 = new MyData2();")
+            .withSourceLine("        MyClass obj1 = GeneratedBuilder.myClass().withField()")
+            .withSourceLine("                                       .withAddedDataField(data1)")
+            .withSourceLine("                                       .withAddedDataField(data2)")
+            .withSourceLine("                                       .endField().build();")
+            .withSourceLine("        MyClass obj2 = GeneratedBuilder.myClass().withField()")
+            .withSourceLine("                                       .withAddedDataField().withData2Field(\"dataField1\").endDataField()")
+            .withSourceLine("                                       .withAddedDataField().withData2Field(\"dataField2\").endDataField()")
+            .withSourceLine("                                       .endField().build();")
+            .withSourceLine("        assert obj1.getField().getDataFields().size() == 2;")
+            .withSourceLine("        assert obj1.getField().getDataFields().get(0) == data1;")
+            .withSourceLine("        assert obj1.getField().getDataFields().get(1) == data2;")
+            .withSourceLine("        assert obj2.getField().getDataFields().size() == 2;")
+            .withSourceLine("        assert obj2.getField().getDataFields().get(0).getData2Field().equals(\"dataField1\");")
+            .withSourceLine("        assert obj2.getField().getDataFields().get(1).getData2Field().equals(\"dataField2\");")
             .withSourceLine("    }")
             .withSourceLine("}")
             .buildType();

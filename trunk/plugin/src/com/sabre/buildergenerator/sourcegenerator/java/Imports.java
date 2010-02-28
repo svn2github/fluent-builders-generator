@@ -38,10 +38,10 @@ public class Imports {
     public String getUnqualified(String qualifiedTypeName, Set<String> nonTypeNames) {
         // remove spaces
         qualifiedTypeName = qualifiedTypeName
-        .replaceAll("\\? +extends +", "?=extends=")
-        .replaceAll("\\? +super +", "?=super=")
-        .replaceAll("\\? +capture +of +", "?=capture=of=")
-        .replaceAll("\\? +", "?=").replaceAll(" ", "")
+        .replaceAll(" +extends +", "=extends=")
+        .replaceAll(" +super +", "=super=")
+        .replaceAll(" +capture +of +", "=capture=of=")
+        .replaceAll(" ", "")
         .replaceAll("=", " ");
 
         return doGetUnqualified(qualifiedTypeName, nonTypeNames);

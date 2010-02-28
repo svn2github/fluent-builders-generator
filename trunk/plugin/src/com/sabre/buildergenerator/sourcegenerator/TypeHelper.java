@@ -147,7 +147,7 @@ public class TypeHelper {
     public static void walkHierarchyTree(IType type, TypeInspector inspector) throws Exception {
         Map<String, String> typeParameterMapping = new HashMap<String, String>();
 
-        inspector.nextSuperType(Signature.createTypeSignature(type.getFullyQualifiedParameterizedName(), true), type,
+        inspector.nextSuperType(Signature.createTypeSignature(type.getFullyQualifiedName(), true), type,
             typeParameterMapping);
 
         String superclassTypeSignature;

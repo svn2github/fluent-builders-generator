@@ -165,20 +165,19 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
 
     public void addFieldSetter(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
-        String type = getType(fieldTypeDescriptor);
-        String uqType = imports.getUnqualified(type,nonTypeNames);
-        generateSimpleSetter(fieldName, uqType, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
+        String type = imports.getUnqualified(getType(fieldTypeDescriptor),nonTypeNames);
+        generateSimpleSetter(fieldName, type, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
     }
 
     public void addFieldBuilder(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions, String[] typeParamNames) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
         String fieldClassName = getClassName(fieldTypeDescriptor);
-        String fieldClassQName = getClassQName(fieldTypeDescriptor);
+        String fieldType = imports.getUnqualified(getType(fieldTypeDescriptor),nonTypeNames);
         String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
         String fieldBuilderName = toUpperCaseStart(fieldName + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(setterPrefix, fieldName);
 
-        generateBuilderSetter(fieldName, fieldClassQName, methodName, exceptionTypes, fieldBuilderName,
+        generateBuilderSetter(fieldName, fieldType, methodName, exceptionTypes, fieldBuilderName,
                 innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, typeParamNames, true);
     }
 
@@ -188,9 +187,8 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         TClassType elementTypeDescriptor = getInnerType(fieldTypeDescriptor);
         String elementType = imports.getUnqualified(getType(elementTypeDescriptor),nonTypeNames);
 
-        String collectionContainerType = getType(collectionContainerTypeDecriptor);
-        String uqCollectionContainerType = imports.getUnqualified(collectionContainerType,nonTypeNames);
-        generateCollectionElementSetter(fieldName, uqCollectionContainerType, elementName,
+        String collectionContainerType = imports.getUnqualified(getType(collectionContainerTypeDecriptor),nonTypeNames);
+        generateCollectionElementSetter(fieldName, collectionContainerType, elementName,
                 elementType, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
     }
 
@@ -282,7 +280,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         String exceptionTypes[] = new String[exceptions.length];
         int i = 0;
         for (TClassType exception : exceptions) {
-            exceptionTypes[i++] = getType(exception);
+            exceptionTypes[i++] = imports.getUnqualified(getType(exception), nonTypeNames);
         }
         return exceptionTypes;
     }

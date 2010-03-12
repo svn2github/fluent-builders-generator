@@ -155,20 +155,7 @@ public class ImportsTest extends TestCase {
         assertTrue(imports.getImports().contains("my.package.MyClass.MyInnerClass"));
     }
 
-    public void testInnerTypeTwisted1() {
-        // given
-        String fullType = "my.package.MyClass<?>.MyInnerClass";
-
-        // when
-        String unqualified = imports.getUnqualified(fullType, null);
-
-        // then
-        assertEquals("MyInnerClass", unqualified);
-        assertEquals(1, imports.getImports().size());
-        assertTrue(imports.getImports().contains("my.package.MyClass.MyInnerClass"));
-    }
-
-    public void testInnerTypeTwisted2() {
+    public void testInnerTypeTwisted() {
         // given
         String fullType = "my.package.MyClass<?>.MyInnerClass";
 

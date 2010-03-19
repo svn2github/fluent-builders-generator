@@ -33,4 +33,6 @@ public class MethodNode extends TreeNode<IMethod> {
 		super(aElement);
 	}
 
+	
+	
 }

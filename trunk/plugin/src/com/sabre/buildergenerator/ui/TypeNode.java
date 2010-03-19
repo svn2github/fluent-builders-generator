@@ -12,6 +12,8 @@
 
 package com.sabre.buildergenerator.ui;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IMethod;
@@ -29,19 +31,31 @@ import org.eclipse.jdt.core.IType;
 
 public class TypeNode extends TreeNode<IType> {
 
+	private HashSet<MethodNode> methodNodes;
+
 	/**
 	 * @param type
+	 * @param definedSettingMethods TODO
 	 */
-	public TypeNode(IType type) {
+	public TypeNode(IType type, Map<IType, Set<IMethod>> definedSettingMethods) {
 		super(type);
+		
+		this.methodNodes = new HashSet<MethodNode>();
+		for (IType baseType: definedSettingMethods.keySet()) {
+			Set<IMethod> settingMethods = definedSettingMethods.get(baseType);
+			for (IMethod settingMethod:settingMethods) {
+				methodNodes.add(new MethodNode(settingMethod));
+			}
+		}
 	}
 
 	/**
 	 * @return
 	 */
 	public Set<MethodNode> getMethodNodes() {
-		return null;
+		return methodNodes;
 	}
+	
 		
 	
 

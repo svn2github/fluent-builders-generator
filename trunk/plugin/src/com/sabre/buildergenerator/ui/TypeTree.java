@@ -38,7 +38,7 @@ public class TypeTree {
 	 * @param aDefinedMethods 
 	 */
 	public TypeTree(IType aType, Map<IType, Set<IMethod>> aDefinedMethods) {
-		this.type = new TypeNode(aType);
+		this.type = new TypeNode(aType, aDefinedMethods);
 	}
 
 	/**

@@ -87,4 +87,28 @@ public class JavaSource {
             imports.add(imp);
         }
     }
+
+    public static void main(String[] args) {
+        Imports imports = new Imports();
+        JavaSource javaSource = JavaSourceBuilder.javaSource()
+            .withImport("java.util.List")
+            .withClazz().withModifiers(JavaSource.MODIFIER_PUBLIC).withName("TestClass")
+                .withTypeArg("T").withTypeArg("G")
+                .withBaseClazz("Base").withInterface("Interface1").withInterface("Interface2")
+                .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName("TestClass")
+                .endMethod()
+                .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName("foo")
+                    .withReturnType(imports.getUnqualified("java.lang.String", null, ""))
+                    .withParameter().withName("arg1").withType(imports.getUnqualified("java.lang.String", null, "")).endParameter()
+                    .withParameter().withName("arg2").withType("int").endParameter()
+                    .withException("Exception")
+                    .withInstruction().withStatement("%s = %s;").withParam("var").withParam("\"text\"").endInstruction()
+                    .withInstruction().endInstruction()
+                    .withReturnValue().withStatement("\"5\"").endReturnValue()
+                .endMethod()
+            .endClazz()
+            .build();
+        javaSource.addImports(imports);
+        javaSource.print(System.out);
+    }
 }

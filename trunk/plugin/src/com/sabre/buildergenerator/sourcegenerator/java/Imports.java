@@ -11,9 +11,7 @@
 
 package com.sabre.buildergenerator.sourcegenerator.java;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -35,7 +33,15 @@ public class Imports {
         simpleTypes.add("?");
     }
 
-    public String getUnqualified(String qualifiedTypeName, Set<String> nonTypeNames) {
+    public SortedSet<String> getImports() {
+        return imports;
+    }
+
+    /**
+     * Adds all classes referenced within the type description to the imports.
+     * Returns type description with package names removed.
+     */
+    public String getUnqualified(String qualifiedTypeName, Set<String> nonTypeNames, String packageName) {
         // remove spaces
         qualifiedTypeName = qualifiedTypeName
         .replaceAll(" +extends +", "=extends=")
@@ -44,134 +50,170 @@ public class Imports {
         .replaceAll(" ", "")
         .replaceAll("=", " ");
 
-        return doGetUnqualified(qualifiedTypeName, nonTypeNames);
+        return doGetUnqualified(qualifiedTypeName, nonTypeNames, packageName);
     }
 
-    public String doGetUnqualified(String qualifiedTypeName, Set<String> nonTypeNames) {
-        String classname = register(qualifiedTypeName, nonTypeNames);
-        String[] params = splitType(classname);
-        StringBuilder buf = new StringBuilder();
-        buf.append(params[0]);
-        if (params.length > 1) {
-            buf.append("<");
-            int paramCnt = params[params.length - 1].equals("[]") ? params.length - 1 : params.length;
-            for (int i = 1; i < paramCnt; i++) {
-                if (i > 1){
-                    buf.append(", ");
-                }
-                String param = params[i];
+    /**
+     * Processes top class and goes recurrently down into type parameters.
+     */
+    public String doGetUnqualified(String qualifiedTypeName, final Set<String> nonTypeNames, final String packageName) {
+        String classname = register(qualifiedTypeName, nonTypeNames, packageName);
+        return processTypeParams(classname, new TypeProcessor() {
+
+            public String processType(String param) {
+                StringBuilder buf = new StringBuilder();
                 int end = param.indexOf('<');
                 int space = (end != -1 ? param.substring(0, end) : param).lastIndexOf(' ');
+
                 if (end > 0 && space > end) {
                     space = -1;
                 }
+
                 buf.append(param.substring(0, space + 1));
                 String type = param.substring(space + 1);
-                buf.append(doGetUnqualified(type, nonTypeNames));
+                buf.append(doGetUnqualified(type, nonTypeNames, packageName));
+
+                return buf.toString();
             }
-            buf.append(">");
-            if (params.length > paramCnt) {
-                buf.append(params[paramCnt]);
-            }
-        }
-        return buf.toString();
+
+        });
     }
 
-    public SortedSet<String> getImports() {
-        return imports;
-    }
-
-    private String register(String qualifiedTypeName, Set<String> nonTypeNames) {
-        String typeErasure = getTypeErasure(qualifiedTypeName);
-        String classType = getClassType(qualifiedTypeName);
-        int i1 = classType.indexOf('<');
-        if (i1 == -1){
-            i1 = classType.length();
-        }
-        int i2 = classType.indexOf('[');
-        if (i2 == -1){
-            i2 = classType.length();
-        }
-        int nameEnd = Math.min(i1, i2);
-        String className = classType.substring(0, nameEnd);
+    /**
+     * Processes single class. Registers import for main class
+     * and returns type description without the main class package.
+     */
+    private String register(String qualifiedType, Set<String> nonTypeNames, String packageName) {
+                                                                                   // "package.MyClass<String>"
+        String qualifiedClassName = getClassName(qualifiedType);                   // "package.MyClass"
+        String unqualifiedType = getTypeDescriptionWithoutPackage(qualifiedType);  // "MyClass<String>"
+        String className = getClassName(unqualifiedType);                          // "MyClass"
 
         if (!simpleTypes.contains(className) && (nonTypeNames == null || !nonTypeNames.contains(className))) {
-            if (imports.contains(typeErasure)) {                // already imported: return class type
-                return classType;
+            if (imports.contains(qualifiedClassName)) {         // already imported: return class type
+                return unqualifiedType;
             } else if (importedClasses.contains(className)) {   // name conflict: return full type
-                return qualifiedTypeName;
+                return qualifiedType;
             } else {                                            // not imported: register import, register class name, return class type
-                if (!typeErasure.startsWith("java.lang.")) {
-                    imports.add(typeErasure);
+                if (!isPackage("java.lang", qualifiedClassName) && !isPackage(packageName, qualifiedClassName)) {
+                    imports.add(qualifiedClassName);
                 }
                 importedClasses.add(className);
+                return unqualifiedType;
+            }
+        } else {
+            return qualifiedType;
+        }
+    }
+
+    /**
+     * Removes type parameters and array brackets.
+     *
+     * package.MyClass<String> --> packageMyClass
+     * MyClass<String>         --> MyClass
+     * MyClass[]               --> MyClass
+     */
+    private String getClassName(String classType) {
+        int i = classType.indexOf('<');
+        if (i != -1) {
+            return classType.substring(0, i);
+        } else {
+            i = classType.indexOf('[');
+            if (i != -1) {
+                return classType.substring(0, i);
+            } else {
                 return classType;
             }
+        }
+    }
+
+    /**
+     * Checks if the given class description is in the package specified.
+     *
+     * @param packageName package name
+     * @param classType class description
+     * @return true if packages match
+     */
+    private boolean isPackage(String packageName, String classType) {
+        if (isEmptyString(packageName)) {
+            return classType.indexOf('.') == -1;
+        } else {
+            return (classType.startsWith(packageName) && classType.lastIndexOf('.') == packageName.length());
+        }
+    }
+
+    /**
+     * Checks if the string is null or empty.
+     */
+    private boolean isEmptyString(String packageName) {
+        return (packageName == null || packageName.length() == 0);
+    }
+
+    /**
+     * Removes package form type description.
+     *
+     * "package.MyClass<String>" --> "MyClass<String>"
+     */
+    private String getTypeDescriptionWithoutPackage(String qualifiedTypeName) {
+        int mainTypeEnd = qualifiedTypeName.indexOf('<');
+        if (mainTypeEnd == -1) {
+            mainTypeEnd = qualifiedTypeName.length();
+        }
+        int dot = qualifiedTypeName.substring(0, mainTypeEnd).lastIndexOf('.');
+        if (dot != -1) {
+            return qualifiedTypeName.substring(dot + 1);
         } else {
             return qualifiedTypeName;
         }
     }
 
-    private String getTypeErasure(String qualifiedTypeName) {
-        StringBuilder buf = new StringBuilder(qualifiedTypeName.length());
+    /**
+     * Calls callback on all type parameters. Replaces parameters with processed strings.
+     *
+     * for type "package.MyType<java.lang.String,? extends package.MyBase>.MyInner<package.MyGeneric<String>>"
+     * parameters are:
+     * - "java.lang.String"
+     * - "? extends package.MyBase"
+     * - "package.MyGeneric<String>"
+     *
+     * @param qualifiedTypeName type to extract parameters
+     * @param proc callback
+     * @return processed type description
+     */
+    private String processTypeParams(String qualifiedTypeName, TypeProcessor proc) {
+        StringBuilder buf = new StringBuilder();
         int depth = 0;
-        for (char c : qualifiedTypeName.toCharArray()) {
-            if (c == '<') {
-                depth++;
-            } else if (c == '>') {
-                depth--;
-            } else if (c == '[' || c == ']') {
-            } else if (depth == 0) {
-                buf.append(c);
-            }
-        }
-        return buf.toString();
-    }
-
-    private String getClassType(String qualifiedTypeName) {
-        int depth = 0;
-        int dot = -1;
-        int i = 0;
-        for (char c : qualifiedTypeName.toCharArray()) {
-            if (c == '<') {
-                depth++;
-            } else if (c == '>') {
-                depth--;
-            } else if (c == '.' && depth == 0) {
-                dot = i;
-            }
-            i++;
-        }
-        return qualifiedTypeName.substring(dot + 1);
-    }
-
-    private String[] splitType(String qualifiedTypeName) {
-        int depth = 0;
-        List<String> p = new ArrayList<String>();
         int beg = 0;
         int i = 0;
         for (char c : qualifiedTypeName.toCharArray()) {
             if (c == '<') {
                 depth++;
                 if (depth == 1) {
-                    p.add(qualifiedTypeName.substring(beg, i));
+                    buf.append(qualifiedTypeName.substring(beg, i));
+                    buf.append('<');
                     beg = i + 1;
                 }
             } else if (c == '>') {
                 if (depth == 1) {
-                    p.add(qualifiedTypeName.substring(beg, i));
+                    buf.append(proc.processType(qualifiedTypeName.substring(beg, i)));
+                    buf.append('>');
                     beg = i + 1;
                 }
                 depth--;
             } else if (c == ',' && depth == 1) {
-                p.add(qualifiedTypeName.substring(beg, i));
+                buf.append(proc.processType(qualifiedTypeName.substring(beg, i)));
+                buf.append(", ");
                 beg = i + 1;
             }
             i++;
         }
         if (beg < qualifiedTypeName.length()) {
-            p.add(qualifiedTypeName.substring(beg));
+            buf.append(qualifiedTypeName.substring(beg));
         }
-        return p.toArray(new String[p.size()]);
+        return buf.toString();
+    }
+
+    static interface TypeProcessor {
+        String processType(String type);
     }
 }

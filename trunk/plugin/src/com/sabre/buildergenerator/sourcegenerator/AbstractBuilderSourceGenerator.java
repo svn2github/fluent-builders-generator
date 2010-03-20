@@ -52,6 +52,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
     private JavaSourceBuilder.ClazzClazzBuilder classBuilder;
 
     private Set<String> nonTypeNames = null;
+    private String builderPackage;
 
     public AbstractBuilderSourceGenerator() {
         javaSourceBuilder = JavaSourceBuilder.javaSource();
@@ -104,8 +105,10 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
     }
 
     public void addBuilderClass(TClassType aBuildClassDescriptor, String aPackageForBuilder, String aBuilderClassName, String[] typeParamNames) {
+        builderPackage = aPackageForBuilder;
+
         buildClassName = getClassName(aBuildClassDescriptor);
-        buildClassType = imports.getUnqualified(getType(aBuildClassDescriptor), nonTypeNames);
+        buildClassType = imports.getUnqualified(getType(aBuildClassDescriptor), nonTypeNames, builderPackage);
         builderClassName = aBuilderClassName;
 
         String baseClass = buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName;
@@ -138,7 +141,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         }
 
         innerBuildClassName = getClassName(buildClassDescriptor);
-        innerBuildClassType = imports.getUnqualified(getType(buildClassDescriptor), nonTypeNames);
+        innerBuildClassType = imports.getUnqualified(getType(buildClassDescriptor), nonTypeNames, builderPackage);
         innerBuilderClassName = innerBuildClassName + BUILDER_BASE_SUFFIX;
 
         String typeArg = BUILDER_TYPE_ARG_NAME + " extends " + innerBuilderClassName;
@@ -165,14 +168,14 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
 
     public void addFieldSetter(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
-        String type = imports.getUnqualified(getType(fieldTypeDescriptor),nonTypeNames);
+        String type = imports.getUnqualified(getType(fieldTypeDescriptor),nonTypeNames, builderPackage);
         generateSimpleSetter(fieldName, type, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
     }
 
     public void addFieldBuilder(String fieldName, TClassType fieldTypeDescriptor, TClassType[] exceptions, String[] typeParamNames) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
         String fieldClassName = getClassName(fieldTypeDescriptor);
-        String fieldType = imports.getUnqualified(getType(fieldTypeDescriptor),nonTypeNames);
+        String fieldType = imports.getUnqualified(getType(fieldTypeDescriptor),nonTypeNames, builderPackage);
         String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
         String fieldBuilderName = toUpperCaseStart(fieldName + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(setterPrefix, fieldName);
@@ -185,9 +188,9 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
             TClassType collectionContainerTypeDecriptor, TClassType[] exceptions) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
         TClassType elementTypeDescriptor = getInnerType(fieldTypeDescriptor);
-        String elementType = imports.getUnqualified(getType(elementTypeDescriptor),nonTypeNames);
+        String elementType = imports.getUnqualified(getType(elementTypeDescriptor),nonTypeNames, builderPackage);
 
-        String collectionContainerType = imports.getUnqualified(getType(collectionContainerTypeDecriptor),nonTypeNames);
+        String collectionContainerType = imports.getUnqualified(getType(collectionContainerTypeDecriptor),nonTypeNames, builderPackage);
         generateCollectionElementSetter(fieldName, collectionContainerType, elementName,
                 elementType, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
     }
@@ -196,13 +199,13 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
             TClassType[] exceptions, String[] typeParams) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
         TClassType elementTypeDescriptor = getInnerType(fieldTypeDescriptor);
-        String elementType = imports.getUnqualified(getType(elementTypeDescriptor), nonTypeNames);
+        String elementType = imports.getUnqualified(getType(elementTypeDescriptor), nonTypeNames, builderPackage);
         String fieldClassName = getClassName(elementTypeDescriptor);
         String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
         String fieldBuilderName = toUpperCaseStart(elementName + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(collectionElementSetterPrefix, elementName);
         for (int i = 0; i < typeParams.length;i++) {
-            typeParams[i] = imports.getUnqualified(typeParams[i], nonTypeNames);
+            typeParams[i] = imports.getUnqualified(typeParams[i], nonTypeNames, builderPackage);
         }
 
         generateBuilderSetter(elementName, elementType, methodName, exceptionTypes, fieldBuilderName,
@@ -283,7 +286,7 @@ public abstract class AbstractBuilderSourceGenerator<TClassType> {
         String exceptionTypes[] = new String[exceptions.length];
         int i = 0;
         for (TClassType exception : exceptions) {
-            exceptionTypes[i++] = imports.getUnqualified(getType(exception), nonTypeNames);
+            exceptionTypes[i++] = imports.getUnqualified(getType(exception), nonTypeNames, builderPackage);
         }
         return exceptionTypes;
     }

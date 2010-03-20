@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) 2009-2010 fluent-builder-generator for Eclipse commiters.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Sabre Polska sp. z o.o. - initial implementation during Hackday
+ */
+
 package com.sabre.buildergenerator.sourcegenerator.java;
 
 import java.util.Arrays;
@@ -26,7 +37,7 @@ public class ImportsTest extends TestCase {
         String fullType = "";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, typeParamNames);
+        String unqualified = imports.getUnqualified(fullType, typeParamNames, null);
 
         // then
         assertEquals("", unqualified);
@@ -41,7 +52,7 @@ public class ImportsTest extends TestCase {
         String fullType = "my.package.MyClass";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, null);
+        String unqualified = imports.getUnqualified(fullType, null, null);
 
         // then
         assertEquals("MyClass", unqualified);
@@ -54,10 +65,22 @@ public class ImportsTest extends TestCase {
         String fullType = "java.lang.String";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, null);
+        String unqualified = imports.getUnqualified(fullType, null, null);
 
         // then
         assertEquals("String", unqualified);
+        assertEquals(0, imports.getImports().size());
+    }
+
+    public void testDontImportCurrentPackage() {
+        // given
+        String fullType = "my.package.MyClass";
+
+        // when
+        String unqualified = imports.getUnqualified(fullType, null, "my.package");
+
+        // then
+        assertEquals("MyClass", unqualified);
         assertEquals(0, imports.getImports().size());
     }
 
@@ -66,7 +89,7 @@ public class ImportsTest extends TestCase {
         String fullType = "long";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, null);
+        String unqualified = imports.getUnqualified(fullType, null, null);
 
         // then
         assertEquals("long", unqualified);
@@ -78,7 +101,7 @@ public class ImportsTest extends TestCase {
         String fullType = "my.package.MyClass[]";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, null);
+        String unqualified = imports.getUnqualified(fullType, null, null);
 
         // then
         assertEquals("MyClass[]", unqualified);
@@ -91,7 +114,7 @@ public class ImportsTest extends TestCase {
         String fullType = "my.package.MyClass<other.package.OtherClass>";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, null);
+        String unqualified = imports.getUnqualified(fullType, null, null);
 
         // then
         assertEquals("MyClass<OtherClass>", unqualified);
@@ -106,7 +129,7 @@ public class ImportsTest extends TestCase {
         String fullType = "my.package.MyClass<T, other.package.OtherClass, C>";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, typeParamNames);
+        String unqualified = imports.getUnqualified(fullType, typeParamNames, null);
 
         // then
         assertEquals("MyClass<T, OtherClass, C>", unqualified);
@@ -120,7 +143,7 @@ public class ImportsTest extends TestCase {
         String fullType = "my.package.MyClass<? extends other.package.OtherClass>";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, null);
+        String unqualified = imports.getUnqualified(fullType, null, "");
 
         // then
         assertEquals("MyClass<? extends OtherClass>", unqualified);
@@ -134,7 +157,7 @@ public class ImportsTest extends TestCase {
         String fullType = "my.package.MyClass<?>";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, null);
+        String unqualified = imports.getUnqualified(fullType, null, null);
 
         // then
         assertEquals("MyClass<?>", unqualified);
@@ -147,7 +170,7 @@ public class ImportsTest extends TestCase {
         String fullType = "my.package.MyClass.MyInnerClass";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, null);
+        String unqualified = imports.getUnqualified(fullType, null, null);
 
         // then
         assertEquals("MyInnerClass", unqualified);
@@ -160,12 +183,27 @@ public class ImportsTest extends TestCase {
         String fullType = "my.package.MyClass<?>.MyInnerClass";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, null);
+        String unqualified = imports.getUnqualified(fullType, null, null);
 
         // then
         assertEquals("MyClass<?>.MyInnerClass", unqualified);
         assertEquals(1, imports.getImports().size());
         assertTrue(imports.getImports().contains("my.package.MyClass"));
+    }
+
+    public void testInnerTypeTwisted2() {
+        // given
+        String fullType = "my.package.MyClass<a.A>.MyInner.Class<b.B>[]";
+
+        // when
+        String unqualified = imports.getUnqualified(fullType, null, null);
+
+        // then
+        assertEquals("MyClass<A>.MyInner.Class<B>[]", unqualified);
+        assertEquals(3, imports.getImports().size());
+        assertTrue(imports.getImports().contains("my.package.MyClass"));
+        assertTrue(imports.getImports().contains("a.A"));
+        assertTrue(imports.getImports().contains("b.B"));
     }
 
     public void testComplexType() {
@@ -174,7 +212,7 @@ public class ImportsTest extends TestCase {
         String fullType = "my.package.MyClass <T[] , other.package.OtherClass < ? super C> , T < C []>[]>";
 
         // when
-        String unqualified = imports.getUnqualified(fullType, typeParamNames);
+        String unqualified = imports.getUnqualified(fullType, typeParamNames, null);
 
         // then
         assertEquals("MyClass<T[], OtherClass<? super C>, T<C[]>[]>", unqualified);

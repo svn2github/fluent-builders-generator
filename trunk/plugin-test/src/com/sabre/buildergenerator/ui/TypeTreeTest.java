@@ -12,17 +12,19 @@
 
 package com.sabre.buildergenerator.ui;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Title: TreeTest.java<br>
@@ -36,27 +38,80 @@ import org.eclipse.jdt.core.IType;
  */
 
 public class TypeTreeTest extends TestCase {
-	private <T> Set<T> createSet(T... elements) {
-		Set<T> set = new HashSet<T>();
+	private IType baseType;
+	private IMethod method;
+	private TypeHelperRouter typeHelperRouter;
+	private Map<IType, List<IMethod>> baseTypeMethods;
 
-		for (T element : elements) {
-			set.add(element);
-		}
-
-		return set;
+	private Map<IType, List<IMethod>> createBaseTypeMethodsMap() {
+		Map<IType, List<IMethod>> baseTypeMethods = new HashMap<IType, List<IMethod>>();
+		baseTypeMethods.put(baseType, asList(method));
+		return baseTypeMethods;
 	}
 
-	public void testShouldExposeMethodsDefinedByIType() {
-		IType baseType = mock(IType.class);
-		IMethod method = mock(IMethod.class);
+	public void setUp() throws Exception {
+		baseType = mock(IType.class);
+		method = mock(IMethod.class);
+		typeHelperRouter = mock(TypeHelperRouter.class);
+		
+		baseTypeMethods = createBaseTypeMethodsMap();
+		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType))
+			.thenReturn(baseTypeMethods);
+	}
 
-		Map<IType, Set<IMethod>> definedMethods = new HashMap<IType, Set<IMethod>>();
-		definedMethods.put(baseType, createSet(method));
+	public void testShouldExposeBaseTypeAsRootNode() throws Exception {
+		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
+		
+		assertNotNull(typeTree.getNodeFor(baseType));
+	}
 
-		TypeTree typeTree = new TypeTree(baseType, definedMethods);
+	public void testShouldExposeComplexSubtypeAsOneOfTheRootNodesOfTheTreeAndSetterForBaseType()
+			throws Exception {
 
-		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(
-				new MethodNode(method)));
+		IType complexType = mock(IType.class);
+		when(typeHelperRouter.getSetterSetType(method)).thenReturn(complexType);
+		when(complexType.isClass()).thenReturn(true);
+
+		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
+		
+		assertNotNull(typeTree.getNodeFor(complexType));
+		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(new MethodNode(method)));
+	}
+
+	
+	public void testShouldExposeSimpleTypesSettersOfTheTypeAsMethodNode() throws Exception {
+		
+		IType simpleType = mock(IType.class);
+		when(simpleType.isClass()).thenReturn(false);
+		when(typeHelperRouter.getSetterSetType(method)).thenReturn(simpleType);
+		
+		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
+
+		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(new MethodNode(method)));
+		assertNull(typeTree.getNodeFor(simpleType));
+	}
+
+	public void testShouldExposeBinaryTypesSettersOfTheTypeAsMethodNode() throws Exception {
+		IType binaryType = mock(IType.class);
+		when(binaryType.isClass()).thenReturn(true);
+		when(binaryType.isBinary()).thenReturn(true);
+		when(typeHelperRouter.getSetterSetType(method)).thenReturn(binaryType);
+		
+		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
+
+		typeTree.getNodeFor(baseType).getMethodNodes().contains(new MethodNode(method));
+		assertNull(typeTree.getNodeFor(binaryType));
+	}
+	
+	public void testShouldExposeCollectionSetterOfTheTypeAsMethodNodeAndRootNodeForTheComplexCollectionSubType() throws JavaModelException {
+		IType collectionType = mock(IType.class);
+		when(collectionType.isClass()).thenReturn(true);
+		when(collectionType.isBinary()).thenReturn(true);
+		
+		IType collectionSubType = mock(IType.class);
+		when(collectionType.isClass()).thenReturn(true);
+		when(collectionType.isBinary()).thenReturn(false);
+		
 		
 	}
 }

@@ -13,11 +13,18 @@
 
 package com.sabre.buildergenerator.ui;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
+import com.sabre.buildergenerator.signatureutils.SignatureParserException;
+import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
 /**
  * Title: TypeTree.java<br>
@@ -31,14 +38,44 @@ import org.eclipse.jdt.core.IType;
 
 public class TypeTree {
 
-	private TypeNode type;
-
+	private Map<IType, TypeNode> typeNodes;
+	
+	private Set<IMethod> flattenSettersMap(Map<IType, List<IMethod>> setters) {
+		HashSet<IMethod> methods = new HashSet<IMethod>();
+		
+		for (IType key : setters.keySet()) {
+			methods.addAll(setters.get(key));
+		}
+		
+		return methods;
+		
+	}
+	
 	/**
 	 * @param aType
-	 * @param aDefinedMethods 
+	 * @param typeHelperRouter 
+	 * @throws Exception 
 	 */
-	public TypeTree(IType aType, Map<IType, Set<IMethod>> aDefinedMethods) {
-		this.type = new TypeNode(aType, aDefinedMethods);
+	public TypeTree(IType aType, TypeHelperRouter typeHelperRouter) throws Exception {
+		typeNodes = new HashMap<IType, TypeNode>();
+		Set<IMethod> flattenSetters = flattenSettersMap(typeHelperRouter.findSetterMethodsForInhritedTypes(aType));
+		processSetters(aType, flattenSetters, typeHelperRouter);
+	}
+
+	private void processSetters(IType aType, Set<IMethod> setters,
+			TypeHelperRouter typeHelperRouter) throws JavaModelException,
+			SignatureParserException, Exception {
+		typeNodes.put(aType, new TypeNode(aType, setters));
+		for (IMethod setter : setters) {
+			IType setType = typeHelperRouter.getSetterSetType(setter);
+			if (setType.isClass() && !setType.isBinary() && isNotCollection(setType)) {
+				processSetters(setType, flattenSettersMap(typeHelperRouter.findSetterMethodsForInhritedTypes(setType)), typeHelperRouter);
+			}
+		}
+	}
+
+	private boolean isNotCollection(IType setType) {
+		return true;
 	}
 
 	/**
@@ -46,8 +83,9 @@ public class TypeTree {
 	 * @return
 	 */
 	public TypeNode getNodeFor(IType aBaseType) {
-		return type;
+		return typeNodes.get(aBaseType);
 	}
 
 
 }
+ 

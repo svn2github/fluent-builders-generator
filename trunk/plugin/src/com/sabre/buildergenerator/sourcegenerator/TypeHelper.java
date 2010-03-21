@@ -33,7 +33,7 @@ public class TypeHelper {
     public static Map<IType, List<IMethod>> findSetterMethodsForInhritedTypes(IType type) throws Exception {
         Map<IType, List<IMethod>> methodsTree = findAllMethodsForInhritedTypes(type);
 
-        for (IType t : methodsTree.keySet()) {
+        for (IType t : methodsTree.keySet()) {	
             methodsTree.put(t, filterSetterMethods(methodsTree.get(t)));
         }
 

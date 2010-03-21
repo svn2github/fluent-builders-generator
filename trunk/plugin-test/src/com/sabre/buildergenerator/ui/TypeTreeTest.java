@@ -107,10 +107,16 @@ public class TypeTreeTest extends TestCase {
 		IType collectionType = mock(IType.class);
 		when(collectionType.isClass()).thenReturn(true);
 		when(collectionType.isBinary()).thenReturn(true);
+		String collectionSig = "java.util.List<Abcd>";
+		when(collectionType.getFullyQualifiedName()).thenReturn(collectionSig);
 		
 		IType collectionSubType = mock(IType.class);
 		when(collectionType.isClass()).thenReturn(true);
 		when(collectionType.isBinary()).thenReturn(false);
+		
+		// creating signature:
+		// String fullQName = type.getFullyQualifiedName();
+		// String sig = Signature.createSignature(fullQName, true);
 		
 		
 	}

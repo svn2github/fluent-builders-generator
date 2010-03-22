@@ -16,6 +16,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,6 @@ import junit.framework.TestCase;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Title: TreeTest.java<br>
@@ -60,8 +60,9 @@ public class TypeTreeTest extends TestCase {
 	}
 
 	public void testShouldExposeBaseTypeAsRootNode() throws Exception {
-		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
+		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType)).thenReturn(Collections.<IType, List<IMethod>>emptyMap());
 		
+		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 		assertNotNull(typeTree.getNodeFor(baseType));
 	}
 
@@ -103,21 +104,24 @@ public class TypeTreeTest extends TestCase {
 		assertNull(typeTree.getNodeFor(binaryType));
 	}
 	
-	public void testShouldExposeCollectionSetterOfTheTypeAsMethodNodeAndRootNodeForTheComplexCollectionSubType() throws JavaModelException {
+	public void testShouldExposeCollectionSetterOfTheTypeAsMethodNodeAndRootNodeForTheComplexCollectionSubType() throws Exception {
 		IType collectionType = mock(IType.class);
 		when(collectionType.isClass()).thenReturn(true);
 		when(collectionType.isBinary()).thenReturn(true);
-		String collectionSig = "java.util.List<Abcd>";
-		when(collectionType.getFullyQualifiedName()).thenReturn(collectionSig);
+		String collectionFullyQName = "java.util.List<Abcd>";
+		when(collectionType.getFullyQualifiedName()).thenReturn(collectionFullyQName);
+		
+		when(typeHelperRouter.getSetterSetType(method)).thenReturn(collectionType);
 		
 		IType collectionSubType = mock(IType.class);
 		when(collectionType.isClass()).thenReturn(true);
 		when(collectionType.isBinary()).thenReturn(false);
-		
+
+		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
+
+		assertNotNull(typeTree.getNodeFor(collectionSubType));
 		// creating signature:
 		// String fullQName = type.getFullyQualifiedName();
 		// String sig = Signature.createSignature(fullQName, true);
-		
-		
 	}
 }

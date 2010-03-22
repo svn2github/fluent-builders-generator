@@ -59,17 +59,17 @@ public class TypeTree {
 	public TypeTree(IType aType, TypeHelperRouter typeHelperRouter) throws Exception {
 		typeNodes = new HashMap<IType, TypeNode>();
 		Set<IMethod> flattenSetters = flattenSettersMap(typeHelperRouter.findSetterMethodsForInhritedTypes(aType));
-		processSetters(aType, flattenSetters, typeHelperRouter);
+		processType(aType, flattenSetters, typeHelperRouter);
 	}
 
-	private void processSetters(IType aType, Set<IMethod> setters,
+	private void processType(IType aType, Set<IMethod> setters,
 			TypeHelperRouter typeHelperRouter) throws JavaModelException,
 			SignatureParserException, Exception {
 		typeNodes.put(aType, new TypeNode(aType, setters));
 		for (IMethod setter : setters) {
 			IType setType = typeHelperRouter.getSetterSetType(setter);
 			if (setType.isClass() && !setType.isBinary() && isNotCollection(setType)) {
-				processSetters(setType, flattenSettersMap(typeHelperRouter.findSetterMethodsForInhritedTypes(setType)), typeHelperRouter);
+				processType(setType, flattenSettersMap(typeHelperRouter.findSetterMethodsForInhritedTypes(setType)), typeHelperRouter);
 			}
 		}
 	}

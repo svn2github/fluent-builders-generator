@@ -27,4 +27,8 @@ public class TypeHelperRouter {
     public IType getSetterSetType(IMethod method) throws JavaModelException, SignatureParserException {
     	return SignatureResolver.resolveType(method.getDeclaringType(), method.getParameterTypes()[0]);
     }
+    
+    public IType resolveSignature(IType owningType, String signature) throws JavaModelException, SignatureParserException {
+    	return SignatureResolver.resolveType(owningType, signature);
+    }
 }

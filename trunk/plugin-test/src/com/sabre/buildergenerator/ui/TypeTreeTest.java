@@ -72,6 +72,7 @@ public class TypeTreeTest extends TestCase {
 		IType complexType = mock(IType.class);
 		when(typeHelperRouter.getSetterSetType(method)).thenReturn(complexType);
 		when(complexType.isClass()).thenReturn(true);
+		when(complexType.getFullyQualifiedName()).thenReturn("A");
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 		

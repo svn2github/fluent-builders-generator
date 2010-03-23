@@ -26,11 +26,28 @@ import org.eclipse.jdt.core.IMethod;
 
 public class MethodNode extends TreeNode<IMethod> {
 
+	private boolean selected;
+	private TypeNode parentTypeNode;
+
 	/**
 	 * @param aElement
+	 * @param parentTypeNode TODO
 	 */
-	public MethodNode(IMethod aElement) {
+	public MethodNode(IMethod aElement, TypeNode parentTypeNode) {
 		super(aElement);
+		this.parentTypeNode = parentTypeNode;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean b) {
+		if (!parentTypeNode.isActive()) {
+			throw new IllegalStateException("Can't select setter of inactive type");
+		}
+		
+		this.selected = b;
 	}
 
 	

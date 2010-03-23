@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
-import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
 /**
  * Title: TypeTree.java<br>
@@ -69,9 +68,8 @@ public class TypeTree {
 			throws Exception {
 		this.typeNodes = new HashMap<IType, TypeNode>();
 		this.typeHelperRouter = typeHelperRouter;
-		Set<IMethod> flattenSetters = flattenSettersMap(typeHelperRouter
-				.findSetterMethodsForInhritedTypes(aType));
-		processType(aType, flattenSetters);
+		processType(aType, flattenSettersMap(typeHelperRouter
+				.findSetterMethodsForInhritedTypes(aType)));
 	}
 
 	private void processType(IType aType, Set<IMethod> setters)

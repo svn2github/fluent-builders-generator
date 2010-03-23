@@ -59,6 +59,12 @@ public class TypeTreeTest extends TestCase {
 				.thenReturn(baseTypeMethods);
 	}
 
+	public void testRootNodeShouldBeAlwaysMarkedAsActive() throws Exception {
+		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
+				
+		assertTrue(typeTree.getNodeFor(baseType).isActive());
+	}
+	
 	public void testShouldExposeBaseTypeAsRootNode() throws Exception {
 		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType))
 				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
@@ -79,7 +85,7 @@ public class TypeTreeTest extends TestCase {
 
 		assertNotNull(typeTree.getNodeFor(complexType));
 		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(
-				new MethodNode(method)));
+				new MethodNode(method, null)));
 	}
 
 	public void testShouldExposeSimpleTypesSettersOfTheTypeAsMethodNode()
@@ -92,7 +98,7 @@ public class TypeTreeTest extends TestCase {
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
 		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(
-				new MethodNode(method)));
+				new MethodNode(method, null)));
 		assertNull(typeTree.getNodeFor(simpleType));
 	}
 
@@ -106,7 +112,7 @@ public class TypeTreeTest extends TestCase {
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
 		typeTree.getNodeFor(baseType).getMethodNodes().contains(
-				new MethodNode(method));
+				new MethodNode(method, null));
 		assertNull(typeTree.getNodeFor(binaryType));
 	}
 

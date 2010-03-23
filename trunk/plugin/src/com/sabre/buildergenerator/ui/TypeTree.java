@@ -42,6 +42,10 @@ import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
 public class TypeTree {
 
+	public static final String COLLECTIONS_REGEX = "^(java\\.util\\.Collection|" +
+					"java\\.util\\.Set|java\\.util\\.HashSet|" +
+					"java\\.util\\.List|java\\.util\\.ArrayList|" +
+					"java\\.util\\.LinkedList|java\\.util\\.TreeSet)\\<.*$"; 
 	private Map<IType, TypeNode> typeNodes;
 	private TypeHelperRouter typeHelperRouter;
 
@@ -97,8 +101,8 @@ public class TypeTree {
 		}
 	}
 
-	private String getInnerTypeSignature(String collectionSignature) {
-		Pattern p = Pattern.compile("[\\w\\.]+\\<([\\w\\.]+)[\\,\\>].*");
+	static String getInnerTypeSignature(String collectionSignature) {
+		Pattern p = Pattern.compile("L[\\w\\.]+\\<(L[\\w\\.]+;)\\>.*;");
 		Matcher matcher = p.matcher(collectionSignature);
 		if (matcher.matches()) {
 			return matcher.group(1);
@@ -110,10 +114,7 @@ public class TypeTree {
 	private boolean isCollection(IType setType) {
 		String fullyQName = setType.getFullyQualifiedName();
 		
-		return fullyQName.matches("^(java\\.util\\.Collection)|" +
-				"(java\\.util\\.Set)|(java\\.util\\.HashSet)|" +
-				"(java\\.util\\.List)|(java\\.util\\.ArrayList)|" +
-				"(java\\.util\\.LinkedList)|(java\\.util\\.TreeSet)\\<.*");
+		return fullyQName.matches(COLLECTIONS_REGEX);
 	}
 
 	/**

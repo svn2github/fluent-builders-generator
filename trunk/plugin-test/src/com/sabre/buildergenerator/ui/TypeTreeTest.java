@@ -53,15 +53,16 @@ public class TypeTreeTest extends TestCase {
 		baseType = mock(IType.class);
 		method = mock(IMethod.class);
 		typeHelperRouter = mock(TypeHelperRouter.class);
-		
+
 		baseTypeMethods = createBaseTypeMethodsMap();
 		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType))
-			.thenReturn(baseTypeMethods);
+				.thenReturn(baseTypeMethods);
 	}
 
 	public void testShouldExposeBaseTypeAsRootNode() throws Exception {
-		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType)).thenReturn(Collections.<IType, List<IMethod>>emptyMap());
-		
+		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType))
+				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
+
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 		assertNotNull(typeTree.getNodeFor(baseType));
 	}
@@ -75,48 +76,62 @@ public class TypeTreeTest extends TestCase {
 		when(complexType.getFullyQualifiedName()).thenReturn("A");
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
-		
+
 		assertNotNull(typeTree.getNodeFor(complexType));
-		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(new MethodNode(method)));
+		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(
+				new MethodNode(method)));
 	}
 
-	
-	public void testShouldExposeSimpleTypesSettersOfTheTypeAsMethodNode() throws Exception {
-		
+	public void testShouldExposeSimpleTypesSettersOfTheTypeAsMethodNode()
+			throws Exception {
+
 		IType simpleType = mock(IType.class);
 		when(simpleType.isClass()).thenReturn(false);
 		when(typeHelperRouter.getSetterSetType(method)).thenReturn(simpleType);
-		
+
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
-		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(new MethodNode(method)));
+		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(
+				new MethodNode(method)));
 		assertNull(typeTree.getNodeFor(simpleType));
 	}
 
-	public void testShouldExposeBinaryTypesSettersOfTheTypeAsMethodNode() throws Exception {
+	public void testShouldExposeBinaryTypesSettersOfTheTypeAsMethodNode()
+			throws Exception {
 		IType binaryType = mock(IType.class);
 		when(binaryType.isClass()).thenReturn(true);
 		when(binaryType.isBinary()).thenReturn(true);
 		when(typeHelperRouter.getSetterSetType(method)).thenReturn(binaryType);
-		
+
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
-		typeTree.getNodeFor(baseType).getMethodNodes().contains(new MethodNode(method));
+		typeTree.getNodeFor(baseType).getMethodNodes().contains(
+				new MethodNode(method));
 		assertNull(typeTree.getNodeFor(binaryType));
 	}
-	
-	public void testShouldExposeCollectionSetterOfTheTypeAsMethodNodeAndRootNodeForTheComplexCollectionSubType() throws Exception {
+
+	public void testShouldExposeCollectionSetterOfTheTypeAsMethodNodeAndRootNodeForTheComplexCollectionSubType()
+			throws Exception {
 		IType collectionType = mock(IType.class);
 		when(collectionType.isClass()).thenReturn(true);
 		when(collectionType.isBinary()).thenReturn(true);
 		String collectionFullyQName = "java.util.List<Abcd>";
-		when(collectionType.getFullyQualifiedName()).thenReturn(collectionFullyQName);
-		
-		when(typeHelperRouter.getSetterSetType(method)).thenReturn(collectionType);
-		
+		when(collectionType.getFullyQualifiedName()).thenReturn(
+				collectionFullyQName);
+
+		when(typeHelperRouter.getSetterSetType(method)).thenReturn(
+				collectionType);
+
 		IType collectionSubType = mock(IType.class);
 		when(collectionType.isClass()).thenReturn(true);
 		when(collectionType.isBinary()).thenReturn(false);
+
+		when(typeHelperRouter.resolveSignature(collectionType, "LAbcd;"))
+				.thenReturn(collectionSubType);
+		when(
+				typeHelperRouter
+						.findSetterMethodsForInhritedTypes(collectionSubType))
+				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
@@ -125,4 +140,22 @@ public class TypeTreeTest extends TestCase {
 		// String fullQName = type.getFullyQualifiedName();
 		// String sig = Signature.createSignature(fullQName, true);
 	}
+
+	public void testCollectionRegexShouldMatchTheCollectionSignatures() {
+		String[] collectionSignatures = new String[] {
+				"java.util.Collection<A>", "java.util.List<A>",
+				"java.util.ArrayList<A>", "java.util.LinkedList<A>",
+				"java.util.HashSet<A>", "java.util.Set<A>" };
+		for (String sig : collectionSignatures) {
+			String collectionRegex = TypeTree.COLLECTIONS_REGEX;
+			assertTrue("Cant match with " + sig + " with regex "
+					+ collectionRegex, sig.matches(collectionRegex));
+		}
+	}
+
+	public void testShouldGetTheInnerSignatureFromTypedCollection() {
+		String signature = "Ljava.util.List<LString;>;";
+		assertEquals("LString;", TypeTree.getInnerTypeSignature(signature));
+	}
+
 }

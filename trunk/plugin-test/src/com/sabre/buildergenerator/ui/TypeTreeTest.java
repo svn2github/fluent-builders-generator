@@ -14,6 +14,8 @@ package com.sabre.buildergenerator.ui;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -25,6 +27,9 @@ import junit.framework.TestCase;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
+import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 
 /**
  * Title: TreeTest.java<br>
@@ -60,11 +65,13 @@ public class TypeTreeTest extends TestCase {
 	}
 
 	public void testRootNodeShouldBeAlwaysMarkedAsActive() throws Exception {
+		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType))
+				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
-				
+
 		assertTrue(typeTree.getNodeFor(baseType).isActive());
 	}
-	
+
 	public void testShouldExposeBaseTypeAsRootNode() throws Exception {
 		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType))
 				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
@@ -84,8 +91,9 @@ public class TypeTreeTest extends TestCase {
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
 		assertNotNull(typeTree.getNodeFor(complexType));
-		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(
-				new MethodNode(method, null)));
+		TypeNode baseTypeNode = typeTree.getNodeFor(baseType);
+		assertTrue(baseTypeNode.getMethodNodes().contains(
+				new MethodNode(method, baseTypeNode)));
 	}
 
 	public void testShouldExposeSimpleTypesSettersOfTheTypeAsMethodNode()
@@ -97,8 +105,9 @@ public class TypeTreeTest extends TestCase {
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
-		assertTrue(typeTree.getNodeFor(baseType).getMethodNodes().contains(
-				new MethodNode(method, null)));
+		TypeNode baseTypeNode = typeTree.getNodeFor(baseType);
+		assertTrue(baseTypeNode.getMethodNodes().contains(
+				new MethodNode(method, baseTypeNode)));
 		assertNull(typeTree.getNodeFor(simpleType));
 	}
 
@@ -162,6 +171,22 @@ public class TypeTreeTest extends TestCase {
 	public void testShouldGetTheInnerSignatureFromTypedCollection() {
 		String signature = "Ljava.util.List<LString;>;";
 		assertEquals("LString;", TypeTree.getInnerTypeSignature(signature));
+	}
+
+	public void afterTreeInitializationAllPointingMethodNodesShouldBeAttachedToTargetTypeNodes()
+			throws Exception {
+		IType pointedType = mock(IType.class);
+
+		when(typeHelperRouter.getSetterSetType(method)).thenReturn(pointedType);
+
+		when(pointedType.isBinary()).thenReturn(false);
+		when(pointedType.isClass()).thenReturn(true);
+
+		when(typeHelperRouter.findSetterMethodsForInhritedTypes(pointedType))
+				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
+
+		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
+
 	}
 
 }

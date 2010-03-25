@@ -50,6 +50,35 @@ public class MethodNode extends TreeNode<IMethod> {
 		this.selected = b;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((parentTypeNode == null) ? 0 : parentTypeNode.hashCode());
+		result = prime * result + (selected ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MethodNode other = (MethodNode) obj;
+		if (parentTypeNode == null) {
+			if (other.parentTypeNode != null)
+				return false;
+		} else if (!parentTypeNode.equals(other.parentTypeNode))
+			return false;
+		if (selected != other.selected)
+			return false;
+		return true;
+	}
+
 	
 	
 }

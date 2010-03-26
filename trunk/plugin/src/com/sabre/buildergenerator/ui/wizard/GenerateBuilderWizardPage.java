@@ -338,7 +338,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
     }
 
     private Map<IType, List<IMethod>> createMapping(IType type) throws Exception {
-        Map<IType, List<IMethod>> mapping = TypeHelper.findSetterMethodsForInhritedTypes(type);
+        Map<IType, List<IMethod>> mapping = TypeHelper.findSetterMethodsForAllTypesReferenced(type);
         Iterator<IType> typeIterator = mapping.keySet().iterator();
 
         while (typeIterator.hasNext()) {

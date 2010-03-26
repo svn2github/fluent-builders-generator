@@ -25,77 +25,77 @@ import org.eclipse.jdt.core.Signature;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class TypeHelper {
-    public static Map<IType, List<IMethod>> findSetterMethodsForInhritedTypes(IType type) throws Exception {
-        Map<IType, List<IMethod>> methodsTree = findAllMethodsForInhritedTypes(type);
-
-        for (IType t : methodsTree.keySet()) {	
-            methodsTree.put(t, filterSetterMethods(methodsTree.get(t)));
-        }
-
-        return methodsTree;
-    }
-
-    public static Map<IType, List<IMethod>> findAllMethodsForInhritedTypes(IType type) throws Exception {
+    public static Map<IType, List<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
         Map<IType, List<IMethod>> result = new HashMap<IType, List<IMethod>>();
+        final Set<IType> types = new HashSet<IType>();
+        types.add(type);
 
-        result.put(type, new ArrayList<IMethod>(Arrays.asList(type.getMethods())));
-
-        IType superType = type;
-        String supertypeSignature;
-
-        while (superType != null && (supertypeSignature = superType.getSuperclassTypeSignature()) != null) {
-            String resolvedTypeSignature = SignatureResolver.resolveSignature(type, supertypeSignature);
-
-            if (resolvedTypeSignature == null) {
-                break;
-            }
-
-            superType = SignatureResolver.resolveType(type, resolvedTypeSignature);
-
-            if (superType == null) {
-                break;
-            }
-
-            IMethod[] superMethods = superType.getMethods();
-
-            if (superMethods != null) {
-                result.put(superType, Arrays.asList(superMethods));
+        while (!types.isEmpty()) {
+            Iterator<IType> iterator = types.iterator();
+            IType nextType = iterator.next();
+            iterator.remove();
+            final ArrayList<IMethod> methods = new ArrayList<IMethod>();
+            findSetterMethods(nextType, new MethodInspector() {
+                public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution)
+                        throws Exception {
+                    methods.add(method);
+                    String parameterTypeSignature = method.getParameterTypes()[0];
+                    String qualifiedParameterTypeSignature = SignatureResolver.resolveTypeWithParameterMapping(
+                            methodOwnerType, parameterTypeSignature, parameterSubstitution);
+                    IType newType = null;
+                    if (isCollection(qualifiedParameterTypeSignature)) {
+                        String innerTypeSignature = getInner(qualifiedParameterTypeSignature);
+                        newType = SignatureResolver.resolveType(methodOwnerType, innerTypeSignature);
+                    } else {
+                        newType = SignatureResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
+                    }
+                    if (newType != null) {
+                        types.add(newType);
+                    }
+                }
+            });
+            if (!methods.isEmpty()) {
+                result.put(nextType, methods);
             }
         }
 
         return result;
     }
 
-    public static String[] findFieldNames(IType type) throws Exception {
-        final List<String> fieldNames = new ArrayList<String>();
-
-        findSetterMethods(type, new MethodInspector() {
-                public void nextMethod(IType methodOwnerType, IMethod method,
-                    Map<String, String> typeParameterMapping) {
-                    fieldNames.add(getFieldName(method));
-                }
-            });
-
-        return fieldNames.toArray(new String[fieldNames.size()]);
+    private static boolean isCollection(String fieldType) {
+        boolean isCollection = fieldType.contains("java.util.Collection<");
+        boolean isList = fieldType.contains("java.util.List<");
+        boolean isArrayList = fieldType.contains("java.util.ArrayList<");
+        boolean isLinkedList = fieldType.contains("java.util.LinkedList<");
+        boolean isSet = fieldType.contains("java.util.Set<");
+        boolean isHashSet = fieldType.contains("java.util.HashSet<");
+        boolean isTreeSet = fieldType.contains("java.util.TreeSet<");
+        return isCollection || isList || isArrayList || isLinkedList || isSet || isHashSet || isTreeSet;
     }
 
-    private static String getFieldName(IMethod method) {
-        String tmp = method.getElementName().substring(BuilderGenerator.SETTER_PREFIX.length());
-
-        return capitalize(tmp);
-    }
-
-    private static String capitalize(String name) {
-        StringBuilder buf = new StringBuilder(name);
-
-        buf.setCharAt(0, Character.toUpperCase(buf.charAt(0)));
-
-        return buf.toString();
+    private static String getInner(String qualifiedParameterTypeSignature) {
+        int beg = qualifiedParameterTypeSignature.indexOf('<');
+        if (beg != -1) {
+            int end = qualifiedParameterTypeSignature.lastIndexOf('>');
+            String innerContent = qualifiedParameterTypeSignature.substring(beg + 1, end);
+            if (innerContent.charAt(0) == Signature.C_STAR
+                    || innerContent.charAt(0) == Signature.C_EXTENDS
+                    || innerContent.charAt(0) == Signature.C_SUPER
+                    || innerContent.charAt(0) == Signature.C_CAPTURE) {
+                return innerContent.substring(1);
+            } else {
+                return innerContent;
+            }
+        }
+        return qualifiedParameterTypeSignature;
     }
 
     @SuppressWarnings("unused")

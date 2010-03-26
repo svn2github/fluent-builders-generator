@@ -21,7 +21,7 @@ import com.sabre.buildergenerator.sourcegenerator.TypeHelper;
  */
 public class TypeHelperRouter {
     public Map<IType, List<IMethod>> findSetterMethodsForInhritedTypes(IType type) throws Exception {
-    	return TypeHelper.findSetterMethodsForInhritedTypes(type);
+    	return TypeHelper.findSetterMethodsForAllTypesReferenced(type);
     }
 
     public IType getSetterSetType(IMethod method) throws JavaModelException, SignatureParserException {

@@ -89,7 +89,7 @@ public class BuilderGenerationProperties {
     */
     private Set<IMethod> getAllSetters(IType aType) throws Exception {
         Set<IMethod> result = new HashSet<IMethod>();
-        Map<IType, List<IMethod>> map = TypeHelper.findSetterMethodsForInhritedTypes(aType);
+        Map<IType, List<IMethod>> map = TypeHelper.findSetterMethodsForAllTypesReferenced(aType);
 
         for (List<IMethod> methods : map.values()) {
             result.addAll(methods);

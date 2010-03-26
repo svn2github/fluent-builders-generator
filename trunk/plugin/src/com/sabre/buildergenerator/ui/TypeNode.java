@@ -13,6 +13,7 @@
 package com.sabre.buildergenerator.ui;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -74,6 +75,10 @@ public class TypeNode extends TreeNode<IType> {
 
 	public void addPointingMethodNode(MethodNode methodNode) {
 		methodNodesPointingAtMe.add(methodNode);
+	}
+	
+	public Collection<MethodNode> getMethodsPointingAtMe() {
+		return Collections.unmodifiableCollection(methodNodesPointingAtMe);
 	}
 
 	public void setSelected(boolean b) {

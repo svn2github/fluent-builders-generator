@@ -163,7 +163,7 @@ public class TypeTreeTest extends TestCase {
 		assertEquals("LString;", TypeTree.getInnerTypeSignature(signature));
 	}
 
-	public void afterTreeInitializationAllPointingMethodNodesShouldBeAttachedToTargetTypeNodes()
+	public void testAfterTreeInitializationAllPointingMethodNodesShouldBeAttachedToTargetTypeNodes()
 			throws Exception {
 		IType pointedType = mock(IType.class);
 
@@ -171,12 +171,17 @@ public class TypeTreeTest extends TestCase {
 
 		when(pointedType.isBinary()).thenReturn(false);
 		when(pointedType.isClass()).thenReturn(true);
+		when(pointedType.getFullyQualifiedName()).thenReturn("");
 
 		when(typeHelperRouter.findSetterMethods(pointedType))
 				.thenReturn(Collections.<IMethod> emptyList());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
+		assertTrue(typeTree
+				.getNodeFor(pointedType)
+				.getMethodsPointingAtMe()
+				.contains(new MethodNode(method, typeTree.getNodeFor(baseType))));
 	}
 
 }

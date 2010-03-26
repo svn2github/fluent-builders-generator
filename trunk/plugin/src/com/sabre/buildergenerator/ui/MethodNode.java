@@ -13,6 +13,7 @@
 package com.sabre.buildergenerator.ui;
 
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 
 /**
  * Title: MethodNode.java<br>
@@ -79,6 +80,5 @@ public class MethodNode extends TreeNode<IMethod> {
 		return true;
 	}
 
-	
 	
 }

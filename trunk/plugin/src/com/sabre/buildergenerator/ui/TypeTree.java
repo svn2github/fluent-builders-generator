@@ -55,6 +55,16 @@ public class TypeTree {
 		this.typeHelperRouter = typeHelperRouter;
 
 		processType(new RootTypeNode(aType, typeHelperRouter.findSetterMethods(aType)));
+		
+		for (TypeNode typeNode : typeNodes.values()) {
+			for (MethodNode methodNode : typeNode.getMethodNodes()) {
+				IType setType = typeHelperRouter.getSetterSetType(methodNode.getElement());
+				TypeNode setTypeNode = getNodeFor(setType);
+				if (setTypeNode != null) {
+					setTypeNode.addPointingMethodNode(methodNode);
+				}
+			}
+		}
 	}
 
 	private void processType(TypeNode typeNode) throws JavaModelException,

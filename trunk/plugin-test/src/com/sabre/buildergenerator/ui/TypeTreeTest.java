@@ -14,22 +14,14 @@ package com.sabre.buildergenerator.ui;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import junit.framework.TestCase;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 
 /**
  * Title: TreeTest.java<br>
@@ -37,7 +29,7 @@ import com.sabre.buildergenerator.signatureutils.SignatureParserException;
  * Created: Mar 19, 2010<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
@@ -46,35 +38,34 @@ public class TypeTreeTest extends TestCase {
 	private IType baseType;
 	private IMethod method;
 	private TypeHelperRouter typeHelperRouter;
-	private Map<IType, List<IMethod>> baseTypeMethods;
+	private Collection<IMethod> baseTypeMethods;
 
-	private Map<IType, List<IMethod>> createBaseTypeMethodsMap() {
-		Map<IType, List<IMethod>> baseTypeMethods = new HashMap<IType, List<IMethod>>();
-		baseTypeMethods.put(baseType, asList(method));
-		return baseTypeMethods;
+	private Collection<IMethod> createBaseTypeMethodsMap() {
+		return asList(method);
 	}
 
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
 		baseType = mock(IType.class);
 		method = mock(IMethod.class);
 		typeHelperRouter = mock(TypeHelperRouter.class);
 
 		baseTypeMethods = createBaseTypeMethodsMap();
-		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType))
+		when(typeHelperRouter.findSetterMethods(baseType))
 				.thenReturn(baseTypeMethods);
 	}
 
 	public void testRootNodeShouldBeAlwaysMarkedAsActive() throws Exception {
-		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType))
-				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
+		when(typeHelperRouter.findSetterMethods(baseType))
+				.thenReturn(Collections.<IMethod> emptyList());
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
 		assertTrue(typeTree.getNodeFor(baseType).isActive());
 	}
 
 	public void testShouldExposeBaseTypeAsRootNode() throws Exception {
-		when(typeHelperRouter.findSetterMethodsForInhritedTypes(baseType))
-				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
+		when(typeHelperRouter.findSetterMethods(baseType))
+				.thenReturn(Collections.<IMethod> emptyList());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 		assertNotNull(typeTree.getNodeFor(baseType));
@@ -144,9 +135,8 @@ public class TypeTreeTest extends TestCase {
 		when(typeHelperRouter.resolveSignature(collectionType, "LAbcd;"))
 				.thenReturn(collectionSubType);
 		when(
-				typeHelperRouter
-						.findSetterMethodsForInhritedTypes(collectionSubType))
-				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
+				typeHelperRouter.findSetterMethods(collectionSubType))
+				.thenReturn(Collections.<IMethod> emptyList());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
@@ -182,8 +172,8 @@ public class TypeTreeTest extends TestCase {
 		when(pointedType.isBinary()).thenReturn(false);
 		when(pointedType.isClass()).thenReturn(true);
 
-		when(typeHelperRouter.findSetterMethodsForInhritedTypes(pointedType))
-				.thenReturn(Collections.<IType, List<IMethod>> emptyMap());
+		when(typeHelperRouter.findSetterMethods(pointedType))
+				.thenReturn(Collections.<IMethod> emptyList());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 

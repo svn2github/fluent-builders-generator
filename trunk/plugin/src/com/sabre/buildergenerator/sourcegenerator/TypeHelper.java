@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.Signature;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,20 +34,18 @@ import java.util.Set;
 
 
 public class TypeHelper {
-    public static Map<IType, List<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
-        Map<IType, List<IMethod>> result = new HashMap<IType, List<IMethod>>();
+    public static Map<IType, Collection<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
+        final Map<IType, Collection<IMethod>> result = new HashMap<IType, Collection<IMethod>>();
         final Set<IType> types = new HashSet<IType>();
         types.add(type);
 
         while (!types.isEmpty()) {
             Iterator<IType> iterator = types.iterator();
-            IType nextType = iterator.next();
+            final IType nextType = iterator.next();
             iterator.remove();
-            final ArrayList<IMethod> methods = new ArrayList<IMethod>();
             findSetterMethods(nextType, new MethodInspector() {
                 public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution)
                         throws Exception {
-                    methods.add(method);
                     String parameterTypeSignature = method.getParameterTypes()[0];
                     String qualifiedParameterTypeSignature = SignatureResolver.resolveTypeWithParameterMapping(
                             methodOwnerType, parameterTypeSignature, parameterSubstitution);
@@ -57,14 +56,22 @@ public class TypeHelper {
                     } else {
                         newType = SignatureResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
                     }
+
+                    inspectSetter(nextType, method, newType);
+                }
+
+                private void inspectSetter(final IType nextType, IMethod method, IType newType) {
+                    Collection<IMethod> methods = result.get(nextType);
+                    if (methods == null) {
+                        methods = new ArrayList<IMethod>();
+                        result.put(nextType, methods);
+                    }
+                    methods.add(method);
                     if (newType != null) {
                         types.add(newType);
                     }
                 }
             });
-            if (!methods.isEmpty()) {
-                result.put(nextType, methods);
-            }
         }
 
         return result;
@@ -98,15 +105,14 @@ public class TypeHelper {
         return qualifiedParameterTypeSignature;
     }
 
-    @SuppressWarnings("unused")
-    private static List<IMethod> findSetterMethods(IType type) throws JavaModelException {
-        List<IMethod> methods = findAllMethods(type);
-        List<IMethod> setterMethods = filterSetterMethods(methods);
+    public static Collection<IMethod> findSetterMethods(IType type) throws JavaModelException {
+        Collection<IMethod> methods = findAllMethods(type);
+        Collection<IMethod> setterMethods = filterSetterMethods(methods);
 
         return setterMethods;
     }
 
-    private static List<IMethod> filterSetterMethods(List<IMethod> methods) throws JavaModelException {
+    private static Collection<IMethod> filterSetterMethods(Collection<IMethod> methods) throws JavaModelException {
         List<IMethod> setterMethods = new ArrayList<IMethod>();
 
         for (IMethod method : methods) {
@@ -123,7 +129,7 @@ public class TypeHelper {
             && method.getReturnType().equals(Signature.SIG_VOID) && method.getParameterTypes().length == 1;
     }
 
-    private static List<IMethod> findAllMethods(IType type) throws JavaModelException {
+    private static Collection<IMethod> findAllMethods(IType type) throws JavaModelException {
         List<IMethod> methods = new ArrayList<IMethod>(Arrays.asList(type.getMethods()));
 
         ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());

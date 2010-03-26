@@ -17,8 +17,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -89,9 +89,9 @@ public class BuilderGenerationProperties {
     */
     private Set<IMethod> getAllSetters(IType aType) throws Exception {
         Set<IMethod> result = new HashSet<IMethod>();
-        Map<IType, List<IMethod>> map = TypeHelper.findSetterMethodsForAllTypesReferenced(aType);
+        Map<IType, Collection<IMethod>> map = TypeHelper.findSetterMethodsForAllTypesReferenced(aType);
 
-        for (List<IMethod> methods : map.values()) {
+        for (Collection<IMethod> methods : map.values()) {
             result.addAll(methods);
         }
 

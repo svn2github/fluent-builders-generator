@@ -14,14 +14,10 @@
 package com.sabre.buildergenerator.ui;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -34,7 +30,7 @@ import com.sabre.buildergenerator.signatureutils.SignatureParserException;
  * Created: Mar 19, 2010<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
@@ -45,19 +41,8 @@ public class TypeTree {
 			+ "java\\.util\\.Set|java\\.util\\.HashSet|"
 			+ "java\\.util\\.List|java\\.util\\.ArrayList|"
 			+ "java\\.util\\.LinkedList|java\\.util\\.TreeSet)\\<.*$";
-	private Map<IType, TypeNode> typeNodes;
-	private TypeHelperRouter typeHelperRouter;
-
-	private Set<IMethod> flattenSettersMap(Map<IType, List<IMethod>> setters) {
-		HashSet<IMethod> methods = new HashSet<IMethod>();
-
-		for (IType key : setters.keySet()) {
-			methods.addAll(setters.get(key));
-		}
-
-		return methods;
-
-	}
+	private final Map<IType, TypeNode> typeNodes;
+	private final TypeHelperRouter typeHelperRouter;
 
 	/**
 	 * @param aType
@@ -69,8 +54,7 @@ public class TypeTree {
 		this.typeNodes = new HashMap<IType, TypeNode>();
 		this.typeHelperRouter = typeHelperRouter;
 
-		processType(new RootTypeNode(aType, flattenSettersMap(typeHelperRouter
-				.findSetterMethodsForInhritedTypes(aType))));
+		processType(new RootTypeNode(aType, typeHelperRouter.findSetterMethods(aType)));
 	}
 
 	private void processType(TypeNode typeNode) throws JavaModelException,
@@ -92,8 +76,7 @@ public class TypeTree {
 	private TypeNode createTypeNode(IType setType) throws Exception {
 		return new TypeNode(
 				setType,
-				flattenSettersMap(typeHelperRouter
-						.findSetterMethodsForInhritedTypes(setType)));
+				typeHelperRouter.findSetterMethods(setType));
 	}
 
 	private void processCollection(IType setType) throws Exception {

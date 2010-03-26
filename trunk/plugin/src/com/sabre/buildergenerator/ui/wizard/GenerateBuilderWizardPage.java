@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -73,7 +74,7 @@ import java.util.Set;
  */
 
 class GenerateBuilderWizardPage extends NewElementWizardPage {
-    private Map<IType, List<IMethod>> aSettersMapping;
+    private Map<IType, Collection<IMethod>> aSettersMapping;
 
     private Text builderClassNameText;
 
@@ -293,7 +294,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
     }
 
     private void typeClicked(IType element, boolean state) {
-        List<IMethod> typeSetters = aSettersMapping.get(element);
+        Collection<IMethod> typeSetters = aSettersMapping.get(element);
 
         if (state) {
             getCheckedTypes().add(element);
@@ -337,8 +338,8 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
         return null;
     }
 
-    private Map<IType, List<IMethod>> createMapping(IType type) throws Exception {
-        Map<IType, List<IMethod>> mapping = TypeHelper.findSetterMethodsForAllTypesReferenced(type);
+    private Map<IType, Collection<IMethod>> createMapping(IType type) throws Exception {
+        Map<IType, Collection<IMethod>> mapping = TypeHelper.findSetterMethodsForAllTypesReferenced(type);
         Iterator<IType> typeIterator = mapping.keySet().iterator();
 
         while (typeIterator.hasNext()) {

@@ -17,8 +17,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -34,10 +34,10 @@ import java.util.Map.Entry;
  */
 
 public class SettersContentTreeProvider implements ITreeContentProvider {
-    private Map<IType, List<IMethod>> entries;
+    private Map<IType, Collection<IMethod>> entries;
 
-    public SettersContentTreeProvider(Map<IType, List<IMethod>> aMap) {
-        this.entries = new HashMap<IType, List<IMethod>>(aMap);
+    public SettersContentTreeProvider(Map<IType, Collection<IMethod>> aMap) {
+        this.entries = new HashMap<IType, Collection<IMethod>>(aMap);
     }
 
     /**
@@ -53,7 +53,7 @@ public class SettersContentTreeProvider implements ITreeContentProvider {
      * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
      */
     public Object getParent(Object aElement) {
-        for (Entry<IType, List<IMethod>> entry : entries.entrySet()) {
+        for (Entry<IType, Collection<IMethod>> entry : entries.entrySet()) {
             if (entry.getValue().contains(aElement)) {
                 return entry.getKey();
             }
@@ -68,7 +68,7 @@ public class SettersContentTreeProvider implements ITreeContentProvider {
      */
     public boolean hasChildren(Object aElement) {
         if (aElement instanceof IType) {
-            List<IMethod> methods = entries.get(aElement);
+            Collection<IMethod> methods = entries.get(aElement);
 
             if (methods != null) {
                 return !methods.isEmpty();
@@ -86,7 +86,7 @@ public class SettersContentTreeProvider implements ITreeContentProvider {
      */
     public Object[] getElements(Object aInputElement) {
         if (aInputElement instanceof IType) {
-            List<IMethod> list = entries.get(aInputElement);
+            Collection<IMethod> list = entries.get(aInputElement);
 
             if (list != null) {
                 return list.toArray();

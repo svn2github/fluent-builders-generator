@@ -12,6 +12,7 @@
 
 package com.sabre.buildergenerator.ui;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,15 +25,15 @@ import org.eclipse.jdt.core.IType;
  * Created: Mar 19, 2010<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
 
 public class TypeNode extends TreeNode<IType> {
 
-	private HashSet<MethodNode> methodNodes;
-	private HashSet<MethodNode> methodNodesPointingAtMe;
+	private final HashSet<MethodNode> methodNodes;
+	private final HashSet<MethodNode> methodNodesPointingAtMe;
 	private boolean selected = false;
 
 	/**
@@ -40,14 +41,14 @@ public class TypeNode extends TreeNode<IType> {
 	 * @param definedSettingMethods
 	 *            TODO
 	 */
-	public TypeNode(IType type, Set<IMethod> definedSettingMethods) {
+	public TypeNode(IType type, Collection<IMethod> definedSettingMethods) {
 		super(type);
 
 		this.methodNodes = new HashSet<MethodNode>();
 		for (IMethod settingMethod : definedSettingMethods) {
 			methodNodes.add(new MethodNode(settingMethod, this));
 		}
-		
+
 		methodNodesPointingAtMe = new HashSet<MethodNode>();
 	}
 
@@ -60,14 +61,14 @@ public class TypeNode extends TreeNode<IType> {
 
 	public boolean isActive() {
 		boolean active = false;
-		
+
 		for (MethodNode node : methodNodesPointingAtMe) {
 			if (node.isSelected()) {
 				active = true;
 				break;
 			}
 		}
-		
+
 		return active;
 	}
 
@@ -79,14 +80,14 @@ public class TypeNode extends TreeNode<IType> {
 		if (!isActive()) {
 			throw new IllegalStateException("Can't be selected while being inactive");
 		}
-		
+
 		this.selected = b;
-		
+
 		for (MethodNode methodNode  : methodNodes) {
 			methodNode.setSelected(b);
 		}
 	}
-	
+
 	public boolean isSelected() {
 		return selected;
 	}

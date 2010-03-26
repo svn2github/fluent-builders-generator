@@ -50,8 +50,8 @@ public class TypeHelper {
                     String qualifiedParameterTypeSignature = SignatureResolver.resolveTypeWithParameterMapping(
                             methodOwnerType, parameterTypeSignature, parameterSubstitution);
                     IType newType = null;
-                    if (isCollection(qualifiedParameterTypeSignature)) {
-                        String innerTypeSignature = getInner(qualifiedParameterTypeSignature);
+                    if (isCollection(methodOwnerType, qualifiedParameterTypeSignature)) {
+                        String innerTypeSignature = getTypeParameterSignature(qualifiedParameterTypeSignature);
                         newType = SignatureResolver.resolveType(methodOwnerType, innerTypeSignature);
                     } else {
                         newType = SignatureResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
@@ -77,32 +77,34 @@ public class TypeHelper {
         return result;
     }
 
-    private static boolean isCollection(String fieldType) {
-        boolean isCollection = fieldType.contains("java.util.Collection<");
-        boolean isList = fieldType.contains("java.util.List<");
-        boolean isArrayList = fieldType.contains("java.util.ArrayList<");
-        boolean isLinkedList = fieldType.contains("java.util.LinkedList<");
-        boolean isSet = fieldType.contains("java.util.Set<");
-        boolean isHashSet = fieldType.contains("java.util.HashSet<");
-        boolean isTreeSet = fieldType.contains("java.util.TreeSet<");
-        return isCollection || isList || isArrayList || isLinkedList || isSet || isHashSet || isTreeSet;
+    public static boolean isCollection(IType owningType, String typeSignature) throws Exception {
+        IType type = SignatureResolver.resolveType(owningType, typeSignature);
+        return type != null ? isCollection(type) : false;
     }
 
-    private static String getInner(String qualifiedParameterTypeSignature) {
-        int beg = qualifiedParameterTypeSignature.indexOf('<');
-        if (beg != -1) {
-            int end = qualifiedParameterTypeSignature.lastIndexOf('>');
-            String innerContent = qualifiedParameterTypeSignature.substring(beg + 1, end);
-            if (innerContent.charAt(0) == Signature.C_STAR
-                    || innerContent.charAt(0) == Signature.C_EXTENDS
-                    || innerContent.charAt(0) == Signature.C_SUPER
-                    || innerContent.charAt(0) == Signature.C_CAPTURE) {
-                return innerContent.substring(1);
-            } else {
-                return innerContent;
+    public static boolean isCollection(IType type) throws Exception {
+        ITypeHierarchy supertypeHierarchy = type.newSupertypeHierarchy(null);
+        IType[] interfaces = supertypeHierarchy.getAllInterfaces();
+        for (IType intrfc : interfaces) {
+            if (intrfc.getFullyQualifiedName().equals("java.util.Collection")) {
+                return true;
             }
         }
-        return qualifiedParameterTypeSignature;
+        return false;
+    }
+
+    public static String getTypeParameterSignature(String resolvedTypeSignature) {
+        String[] typeArguments = Signature.getTypeArguments(resolvedTypeSignature);
+        if (typeArguments != null && typeArguments.length == 1) {
+            String fieldTypeArgumentSignature = typeArguments[0];
+            return fieldTypeArgumentSignature.charAt(0) == Signature.C_EXTENDS
+                    || fieldTypeArgumentSignature.charAt(0) == Signature.C_SUPER
+                    || fieldTypeArgumentSignature.charAt(0) == Signature.C_CAPTURE
+                    ? fieldTypeArgumentSignature.substring(1)
+                    : fieldTypeArgumentSignature.equals(String.valueOf(Signature.C_STAR)) ? "Qjava.lang.Object;"
+                            : fieldTypeArgumentSignature;
+        }
+        return null;
     }
 
     public static Collection<IMethod> findSetterMethods(IType type) throws JavaModelException {

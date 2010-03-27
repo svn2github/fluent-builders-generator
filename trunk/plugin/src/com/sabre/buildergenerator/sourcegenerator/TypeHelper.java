@@ -34,6 +34,9 @@ import java.util.Set;
 
 
 public class TypeHelper {
+    private static final String OBJECT_SIGNATURE = "Qjava.lang.Object;";
+    private static final String COLLECTION_INTERFACE_NAME = "java.util.Collection";
+
     public static Map<IType, Collection<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
         final Map<IType, Collection<IMethod>> result = new HashMap<IType, Collection<IMethod>>();
         final Set<IType> types = new HashSet<IType>();
@@ -78,15 +81,39 @@ public class TypeHelper {
     }
 
     public static boolean isCollection(IType owningType, String typeSignature) throws Exception {
-        IType type = SignatureResolver.resolveType(owningType, typeSignature);
-        return type != null ? isCollection(type) : false;
+        return implementsInterface(owningType, typeSignature, COLLECTION_INTERFACE_NAME);
     }
 
     public static boolean isCollection(IType type) throws Exception {
+        return implementsInterface(type, COLLECTION_INTERFACE_NAME);
+    }
+
+    public static boolean implementsInterface(IType owningType, String typeSignature, String interfaceName) throws Exception {
+        IType type = SignatureResolver.resolveType(owningType, typeSignature);
+        return type != null ? implementsInterface(type, interfaceName) : false;
+    }
+
+    public static boolean implementsInterface(IType type, String interfaceName) throws JavaModelException {
         ITypeHierarchy supertypeHierarchy = type.newSupertypeHierarchy(null);
-        IType[] interfaces = supertypeHierarchy.getAllInterfaces();
-        for (IType intrfc : interfaces) {
-            if (intrfc.getFullyQualifiedName().equals("java.util.Collection")) {
+        IType[] superInterfaces = supertypeHierarchy.getAllInterfaces();
+        for (IType interfaceType : superInterfaces) {
+            if (interfaceType.getFullyQualifiedName().equals(interfaceName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasSuperType(IType owningType, String typeSignature, String superTypeName) throws Exception {
+        IType type = SignatureResolver.resolveType(owningType, typeSignature);
+        return type != null ? hasSuperType(type, superTypeName) : false;
+    }
+
+    public static boolean hasSuperType(IType type, String superTypeName) throws JavaModelException {
+        ITypeHierarchy supertypeHierarchy = type.newSupertypeHierarchy(null);
+        IType[] superTypes = supertypeHierarchy.getAllTypes();
+        for (IType superType : superTypes) {
+            if (superType.getFullyQualifiedName().equals(superTypeName)) {
                 return true;
             }
         }
@@ -101,7 +128,7 @@ public class TypeHelper {
                     || fieldTypeArgumentSignature.charAt(0) == Signature.C_SUPER
                     || fieldTypeArgumentSignature.charAt(0) == Signature.C_CAPTURE
                     ? fieldTypeArgumentSignature.substring(1)
-                    : fieldTypeArgumentSignature.equals(String.valueOf(Signature.C_STAR)) ? "Qjava.lang.Object;"
+                    : fieldTypeArgumentSignature.equals(String.valueOf(Signature.C_STAR)) ? OBJECT_SIGNATURE
                             : fieldTypeArgumentSignature;
         }
         return null;

@@ -20,9 +20,9 @@ public class SignatureResolverTest extends JdtTestCase {
         super.tearDown();
     }
 
-    public void testShouldResolveLibraryClass() throws Exception {
+    public void testShouldResolveBinaryClass() throws Exception {
         // given
-        IType owningType = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        IType mainType = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -30,19 +30,65 @@ public class SignatureResolverTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
         String typeName = "java.util.List";
-        String signature = Signature.createTypeSignature(typeName, true);
+        String typeSignature = Signature.createTypeSignature(typeName, true);
 
         // when
-        IType resolvedType = SignatureResolver.resolveType(owningType, signature);
+        IType resolvedType = SignatureResolver.resolveType(mainType, typeSignature);
 
         // then
-        assertNotNull("Resolved type is null", resolvedType);
-        assertEquals("Wrong resolved type", typeName, resolvedType.getFullyQualifiedName());
+        assertNotNull("Resolved type should not be null", resolvedType);
+        assertEquals("Resolved type doesn't match the given signature", typeName, resolvedType.getFullyQualifiedName('.'));
+    }
+
+    public void testShouldResolveProjectClass() throws Exception {
+        // given
+        IType mainType = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class MyClass {")
+            .withSourceLine("}")
+            .buildType();
+        buildJavaSource().forPackage("otherpkg").forClassName("MyOtherClass")
+            .withSourceLine("package otherpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class MyOtherClass {")
+            .withSourceLine("}")
+            .buildType();
+        String typeName = "otherpkg.MyOtherClass";
+        String typeSignature = Signature.createTypeSignature(typeName, true);
+
+        // when
+        IType resolvedType = SignatureResolver.resolveType(mainType, typeSignature);
+
+        // then
+        assertNotNull("Resolved type should not be null", resolvedType);
+        assertEquals("Resolved type doesn't match the given signature", typeName, resolvedType.getFullyQualifiedName('.'));
+    }
+
+    public void testShouldResolveInnerClass() throws Exception {
+        // given
+        IType mainType = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class MyClass {")
+            .withSourceLine("    public static class MyInnerClass {")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+        String typeName = "testpkg.MyClass.MyInnerClass";
+        String typeSignature = Signature.createTypeSignature(typeName, true);
+
+        // when
+        IType resolvedType = SignatureResolver.resolveType(mainType, typeSignature);
+
+        // then
+        assertNotNull("Resolved type should not be null", resolvedType);
+        assertEquals("Resolved type doesn't match the given signature", typeName, resolvedType.getFullyQualifiedName('.'));
     }
 
     public void testShouldResolveSimpleType() throws Exception {
         // given
-        IType owningType = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        IType mainType = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -50,22 +96,29 @@ public class SignatureResolverTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
         String typeName = "int";
-        String signature = Signature.createTypeSignature(typeName, true);
+        String typeSignature = Signature.createTypeSignature(typeName, true);
 
         // when
-        IType resolvedType = SignatureResolver.resolveType(owningType, signature);
+        IType resolvedType = SignatureResolver.resolveType(mainType, typeSignature);
 
         // then
-        assertNotNull("Resolved type is null", resolvedType);
-        assertEquals("Wrong resolved type", typeName, resolvedType.getFullyQualifiedName());
+        assertNotNull("Resolved type should not be null", resolvedType);
+        assertEquals("Resolved type doesn't match the given signature", typeName, resolvedType.getFullyQualifiedName('.'));
     }
 
     public void testShouldFindSimpleType() throws JavaModelException {
-        IType type = getJavaProject().findType("int", (IProgressMonitor)null);
+        // given
+        String simpleType = "int";
+
+        // when
+        IType type = getJavaProject().findType(simpleType, (IProgressMonitor)null);
+
+        // then
         assertNotNull(type);
     }
 
     public void testSimpleType() throws Exception {
+        // given
         IType owningType = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
@@ -74,7 +127,10 @@ public class SignatureResolverTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
+        // when
         IMethod method = owningType.getMethods()[0];
+
+        // then
         String returnType = method.getReturnType();
         String parameterType = method.getParameterTypes()[0];
         assertEquals("I", returnType);

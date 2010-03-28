@@ -14,17 +14,14 @@ package com.sabre.buildergenerator.sourcegenerator;
 
 
 public class BuilderSourceGenerator extends AbstractBuilderSourceGenerator<String> {
-    private String getClassQName(String aT) {
-        int i = aT.indexOf('<');
+    @Override public String getClassName(String aType) {
+        int e = aType.indexOf('<');
+        if (e == -1) {
+            e = aType.length();
+        }
+        int b = aType.lastIndexOf('.', e) + 1;
 
-        return i != -1 ? aT.substring(0, i) : aT;
-    }
-
-    @Override public String getClassName(String aT) {
-        String classQName = getClassQName(aT);
-        int i = classQName.lastIndexOf('.');
-
-        return i != -1 ? classQName.substring(i + 1) : classQName;
+        return aType.substring(b, e);
     }
 
     @Override public String getType(String aT) {

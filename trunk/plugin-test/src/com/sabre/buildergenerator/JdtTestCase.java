@@ -14,7 +14,7 @@ import junit.framework.TestCase;
 
 import static com.sabre.buildergenerator.TestHelper.*;
 
-public class JdtTestCase extends TestCase {
+public abstract class JdtTestCase extends TestCase {
     private IJavaProject javaProject;
 
     public IJavaProject getJavaProject() {

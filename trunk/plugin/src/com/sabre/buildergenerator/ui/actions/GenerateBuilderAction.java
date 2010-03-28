@@ -86,15 +86,6 @@ public class GenerateBuilderAction {
                             boolean formatCode = properties.isFormatCode();
 
                             // generate source code
-                            String[] fieldNames = new String[selectedSetters.size()];
-
-                            int i = 0;
-
-                            for (IMethod setter : selectedSetters) {
-                                String tmp = setter.getElementName().substring(3);
-
-                                fieldNames[i++] = Character.toLowerCase(tmp.charAt(0)) + tmp.substring(1);
-                            }
 
                             //                            String packageName = selectedPackage.getElementName();
 
@@ -106,7 +97,7 @@ public class GenerateBuilderAction {
                             }
 
                             String source =
-                                new BuilderGenerator().generateSource(type, packageName, builderClassName, fieldNames,
+                                new BuilderGenerator().generateSource(type, packageName, builderClassName, selectedSetters,
                                     setterPrefix, collectionSetterPrefix, endPrefix, formatCode);
 
                             aMonitor.worked(2);

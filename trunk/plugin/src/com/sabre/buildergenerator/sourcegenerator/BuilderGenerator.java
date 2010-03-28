@@ -35,6 +35,7 @@ import org.eclipse.text.edits.TextEdit;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -45,10 +46,25 @@ public class BuilderGenerator {
 
     private final Set<String> typesAlradyGeneratedInnerBuilders = new HashSet<String>();
     private final Set<String> typesToGenerateInnerBuilders = new HashSet<String>();
+    private final Map<String, Set<String>> typesAndFieldsToGenerate = new HashMap<String, Set<String>>();
 
-    public String generateSource(final IType type, String packageName, String builderName, String[] fieldNames,
+    public String generateSource(final IType type, String packageName, String builderName, Set<IMethod> selectedSetters,
         String setterPrefix, String collectionSetterPrefix, String endPrefix, boolean doFormat) throws Exception {
 
+        if (selectedSetters != null) {
+            for (IMethod method : selectedSetters) {
+                IType declaringType = method.getDeclaringType();
+                String typeName = declaringType.getFullyQualifiedName();
+                String typeSignature = Signature.createTypeSignature(typeName, true);
+                String fieldName = fieldNameFromSetter(method);
+                Set<String> fieldNames = typesAndFieldsToGenerate.get(typeSignature);
+                if (fieldNames == null) {
+                    fieldNames = new HashSet<String>();
+                    typesAndFieldsToGenerate.put(typeSignature, fieldNames);
+                }
+                fieldNames.add(fieldName);
+            }
+        }
         final AbstractBuilderSourceGenerator<String> generator = new BuilderSourceGenerator();
 
         generator.setSetterPrefix(setterPrefix);
@@ -106,6 +122,7 @@ public class BuilderGenerator {
     }
 
     private void addTypeToGenerateInnerBuilder(String elementTypeSignature) {
+//        if (typesAndFieldsToGenerate.get(elementTypeSignature) != null
         if (!typesAlradyGeneratedInnerBuilders.contains(elementTypeSignature)) {
             typesToGenerateInnerBuilders.add(elementTypeSignature);
         }

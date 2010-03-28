@@ -122,8 +122,8 @@ public class BuilderGenerator {
     }
 
     private void addTypeToGenerateInnerBuilder(String elementTypeSignature) {
-//        if (typesAndFieldsToGenerate.get(elementTypeSignature) != null
-        if (!typesAlradyGeneratedInnerBuilders.contains(elementTypeSignature)) {
+        if ((typesAndFieldsToGenerate == null || typesAndFieldsToGenerate.get(elementTypeSignature) != null)
+                && !typesAlradyGeneratedInnerBuilders.contains(elementTypeSignature)) {
             typesToGenerateInnerBuilders.add(elementTypeSignature);
         }
     }

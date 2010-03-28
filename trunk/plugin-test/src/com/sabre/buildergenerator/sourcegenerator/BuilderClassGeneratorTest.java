@@ -11,40 +11,32 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
-import junit.framework.TestCase;
-
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import com.sabre.buildergenerator.JdtTestCase;
+import com.sabre.buildergenerator.TestHelper;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
-import static com.sabre.buildergenerator.sourcegenerator.TestHelper.*;
+import static com.sabre.buildergenerator.TestHelper.*;
 
-public class BuilderClassGeneratorTest extends TestCase {
-    private IJavaProject javaProject;
+public class BuilderClassGeneratorTest extends JdtTestCase {
     private BuilderGenerator generator;
 
     @Override
     protected void setUp() throws Exception {
-        javaProject = createJavaProject("test-project", "src", null, JavaCore.VERSION_1_5);
-        javaProject.open(null);
+        super.setUp();
 
         generator = new BuilderGenerator();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        javaProject.close();
-        TestHelper.deleteJavaProject(javaProject);
+        super.tearDown();
     }
 
     public void testGenerateEmptyBuilder() throws Exception {
@@ -78,7 +70,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -122,7 +114,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -166,7 +158,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -218,7 +210,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -270,7 +262,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -321,7 +313,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -394,7 +386,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -454,7 +446,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -527,7 +519,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -610,7 +602,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -701,7 +693,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -756,7 +748,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -818,7 +810,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -909,7 +901,7 @@ public class BuilderClassGeneratorTest extends TestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(javaProject, mainClass.getFullyQualifiedName(),
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName(),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
@@ -933,14 +925,10 @@ public class BuilderClassGeneratorTest extends TestCase {
         return builderClass.getMethod(methodName, signatures).getSource();
     }
 
-    JavaBuilder buildJavaSource() {
-        return new JavaBuilder();
-    }
-
     JavaBuilder buildBuilderSource(String aPackage, String aBuilderName) throws Exception {
         return new JavaBuilder() {
             @Override
-            String buildSource() throws Exception {
+            public String buildSource() throws Exception {
                 withSourceLine("}");
                 return super.buildSource();
             }
@@ -963,49 +951,5 @@ public class BuilderClassGeneratorTest extends TestCase {
         .withSourceLine("        return instance;")
         .withSourceLine("    }")
         .withSourceLine("");
-    }
-
-    class JavaBuilder {
-        String packageName;
-        String className;
-        StringWriter buf = new StringWriter();
-        PrintWriter out = new PrintWriter(buf);
-
-        JavaBuilder forPackage(String aPackage) {
-            packageName = aPackage;
-            return this;
-        }
-
-        JavaBuilder forClassName(String aClassName) {
-            className = aClassName;
-            return this;
-        }
-
-        JavaBuilder withSourceLine(String aLine) {
-            out.println(aLine);
-            return this;
-        }
-
-        JavaBuilder withSourceText(String aText) {
-            out.print(aText);
-            return this;
-        }
-
-        IFile buildFile() throws Exception {
-            return createJavaFile(javaProject, packageName, className, buildSource());
-        }
-
-        String buildSource() throws Exception {
-            out.flush();
-            return buf.toString();
-        }
-
-        ICompilationUnit buildCompilationUnit() throws Exception {
-            return createCompilationUnit(buildFile());
-        }
-
-        IType buildType() throws Exception {
-            return buildCompilationUnit().getTypes()[0];
-        }
     }
 }

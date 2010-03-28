@@ -9,7 +9,7 @@
  *    Sabre Polska sp. z o.o. - initial implementation during Hackday
  */
 
-package com.sabre.buildergenerator.sourcegenerator;
+package com.sabre.buildergenerator;
 
 import java.io.IOException;
 import java.io.StringBufferInputStream;

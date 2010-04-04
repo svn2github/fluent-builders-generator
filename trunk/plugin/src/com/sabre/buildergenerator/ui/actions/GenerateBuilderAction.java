@@ -11,34 +11,30 @@
 
 package com.sabre.buildergenerator.ui.actions;
 
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
-import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
+import java.io.PrintWriter;
+import java.io.StringBufferInputStream;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
-
 import org.eclipse.swt.widgets.Shell;
-import java.io.PrintWriter;
-import java.io.StringBufferInputStream;
-import java.io.StringWriter;
 
-import java.lang.reflect.InvocationTargetException;
-
-import java.util.Set;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
+import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
 
 
 /**
@@ -62,11 +58,11 @@ public class GenerateBuilderAction {
     @SuppressWarnings("deprecation")
     public void execute(final IType type, final Shell shell, IRunnableContext runnableContext) throws Exception {
         GenerateBuilderWizard wizard = new GenerateBuilderWizard(new BuilderGenerationProperties(type));
-        WizardDialog dialog = new WizardDialog(shell, wizard);
+        WizardDialog wizardDialog = new WizardDialog(shell, wizard);
 
-        dialog.setMinimumPageSize(200, 500);
+        wizardDialog.setMinimumPageSize(200, 500);
 
-        if (dialog.open() == Dialog.OK) {
+        if (wizardDialog.open() == Dialog.OK) {
             final BuilderGenerationProperties properties = wizard.getBuilderGenerationProperties();
 
             IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {

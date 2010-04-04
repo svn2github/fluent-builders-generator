@@ -13,11 +13,14 @@
 
 package com.sabre.buildergenerator.ui;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -51,7 +54,7 @@ public class TypeTree {
 	 */
 	public TypeTree(IType aType, TypeHelperRouter typeHelperRouter)
 			throws Exception {
-		this.typeNodes = new HashMap<IType, TypeNode>();
+		this.typeNodes = new LinkedHashMap<IType, TypeNode>();
 		this.typeHelperRouter = typeHelperRouter;
 
 		processType(new RootTypeNode(aType, typeHelperRouter.findSetterMethods(aType)));
@@ -70,7 +73,7 @@ public class TypeTree {
 	private void processType(TypeNode typeNode) throws JavaModelException,
 			SignatureParserException, Exception {
 		typeNodes.put(typeNode.getElement(), typeNode);
-		for (MethodNode setterNode : typeNode.getMethodNodes()) {
+		for (TreeNode<IMethod> setterNode : typeNode.getMethodNodes()) {
 			IType setType = typeHelperRouter.getSetterSetType(setterNode
 					.getElement());
 			if (setType.isClass() && !setType.isBinary()) {
@@ -124,5 +127,19 @@ public class TypeTree {
 	public TypeNode getNodeFor(IType aBaseType) {
 		return typeNodes.get(aBaseType);
 	}
-
+	
+	public IType [] getSortedTypes () {
+		return typeNodes.keySet().toArray(new IType[typeNodes.keySet().size()]);
+	}
+	
+	public IType[] getSortedActiveTypes() {
+		List<IType> activeTypes = new ArrayList<IType>(typeNodes.keySet().size()); 
+		for (IType type : typeNodes.keySet()) {
+			if (typeNodes.get(type).isActive()) {
+				activeTypes.add(type);
+			}
+		}
+		
+		return activeTypes.toArray(new IType[activeTypes.size()]);
+	}
 }

@@ -13,7 +13,6 @@
 package com.sabre.buildergenerator.ui;
 
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 
 /**
  * Title: MethodNode.java<br>
@@ -27,37 +26,18 @@ import org.eclipse.jdt.core.IType;
 
 public class MethodNode extends TreeNode<IMethod> {
 
-	private boolean selected;
-	private TypeNode parentTypeNode;
-
 	/**
 	 * @param aElement
 	 * @param parentTypeNode TODO
 	 */
 	public MethodNode(IMethod aElement, TypeNode parentTypeNode) {
-		super(aElement);
-		this.parentTypeNode = parentTypeNode;
-	}
-
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean b) {
-		if (!parentTypeNode.isActive()) {
-			throw new IllegalStateException("Can't select setter of inactive type");
-		}
-		
-		this.selected = b;
+		super(aElement, parentTypeNode);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result
-				+ ((parentTypeNode == null) ? 0 : parentTypeNode.hashCode());
-		result = prime * result + (selected ? 1231 : 1237);
 		return result;
 	}
 
@@ -68,14 +48,6 @@ public class MethodNode extends TreeNode<IMethod> {
 		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
-			return false;
-		MethodNode other = (MethodNode) obj;
-		if (parentTypeNode == null) {
-			if (other.parentTypeNode != null)
-				return false;
-		} else if (!parentTypeNode.equals(other.parentTypeNode))
-			return false;
-		if (selected != other.selected)
 			return false;
 		return true;
 	}

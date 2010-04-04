@@ -69,15 +69,13 @@ public class TypeNodeTest extends TestCase {
 		when(pointingMethodNode.isSelected()).thenReturn(true);
 		typeNode.addPointingMethodNode(pointingMethodNode);
 
-		for (MethodNode node : typeNode.getMethodNodes()) {
+		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {
 			node.setSelected(false);
 		}
 
-		
 		typeNode.setSelected(true);
-		
-		
-		for (MethodNode node : typeNode.getMethodNodes()) {
+
+		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {
 			assertTrue(node.isSelected());
 		}
 	}
@@ -91,19 +89,38 @@ public class TypeNodeTest extends TestCase {
 		when(pointingMethodNode.isSelected()).thenReturn(true);
 		typeNode.addPointingMethodNode(pointingMethodNode);
 
-		for (MethodNode node : typeNode.getMethodNodes()) {
+		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {
 			node.setSelected(true);
 		}
 
-		
 		typeNode.setSelected(false);
-		
-		
-		for (MethodNode node : typeNode.getMethodNodes()) {
+
+		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {
 			assertFalse(node.isSelected());
 		}
 	}
-	
+
+	public void testShouldReturnMethodNodeForIMethodPassed() {
+		IMethod method = mock(IMethod.class);
+		TypeNode typeNode = new TypeNode(type, createSet(method));
+
+		TreeNode<IMethod> methodNode = typeNode.getMethodNodeFor(method);
+
+		assertEquals(methodNode.getElement(), method);
+	}
+
+	public void testShouldFailWhenGettingMethodNodeForWrongMethod() {
+		IMethod method = mock(IMethod.class);
+		TypeNode typeNode = new TypeNode(type, Collections.<IMethod> emptySet());
+		try {
+			typeNode.getMethodNodeFor(method);
+			fail();
+		} catch (IllegalArgumentException ex) {
+			assertTrue(true);
+
+		}
+	}
+
 	private Set<IMethod> createSet(IMethod method) {
 		Set<IMethod> set = new HashSet<IMethod>();
 		set.add(method);

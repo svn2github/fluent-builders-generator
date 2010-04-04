@@ -27,43 +27,40 @@ public class TreeNode<ElementType> {
 
 	private ElementType element;
 	
+	private TypeNode parentTypeNode;
+
+	private boolean selected = true;
+	
 	/**
 	 * @param element
+	 * @param parentTypeNode TODO
 	 */
-	public TreeNode(ElementType element) {
+	public TreeNode(ElementType element, TypeNode parentTypeNode) {
 		this.element = element;
+		this.parentTypeNode = parentTypeNode ;
 	}
 
 	/**
 	 * @return the element
 	 */
-	protected ElementType getElement() {
+	public ElementType getElement() {
 		return element;
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((element == null) ? 0 : element.hashCode());
-		return result;
+	
+	public TypeNode getParentNode() {
+		return parentTypeNode;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TreeNode other = (TreeNode) obj;
-		if (element == null) {
-			if (other.element != null)
-				return false;
-		} else if (!element.equals(other.element))
-			return false;
-		return true;
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean b) {
+		if (getParentNode() != null && !getParentNode().isActive()) {
+			throw new IllegalStateException("Can't select setter of inactive type");
+		}
+		
+		this.selected = b;
 	}
 	
 }

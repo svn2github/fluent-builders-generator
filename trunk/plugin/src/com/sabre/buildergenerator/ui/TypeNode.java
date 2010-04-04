@@ -35,15 +35,14 @@ public class TypeNode extends TreeNode<IType> {
 
 	private final HashSet<MethodNode> methodNodes;
 	private final HashSet<MethodNode> methodNodesPointingAtMe;
-	private boolean selected = false;
-
 	/**
 	 * @param type
+	 *  type represented by this node
 	 * @param definedSettingMethods
-	 *            TODO
+	 *  collection of setting methods on type
 	 */
 	public TypeNode(IType type, Collection<IMethod> definedSettingMethods) {
-		super(type);
+		super(type, null);
 
 		this.methodNodes = new HashSet<MethodNode>();
 		for (IMethod settingMethod : definedSettingMethods) {
@@ -59,11 +58,11 @@ public class TypeNode extends TreeNode<IType> {
 	public Set<MethodNode> getMethodNodes() {
 		return methodNodes;
 	}
-
+	
 	public boolean isActive() {
 		boolean active = false;
 
-		for (MethodNode node : methodNodesPointingAtMe) {
+		for (TreeNode<IMethod> node : methodNodesPointingAtMe) {
 			if (node.isSelected()) {
 				active = true;
 				break;
@@ -73,6 +72,7 @@ public class TypeNode extends TreeNode<IType> {
 		return active;
 	}
 
+	
 	public void addPointingMethodNode(MethodNode methodNode) {
 		methodNodesPointingAtMe.add(methodNode);
 	}
@@ -86,15 +86,20 @@ public class TypeNode extends TreeNode<IType> {
 			throw new IllegalStateException("Can't be selected while being inactive");
 		}
 
-		this.selected = b;
+		super.setSelected(b);
 
-		for (MethodNode methodNode  : methodNodes) {
+		for (TreeNode<IMethod> methodNode  : methodNodes) {
 			methodNode.setSelected(b);
 		}
 	}
 
-	public boolean isSelected() {
-		return selected;
+	public TreeNode<IMethod> getMethodNodeFor(IMethod method) {
+		for (TreeNode<IMethod> methodNode : getMethodNodes()) {
+			if (methodNode.getElement().equals(method)) {
+				return methodNode;
+			}
+		}
+		throw new IllegalArgumentException("No such method node for that method");
 	}
 
 }

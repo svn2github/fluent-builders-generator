@@ -58,7 +58,7 @@ public class TypeTree {
 		this.typeHelperRouter = typeHelperRouter;
 
 		processType(new RootTypeNode(aType, typeHelperRouter.findSetterMethods(aType)));
-		
+
 		for (TypeNode typeNode : typeNodes.values()) {
 			for (MethodNode methodNode : typeNode.getMethodNodes()) {
 				IType setType = typeHelperRouter.getSetterSetType(methodNode.getElement());
@@ -76,7 +76,7 @@ public class TypeTree {
 		for (TreeNode<IMethod> setterNode : typeNode.getMethodNodes()) {
 			IType setType = typeHelperRouter.getSetterSetType(setterNode
 					.getElement());
-			if (setType.isClass() && !setType.isBinary()) {
+			if (setType != null && setType.isClass() && !setType.isBinary()) {
 				if (!isCollection(setType)) {
 					processType(createTypeNode(setType));
 				} else {
@@ -127,19 +127,19 @@ public class TypeTree {
 	public TypeNode getNodeFor(IType aBaseType) {
 		return typeNodes.get(aBaseType);
 	}
-	
+
 	public IType [] getSortedTypes () {
 		return typeNodes.keySet().toArray(new IType[typeNodes.keySet().size()]);
 	}
-	
+
 	public IType[] getSortedActiveTypes() {
-		List<IType> activeTypes = new ArrayList<IType>(typeNodes.keySet().size()); 
+		List<IType> activeTypes = new ArrayList<IType>(typeNodes.keySet().size());
 		for (IType type : typeNodes.keySet()) {
 			if (typeNodes.get(type).isActive()) {
 				activeTypes.add(type);
 			}
 		}
-		
+
 		return activeTypes.toArray(new IType[activeTypes.size()]);
 	}
 }

@@ -265,6 +265,8 @@ public class BuilderGenerator {
             concreteCollectionType = "java.util.ArrayList";
         } else if (collectionTypeErasureSignature.equals("Qjava.util.Set;")) {
             concreteCollectionType = "java.util.HashSet";
+        } else if (collectionTypeErasureSignature.equals("Qjava.util.SortedSet;")) {
+            concreteCollectionType = "java.util.TreeSet";
         } else {
             concreteCollectionType = SignatureResolver.signatureToTypeName(collectionTypeErasureSignature);
         }

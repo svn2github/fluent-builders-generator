@@ -23,8 +23,13 @@ public class TypeHelperRouter {
         return TypeHelper.findSetterMethods(type);
     }
 
-    public IType getSetterSetType(IMethod method) throws JavaModelException, SignatureParserException {
-    	return SignatureResolver.resolveType(method.getDeclaringType(), method.getParameterTypes()[0]);
+    public IType getSetterSetType(IMethod method) throws Exception {
+    	String typeUnresolvedSignature = method.getParameterTypes()[0];
+        String typeSignature = SignatureResolver.resolveSignature(method.getDeclaringType(), typeUnresolvedSignature);
+    	if (TypeHelper.isCollection(method.getDeclaringType(), typeSignature)) {
+    	    typeSignature = TypeHelper.getTypeParameterSignature(typeSignature);
+    	}
+        return SignatureResolver.resolveType(method.getDeclaringType(), typeSignature);
     }
 
     public IType resolveSignature(IType owningType, String signature) throws JavaModelException, SignatureParserException {

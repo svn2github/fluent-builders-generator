@@ -15,6 +15,7 @@ import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -155,7 +156,8 @@ public class TypeHelper {
 
     private static boolean isSetterMethod(IMethod method) throws JavaModelException {
         return method.getElementName().startsWith(BuilderGenerator.SETTER_PREFIX)
-            && method.getReturnType().equals(Signature.SIG_VOID) && method.getParameterTypes().length == 1;
+            && method.getReturnType().equals(Signature.SIG_VOID) && method.getParameterTypes().length == 1
+            && Flags.isPublic(method.getFlags());
     }
 
     private static Collection<IMethod> findAllMethods(IType type) throws JavaModelException {

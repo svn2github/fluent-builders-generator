@@ -15,6 +15,9 @@ import com.sabre.buildergenerator.Activator;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 import com.sabre.buildergenerator.sourcegenerator.TypeHelper.MethodInspector;
+import com.sabre.buildergenerator.ui.MethodNode;
+import com.sabre.buildergenerator.ui.TypeNode;
+import com.sabre.buildergenerator.ui.TypeTree;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -46,25 +49,13 @@ public class BuilderGenerator {
 
     private final Set<String> typesAlradyGeneratedInnerBuilders = new HashSet<String>();
     private final Set<String> typesToGenerateInnerBuilders = new HashSet<String>();
-    private final Map<String, Set<String>> typesAndFieldsToGenerate = new HashMap<String, Set<String>>();
+    private Map<String, Set<String>> typesAndFieldsToGenerate;
 
-    public String generateSource(final IType type, String packageName, String builderName, Set<IMethod> selectedSetters,
+    public String generateSource(final IType type, String packageName, String builderName, TypeTree selectedSetters,
         String setterPrefix, String collectionSetterPrefix, String endPrefix, boolean doFormat) throws Exception {
 
-        if (selectedSetters != null) {
-            for (IMethod method : selectedSetters) {
-                IType declaringType = method.getDeclaringType();
-                String typeName = declaringType.getFullyQualifiedName();
-                String typeSignature = Signature.createTypeSignature(typeName, true);
-                String fieldName = fieldNameFromSetter(method);
-                Set<String> fieldNames = typesAndFieldsToGenerate.get(typeSignature);
-                if (fieldNames == null) {
-                    fieldNames = new HashSet<String>();
-                    typesAndFieldsToGenerate.put(typeSignature, fieldNames);
-                }
-                fieldNames.add(fieldName);
-            }
-        }
+        typesAndFieldsToGenerate = selectedFieldsFromTypeTree(selectedSetters);
+
         final AbstractBuilderSourceGenerator<String> generator = new BuilderSourceGenerator();
 
         generator.setSetterPrefix(setterPrefix);
@@ -95,6 +86,30 @@ public class BuilderGenerator {
         }
 
         return builderSource;
+    }
+
+    private Map<String, Set<String>> selectedFieldsFromTypeTree(TypeTree selectedSetters) {
+        if (selectedSetters != null) {
+            Map<String, Set<String>> selectedFieldsForTypes = new HashMap<String, Set<String>>();
+            for (IType selectedType : selectedSetters.getSortedActiveTypes()) {
+                TypeNode typeNode = selectedSetters.getNodeFor(selectedType);
+                if (typeNode.isSelected()) {
+                    String typeName = selectedType.getFullyQualifiedName();
+                    String typeSignature = Signature.createTypeSignature(typeName, true);
+                    Set<String> fieldNames = new HashSet<String>();
+                    selectedFieldsForTypes.put(typeSignature, fieldNames);
+                    for (MethodNode methodNode : typeNode.getMethodNodes()) {
+                        if (methodNode.isSelected()) {
+                            IMethod selectedMethod = methodNode.getElement();
+                            String fieldName = fieldNameFromSetter(selectedMethod);
+                            fieldNames.add(fieldName);
+                        }
+                    }
+                }
+            }
+            return selectedFieldsForTypes;
+        }
+        return null;
     }
 
     private String formatSource(String builderSource) {

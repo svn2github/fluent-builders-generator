@@ -15,14 +15,11 @@ import java.io.PrintWriter;
 import java.io.StringBufferInputStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Set;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.Dialog;
@@ -34,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
+import com.sabre.buildergenerator.ui.TypeTree;
 import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
 
 
@@ -78,7 +76,7 @@ public class GenerateBuilderAction {
                             String collectionSetterPrefix = properties.getCollectionAddPrefix();
                             String endPrefix = properties.getEndPrefix();
                             String builderClassName = properties.getBuilderClassName();
-                            Set<IMethod> selectedSetters = properties.getSelectedMethods();
+                            TypeTree selectedSetters = properties.getSettersTypeTree();
                             boolean formatCode = properties.isFormatCode();
 
                             // generate source code

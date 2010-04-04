@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import com.sabre.buildergenerator.ui.TypeTree;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -45,6 +47,7 @@ public class BuilderGenerationProperties {
     private Set<IMethod> selectedMethods;
     private IPackageFragmentRoot sourceFolder;
     private IType type;
+    private TypeTree settersTypeTree;
 
     /**
      * @param aType
@@ -234,5 +237,13 @@ public class BuilderGenerationProperties {
      */
     public void setType(IType aType) {
         type = aType;
+    }
+
+    public void setSettersTypeTree(TypeTree aSettersTypeTree) {
+        settersTypeTree = aSettersTypeTree;
+    }
+
+    public TypeTree getSettersTypeTree() {
+        return settersTypeTree;
     }
 }

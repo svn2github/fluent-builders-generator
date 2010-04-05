@@ -1,9 +1,6 @@
 package com.sabre.buildergenerator.signatureutils;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import com.sabre.buildergenerator.JdtTestCase;
@@ -84,56 +81,5 @@ public class SignatureResolverTest extends JdtTestCase {
         // then
         assertNotNull("Resolved type should not be null", resolvedType);
         assertEquals("Resolved type doesn't match the given signature", typeName, resolvedType.getFullyQualifiedName('.'));
-    }
-
-    public void testShouldResolveSimpleType() throws Exception {
-        // given
-        IType mainType = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
-            .withSourceLine("package testpkg;")
-            .withSourceLine("")
-            .withSourceLine("public class MyClass {")
-            .withSourceLine("    public int field;")
-            .withSourceLine("}")
-            .buildType();
-        String typeName = "int";
-        String typeSignature = Signature.createTypeSignature(typeName, true);
-
-        // when
-        IType resolvedType = SignatureResolver.resolveType(mainType, typeSignature);
-
-        // then
-        assertNotNull("Resolved type should not be null", resolvedType);
-        assertEquals("Resolved type doesn't match the given signature", typeName, resolvedType.getFullyQualifiedName('.'));
-    }
-
-    public void testShouldFindSimpleType() throws JavaModelException {
-        // given
-        String simpleType = "int";
-
-        // when
-        IType type = getJavaProject().findType(simpleType, (IProgressMonitor)null);
-
-        // then
-        assertNotNull(type);
-    }
-
-    public void testSimpleType() throws Exception {
-        // given
-        IType owningType = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
-            .withSourceLine("package testpkg;")
-            .withSourceLine("")
-            .withSourceLine("public class MyClass {")
-            .withSourceLine("    public int method(int value);")
-            .withSourceLine("}")
-            .buildType();
-
-        // when
-        IMethod method = owningType.getMethods()[0];
-
-        // then
-        String returnType = method.getReturnType();
-        String parameterType = method.getParameterTypes()[0];
-        assertEquals("I", returnType);
-        assertEquals("I", parameterType);
     }
 }

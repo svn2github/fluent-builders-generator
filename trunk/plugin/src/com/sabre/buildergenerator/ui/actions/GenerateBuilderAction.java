@@ -20,6 +20,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.Dialog;
@@ -31,6 +32,10 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodConsumer;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvider;
+import com.sabre.buildergenerator.ui.MethodNode;
+import com.sabre.buildergenerator.ui.TypeNode;
 import com.sabre.buildergenerator.ui.TypeTree;
 import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
 
@@ -90,8 +95,7 @@ public class GenerateBuilderAction {
                                 selectedSourceFolder.createPackageFragment(packageName, false, aMonitor);
                             }
 
-                            String source =
-                                new BuilderGenerator().generateSource(type, packageName, builderClassName, selectedSetters,
+                            String source = generateSource(new BuilderGenerator(), type, packageName, builderClassName, selectedSetters,
                                     setterPrefix, collectionSetterPrefix, endPrefix, formatCode);
 
                             aMonitor.worked(2);
@@ -136,5 +140,28 @@ public class GenerateBuilderAction {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String generateSource(BuilderGenerator builderGenerator, final IType type, String packageName, String builderName, final TypeTree selectedSetters,
+            String setterPrefix, String collectionSetterPrefix, String endPrefix, boolean doFormat) throws Exception {
+
+        MethodProvider methodProvider = new MethodProvider() {
+            public void process(MethodConsumer consumer) {
+                if (selectedSetters != null) {
+                    for (IType selectedType : selectedSetters.getSortedActiveTypes()) {
+                        TypeNode typeNode = selectedSetters.getNodeFor(selectedType);
+                        if (typeNode.isSelected()) {
+                            for (MethodNode methodNode : typeNode.getMethodNodes()) {
+                                if (methodNode.isSelected()) {
+                                    IMethod selectedMethod = methodNode.getElement();
+                                    consumer.nextMethod(selectedType, selectedMethod);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        return builderGenerator.generateSource(type, packageName, builderName, methodProvider, setterPrefix, collectionSetterPrefix, endPrefix, doFormat);
     }
 }

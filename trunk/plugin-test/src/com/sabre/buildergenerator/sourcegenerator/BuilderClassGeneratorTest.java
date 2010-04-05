@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.IType;
 import com.sabre.buildergenerator.JdtTestCase;
 import com.sabre.buildergenerator.TestHelper;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodConsumer;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvider;
 
 import java.io.OutputStreamWriter;
 
@@ -891,6 +893,188 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("        assert obj2.getField().getDataFields().size() == 2;")
             .withSourceLine("        assert obj2.getField().getDataFields().get(0).getData2Field().equals(\"dataField1\");")
             .withSourceLine("        assert obj2.getField().getDataFields().get(1).getData2Field().equals(\"dataField2\");")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+    }
+
+    public void testShouldBuildAllRequestedSetters() throws Exception {
+        // given
+        final IType companyClass = buildJavaSource().forPackage("testpkg").forClassName("Company")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("import java.util.List;")
+            .withSourceLine("")
+            .withSourceLine("public class Company {")
+            .withSourceLine("    private String name;")
+            .withSourceLine("    private Address location;")
+            .withSourceLine("    private List<Person> employees;")
+            .withSourceLine("")
+            .withSourceLine("    public String getName() {")
+            .withSourceLine("        return name;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setName(String aName) {")
+            .withSourceLine("        name = aName;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public Address getLocation() {")
+            .withSourceLine("        return location;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setLocation(Address aLocation) {")
+            .withSourceLine("        location = aLocation;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public List<Person> getEmployees() {")
+            .withSourceLine("        return employees;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setEmployees(List<Person> aEmployees) {")
+            .withSourceLine("        employees = aEmployees;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("}")
+            .buildType();
+        final IType personClass = buildJavaSource().forPackage("testpkg").forClassName("Person")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class Person {")
+            .withSourceLine("    private String firstName;")
+            .withSourceLine("    private String lastName;")
+            .withSourceLine("    private Address address;")
+            .withSourceLine("")
+            .withSourceLine("    public String getFirstName() {")
+            .withSourceLine("        return firstName;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setFirstName(String aFirstName) {")
+            .withSourceLine("        firstName = aFirstName;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public String getLastName() {")
+            .withSourceLine("        return lastName;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setLastName(String aLastName) {")
+            .withSourceLine("        lastName = aLastName;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public Address getAddress() {")
+            .withSourceLine("        return address;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setAddress(Address aAddress) {")
+            .withSourceLine("        address = aAddress;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("}")
+            .buildType();
+        final IType addressClass = buildJavaSource().forPackage("testpkg").forClassName("Address")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class Address {")
+            .withSourceLine("    private String city;")
+            .withSourceLine("    private String street;")
+            .withSourceLine("    private int number;")
+            .withSourceLine("")
+            .withSourceLine("    public String getCity() {")
+            .withSourceLine("        return city;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setCity(String aCity) {")
+            .withSourceLine("        city = aCity;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public String getStreet() {")
+            .withSourceLine("        return street;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setStreet(String aStreet) {")
+            .withSourceLine("        street = aStreet;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public int getNumber() {")
+            .withSourceLine("        return number;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setNumber(int aNumber) {")
+            .withSourceLine("        number = aNumber;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+        MethodProvider methodProvider = new BuilderGenerator.MethodProvider() {
+
+            public void process(MethodConsumer consumer) {
+                consumer.nextMethod(companyClass, companyClass.getMethod("setName", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(companyClass, companyClass.getMethod("setLocation", new String[]{"Qtestpkg.Address;"}));
+                consumer.nextMethod(companyClass, companyClass.getMethod("setEmployees", new String[]{"Qjava.util.List<Qtestpkg.Person;>;"}));
+
+                consumer.nextMethod(personClass, personClass.getMethod("setFirstName", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(personClass, personClass.getMethod("setLastName", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(personClass, personClass.getMethod("setAddress", new String[]{"Qtestpkg.Address;"}));
+
+                consumer.nextMethod(addressClass, addressClass.getMethod("setCity", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(addressClass, addressClass.getMethod("setStreet", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(addressClass, addressClass.getMethod("setNumber", new String[]{"I"}));
+            }
+
+        };
+
+        // when
+        String builderSource = generator.generateSource(companyClass, "builderpkg", "GeneratedBuilder", methodProvider, "with", "withAdded", "end", false);
+
+        // then
+        buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
+            .withSourceLine(builderSource)
+            .buildType();
+
+        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+            .withSourceLine("package test;")
+            .withSourceLine("")
+            .withSourceLine("import java.util.List;")
+            .withSourceLine("")
+            .withSourceLine("import testpkg.Address;")
+            .withSourceLine("import testpkg.Person;")
+            .withSourceLine("import testpkg.Company;")
+            .withSourceLine("")
+            .withSourceLine("import builderpkg.GeneratedBuilder;")
+            .withSourceLine("")
+            .withSourceLine("public class MainClass {")
+            .withSourceLine("    public static void main(String[] args) {")
+            .withSourceLine("        Object companyBuilder = GeneratedBuilder.company();")
+            .withSourceLine("        assert objectHasMethod(companyBuilder, \"withName\", String.class);")
+            .withSourceLine("        assert objectHasMethod(companyBuilder, \"withLocation\", Address.class);")
+            .withSourceLine("        assert objectHasMethod(companyBuilder, \"withLocation\");")
+            .withSourceLine("        assert objectHasMethod(companyBuilder, \"withEmployees\", List.class);")
+            .withSourceLine("        assert objectHasMethod(companyBuilder, \"withAddedEmployee\", Person.class);")
+            .withSourceLine("        assert objectHasMethod(companyBuilder, \"withAddedEmployee\");")
+            .withSourceLine("")
+            .withSourceLine("        Object locationBuilder = GeneratedBuilder.company().withLocation();")
+            .withSourceLine("        assert objectHasMethod(locationBuilder, \"withCity\", String.class);")
+            .withSourceLine("        assert objectHasMethod(locationBuilder, \"withStreet\", String.class);")
+            .withSourceLine("        assert objectHasMethod(locationBuilder, \"withNumber\", Integer.TYPE);")
+            .withSourceLine("")
+            .withSourceLine("        Object employeeBuilder = GeneratedBuilder.company().withAddedEmployee();")
+            .withSourceLine("        assert objectHasMethod(employeeBuilder, \"withFirstName\", String.class);")
+            .withSourceLine("        assert objectHasMethod(employeeBuilder, \"withLastName\", String.class);")
+            .withSourceLine("        assert objectHasMethod(employeeBuilder, \"withAddress\", Address.class);")
+            .withSourceLine("        assert objectHasMethod(employeeBuilder, \"withAddress\");")
+            .withSourceLine("")
+            .withSourceLine("        Object addressBuilder = GeneratedBuilder.company().withAddedEmployee().withAddress();")
+            .withSourceLine("        assert objectHasMethod(addressBuilder, \"withCity\", String.class);")
+            .withSourceLine("        assert objectHasMethod(addressBuilder, \"withStreet\", String.class);")
+            .withSourceLine("        assert objectHasMethod(addressBuilder, \"withNumber\", Integer.TYPE);")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    private static boolean objectHasMethod(Object object, String methodName, Class... parameterTypes) {")
+            .withSourceLine("        try {")
+            .withSourceLine("            return object.getClass().getMethod(methodName, parameterTypes) != null;")
+            .withSourceLine("        } catch (NoSuchMethodException ex) {")
+            .withSourceLine("            return false;")
+            .withSourceLine("        }")
             .withSourceLine("    }")
             .withSourceLine("}")
             .buildType();

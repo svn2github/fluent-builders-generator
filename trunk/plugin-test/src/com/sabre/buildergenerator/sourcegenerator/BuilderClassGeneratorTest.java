@@ -11,18 +11,12 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-
 import com.sabre.buildergenerator.JdtTestCase;
 import com.sabre.buildergenerator.TestHelper;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 
 import java.io.OutputStreamWriter;
-
-import static com.sabre.buildergenerator.TestHelper.*;
 
 public class BuilderClassGeneratorTest extends JdtTestCase {
     private BuilderGenerator generator;
@@ -903,53 +897,5 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
 
         assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
-    }
-
-    @SuppressWarnings("unused")
-    private static IType generateBuilder(BuilderGenerator generator, IType buildClass, String packageName, String builderName)
-            throws Exception {
-        String builderSource = generator.generateSource(buildClass, packageName, builderName, null, "with",
-                "withAdded", "end", false);
-        ICompilationUnit compilationUnit = createCompilationUnit(createJavaFile(buildClass.getJavaProject(),
-                packageName, packageName, builderSource));
-        return compilationUnit.getType(builderName);
-    }
-
-    @SuppressWarnings("unused")
-    private static String getMethodSource(IType builderClass, String methodName, String[] parameterTypes)
-            throws JavaModelException {
-        String[] signatures = new String[parameterTypes.length];
-        for (int i = 0; i < signatures.length; i++) {
-            signatures[i] = Signature.createTypeSignature(parameterTypes[i], false);
-        }
-        return builderClass.getMethod(methodName, signatures).getSource();
-    }
-
-    JavaBuilder buildBuilderSource(String aPackage, String aBuilderName) throws Exception {
-        return new JavaBuilder() {
-            @Override
-            public String buildSource() throws Exception {
-                withSourceLine("}");
-                return super.buildSource();
-            }
-        }
-        .withSourceLine("package " + aPackage + ";")
-        .withSourceLine("")
-        .withSourceLine("@SuppressWarnings(\"unchecked\")")
-        .withSourceLine("public class " + aBuilderName + " {")
-        .withSourceLine("    private testpkg.MyClass instance;")
-        .withSourceLine("")
-        .withSourceLine("    public static " + aBuilderName + " myClass() {")
-        .withSourceLine("        return new " + aBuilderName + "();")
-        .withSourceLine("    }")
-        .withSourceLine("")
-        .withSourceLine("    public " + aBuilderName + "() {")
-        .withSourceLine("        instance = new testpkg.MyClass();")
-        .withSourceLine("    }")
-        .withSourceLine("")
-        .withSourceLine("    public testpkg.MyClass build() {")
-        .withSourceLine("        return instance;")
-        .withSourceLine("    }")
-        .withSourceLine("");
     }
 }

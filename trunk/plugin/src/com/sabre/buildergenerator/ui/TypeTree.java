@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
+import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
 
 /**
  * Title: TypeTree.java<br>
@@ -33,7 +34,7 @@ import com.sabre.buildergenerator.signatureutils.SignatureParserException;
  * Created: Mar 19, 2010<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- *
+ * 
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
@@ -57,14 +58,18 @@ public class TypeTree {
 		this.typeNodes = new LinkedHashMap<IType, TypeNode>();
 		this.typeHelperRouter = typeHelperRouter;
 
-		processType(new RootTypeNode(aType, typeHelperRouter.findSetterMethods(aType)));
+		processType(new RootTypeNode(aType, typeHelperRouter
+				.findSetterMethods(aType)));
 
 		for (TypeNode typeNode : typeNodes.values()) {
 			for (MethodNode methodNode : typeNode.getMethodNodes()) {
-				IType setType = typeHelperRouter.getSetterSetType(methodNode.getElement());
-				TypeNode setTypeNode = getNodeFor(setType);
-				if (setTypeNode != null) {
-					setTypeNode.addPointingMethodNode(methodNode);
+				SetType setType = typeHelperRouter
+						.resolveSetterSetType(methodNode.getElement());
+				if (!setType.isSimpleType()) {
+					TypeNode setTypeNode = getNodeFor(setType.getType());
+					if (setTypeNode != null) {
+						setTypeNode.addPointingMethodNode(methodNode);
+					}
 				}
 			}
 		}
@@ -74,22 +79,24 @@ public class TypeTree {
 			SignatureParserException, Exception {
 		typeNodes.put(typeNode.getElement(), typeNode);
 		for (TreeNode<IMethod> setterNode : typeNode.getMethodNodes()) {
-			IType setType = typeHelperRouter.getSetterSetType(setterNode
+			SetType setType = typeHelperRouter.resolveSetterSetType(setterNode
 					.getElement());
-			if (setType != null && setType.isClass() && !setType.isBinary()) {
-				if (!isCollection(setType)) {
-					processType(createTypeNode(setType));
-				} else {
-					processCollection(setType);
+			if (!setType.isSimpleType()) {
+				IType setIType = setType.getType();
+				if (setType.getType().isClass() && !setIType.isBinary()) {
+					if (!isCollection(setIType)) {
+						processType(createTypeNode(setIType));
+					} else {
+						processCollection(setIType);
+					}
 				}
 			}
 		}
 	}
 
 	private TypeNode createTypeNode(IType setType) throws Exception {
-		return new TypeNode(
-				setType,
-				typeHelperRouter.findSetterMethods(setType));
+		return new TypeNode(setType, typeHelperRouter
+				.findSetterMethods(setType));
 	}
 
 	private void processCollection(IType setType) throws Exception {
@@ -128,12 +135,13 @@ public class TypeTree {
 		return typeNodes.get(aBaseType);
 	}
 
-	public IType [] getSortedTypes () {
+	public IType[] getSortedTypes() {
 		return typeNodes.keySet().toArray(new IType[typeNodes.keySet().size()]);
 	}
 
 	public IType[] getSortedActiveTypes() {
-		List<IType> activeTypes = new ArrayList<IType>(typeNodes.keySet().size());
+		List<IType> activeTypes = new ArrayList<IType>(typeNodes.keySet()
+				.size());
 		for (IType type : typeNodes.keySet()) {
 			if (typeNodes.get(type).isActive()) {
 				activeTypes.add(type);

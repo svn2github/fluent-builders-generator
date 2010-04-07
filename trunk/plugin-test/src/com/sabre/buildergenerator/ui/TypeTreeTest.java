@@ -18,10 +18,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Collections;
+
 import junit.framework.TestCase;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+
+import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
 
 /**
  * Title: TreeTest.java<br>
@@ -73,9 +76,9 @@ public class TypeTreeTest extends TestCase {
 
 	public void testShouldExposeComplexSubtypeAsOneOfTheRootNodesOfTheTreeAndSetterForBaseType()
 			throws Exception {
-
 		IType complexType = mock(IType.class);
-		when(typeHelperRouter.getSetterSetType(method)).thenReturn(complexType);
+		
+		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(new SetType(complexType));
 		when(complexType.isClass()).thenReturn(true);
 		when(complexType.getFullyQualifiedName()).thenReturn("A");
 
@@ -89,17 +92,13 @@ public class TypeTreeTest extends TestCase {
 
 	public void testShouldExposeSimpleTypesSettersOfTheTypeAsMethodNode()
 			throws Exception {
-
-		IType simpleType = mock(IType.class);
-		when(simpleType.isClass()).thenReturn(false);
-		when(typeHelperRouter.getSetterSetType(method)).thenReturn(simpleType);
+		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(new SetType());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
 		TypeNode baseTypeNode = typeTree.getNodeFor(baseType);
 		assertTrue(baseTypeNode.getMethodNodes().contains(
 				new MethodNode(method, baseTypeNode)));
-		assertNull(typeTree.getNodeFor(simpleType));
 	}
 
 	public void testShouldExposeBinaryTypesSettersOfTheTypeAsMethodNode()
@@ -107,7 +106,7 @@ public class TypeTreeTest extends TestCase {
 		IType binaryType = mock(IType.class);
 		when(binaryType.isClass()).thenReturn(true);
 		when(binaryType.isBinary()).thenReturn(true);
-		when(typeHelperRouter.getSetterSetType(method)).thenReturn(binaryType);
+		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(new SetType(binaryType));
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
@@ -125,8 +124,8 @@ public class TypeTreeTest extends TestCase {
 		when(collectionType.getFullyQualifiedName()).thenReturn(
 				collectionFullyQName);
 
-		when(typeHelperRouter.getSetterSetType(method)).thenReturn(
-				collectionType);
+		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(
+				new SetType(collectionType));
 
 		IType collectionSubType = mock(IType.class);
 		when(collectionType.isClass()).thenReturn(true);
@@ -165,21 +164,21 @@ public class TypeTreeTest extends TestCase {
 
 	public void testAfterTreeInitializationAllPointingMethodNodesShouldBeAttachedToTargetTypeNodes()
 			throws Exception {
-		IType pointedType = mock(IType.class);
+		IType complexPointedType = mock(IType.class);
 
-		when(typeHelperRouter.getSetterSetType(method)).thenReturn(pointedType);
+		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(new SetType(complexPointedType));
 
-		when(pointedType.isBinary()).thenReturn(false);
-		when(pointedType.isClass()).thenReturn(true);
-		when(pointedType.getFullyQualifiedName()).thenReturn("");
+		when(complexPointedType.isBinary()).thenReturn(false);
+		when(complexPointedType.isClass()).thenReturn(true);
+		when(complexPointedType.getFullyQualifiedName()).thenReturn("");
 
-		when(typeHelperRouter.findSetterMethods(pointedType))
+		when(typeHelperRouter.findSetterMethods(complexPointedType))
 				.thenReturn(Collections.<IMethod> emptyList());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
 		assertTrue(typeTree
-				.getNodeFor(pointedType)
+				.getNodeFor(complexPointedType)
 				.getMethodsPointingAtMe()
 				.contains(new MethodNode(method, typeTree.getNodeFor(baseType))));
 	}

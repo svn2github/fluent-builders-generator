@@ -62,5 +62,19 @@ public class TreeNode<ElementType> {
 		
 		this.selected = b;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return getElement().equals(((TreeNode)obj).getElement());
+	}
+
+	/**
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return getElement().hashCode();
+	}
 	
 }

@@ -50,6 +50,7 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.sabre.buildergenerator.Activator;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
+import com.sabre.buildergenerator.ui.MethodNode;
 import com.sabre.buildergenerator.ui.TreeNode;
 import com.sabre.buildergenerator.ui.TypeHelperRouter;
 import com.sabre.buildergenerator.ui.TypeNode;
@@ -61,7 +62,7 @@ import com.sabre.buildergenerator.ui.TypeTree;
  * Created: Dec 9, 2009<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- *
+ * 
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
@@ -99,7 +100,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 	/**
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite aParent) {
@@ -198,7 +199,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 				properties.setCollectionAddPrefix(collectionAddPrefix);
 				handleStatus(prefixChanged("Collection add prefix",
-						collectionAddPrefix, false));
+						collectionAddPrefix, true));
 			}
 		});
 	}
@@ -208,7 +209,6 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 	 */
 	private void createCheckboxTreeViewer(Composite aMainComposite) {
 		createLabel(aMainComposite, "Selected setters");
-
 
 		selectedSettersTreeViewer = new CheckboxTreeViewer(aMainComposite,
 				SWT.BORDER);
@@ -274,7 +274,6 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 			transferClickedNodes(settersTypeTree);
 
-
 			Composite buttonsComposite = new Composite(aMainComposite, SWT.None);
 			GridData buttonsGridData = createGridData();
 			buttonsComposite.setLayoutData(buttonsGridData);
@@ -287,14 +286,16 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 				public void widgetSelected(SelectionEvent e) {
 
 					// FIXME - dirty code :|
-					for (IType type: settersTypeTree.getSortedActiveTypes()) {
+					for (IType type : settersTypeTree.getSortedActiveTypes()) {
 						settersTypeTree.getNodeFor(type).setSelected(true);
 					}
+					
 					selectedSettersTreeViewer.refresh();
 
-					for (IType type: settersTypeTree.getSortedTypes()) {
+					for (IType type : settersTypeTree.getSortedActiveTypes()) {
 						settersTypeTree.getNodeFor(type).setSelected(true);
 					}
+					
 					transferClickedNodes(settersTypeTree);
 					selectedSettersTreeViewer.refresh();
 				}
@@ -308,7 +309,9 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 			deselectAllButton.setText("Deselect All");
 			deselectAllButton.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
-					settersTypeTree.getNodeFor(settersTypeTree.getSortedTypes()[0]).setSelected(false);
+					settersTypeTree.getNodeFor(
+							settersTypeTree.getSortedTypes()[0]).setSelected(
+							false);
 					transferClickedNodes(settersTypeTree);
 					selectedSettersTreeViewer.refresh();
 				}
@@ -329,30 +332,30 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 			TypeNode typeNode = settersTypeTree.getNodeFor(type);
 			if (typeNode.isActive()) {
 
-				boolean allChecked = true;
-				boolean noneChecked = true;
+				boolean allMethodsChecked = true;
+				boolean noMethodChecked = true;
 
-				for (TreeNode<IMethod> methodNode : typeNode.getMethodNodes()) {
+				for (MethodNode methodNode : typeNode.getMethodNodes()) {
 					boolean methodSelected = methodNode.isSelected();
 					selectedSettersTreeViewer.setChecked(methodNode
 							.getElement(), methodSelected);
 					if (!methodSelected) {
-						allChecked = false;
+						allMethodsChecked = false;
 					} else {
-						noneChecked = false;
+						noMethodChecked = false;
 					}
 				}
 
-				if (allChecked) {
+				if (allMethodsChecked) {
 					selectedSettersTreeViewer.setChecked(type, true);
 					selectedSettersTreeViewer.setGrayed(type, false);
-				} else if (noneChecked) {
+				} else if (noMethodChecked) {
 					selectedSettersTreeViewer.setGrayChecked(type, false);
 				} else {
 					selectedSettersTreeViewer.setGrayChecked(type, true);
 				}
 
-			}
+			} 
 		}
 	}
 
@@ -480,13 +483,13 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 	/**
 	 * A prefix for the method has been changed - generic method
-	 *
+	 * 
 	 * @param fieldName
 	 *            TODO
 	 * @param prefix
 	 * @param canBeEmpty
 	 *            TODO
-	 *
+	 * 
 	 * @return
 	 */
 	private IStatus prefixChanged(String fieldName, String prefix,
@@ -513,7 +516,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 	/**
 	 * copied from jdt
-	 *
+	 * 
 	 * @param context
 	 *            an {@link IJavaElement} or <code>null</code>
 	 * @return a <code>String[]</code> whose <code>[0]</code> is the
@@ -684,7 +687,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 					.getMethodsPrefix(), true);
 			IStatus collectionAddPrefixStatus = prefixChanged(
 					"Collection add prefix", properties
-							.getCollectionAddPrefix(), false);
+							.getCollectionAddPrefix(), true);
 			IStatus typeNameStatus = typeNameChanged();
 
 			return notError(typeNameStatus) && notError(prefixStatus)

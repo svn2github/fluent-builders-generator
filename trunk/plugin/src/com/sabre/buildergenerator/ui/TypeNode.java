@@ -62,8 +62,8 @@ public class TypeNode extends TreeNode<IType> {
 	public boolean isActive() {
 		boolean active = false;
 
-		for (TreeNode<IMethod> node : methodNodesPointingAtMe) {
-			if (node.isSelected()) {
+		for (MethodNode node : methodNodesPointingAtMe) {
+			if (node.isSelected() && node.getParentNode().isActive()) {
 				active = true;
 				break;
 			}

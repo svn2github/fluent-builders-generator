@@ -34,7 +34,7 @@ import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodConsumer;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvider;
-import com.sabre.buildergenerator.ui.MethodNode;
+import com.sabre.buildergenerator.ui.TreeNode;
 import com.sabre.buildergenerator.ui.TypeNode;
 import com.sabre.buildergenerator.ui.TypeTree;
 import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
@@ -151,7 +151,7 @@ public class GenerateBuilderAction {
                     for (IType selectedType : selectedSetters.getSortedActiveTypes()) {
                         TypeNode typeNode = selectedSetters.getNodeFor(selectedType);
                         if (typeNode.isSelected()) {
-                            for (MethodNode methodNode : typeNode.getMethodNodes()) {
+                            for (TreeNode<IMethod> methodNode : typeNode.getMethodNodes()) {
                                 if (methodNode.isSelected()) {
                                     IMethod selectedMethod = methodNode.getElement();
                                     consumer.nextMethod(selectedType, selectedMethod);

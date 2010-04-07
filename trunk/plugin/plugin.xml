@@ -13,6 +13,19 @@
                menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup">
          </action>
       </viewerContribution>
+      
+      <!-- contributrion for quick source menu -->
+      <viewerContribution
+            id="builder-generator-eclipse-plugin.editorQuickContribution"
+            targetID="#CompilationUnitEditorContext">
+         <action 
+               class="com.sabre.buildergenerator.ui.actions.GenerateBuilderCompilationUnitEditorAction"
+               id="builder-generator-eclipse-plugin.generateBuilderCompliationUnitEditorQuickPopupMenuAction"
+               label="Generate Fluent Builder..."
+               menubarPath="org.eclipse.jdt.ui.edit.text.java.source.quickMenu/generateGroup">
+         </action>
+      </viewerContribution>
+      
       <objectContribution
             adaptable="false"
             id="builder-generator-eclipse-plugin.itypeContribution"

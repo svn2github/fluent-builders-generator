@@ -109,7 +109,8 @@ public class Clazz {
             w.out.print("private ");
         } else if ((modifiers & JavaSource.MODIFIER_PROTECTED) != 0) {
             w.out.print("protected ");
-        } else if ((modifiers & JavaSource.MODIFIER_STATIC) != 0) {
+        }
+        if ((modifiers & JavaSource.MODIFIER_STATIC) != 0) {
             w.out.print("static ");
         }
         w.out.printf("class %s", name);

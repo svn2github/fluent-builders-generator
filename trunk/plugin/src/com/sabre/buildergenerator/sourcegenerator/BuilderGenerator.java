@@ -93,11 +93,12 @@ public class BuilderGenerator {
         for (ITypeParameter typeParameter : typeParameters) {
             typeParamNames[i++] = typeParameter.getElementName();
         }
-        generator.addBuilderClass(type.getFullyQualifiedName(), packageName, builderName, typeParamNames);
+        generator.startBuilderClass(type.getFullyQualifiedName(), packageName, builderName, typeParamNames);
         typesToGenerateInnerBuilders.add(Signature.createTypeSignature(type.getFullyQualifiedName(), true));
 
         generateBuilderBaseClasses(generator, type);
         generator.finish();
+        generator.endBuilderClass();
         sw.flush();
 
         String builderSource = sw.toString();

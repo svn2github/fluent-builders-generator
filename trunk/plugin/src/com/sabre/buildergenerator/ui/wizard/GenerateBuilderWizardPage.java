@@ -246,7 +246,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 						private void methodClicked(IMethod element,
 								boolean newState) {
 							// method has to be somewhere inside a type - assume
-							IType owningType = (IType) element.getParent();
+							IType owningType = element.getDeclaringType();
 							TypeNode typeNode = settersTypeTree
 									.getNodeFor(owningType);
 

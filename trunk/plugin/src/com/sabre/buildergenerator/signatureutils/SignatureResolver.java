@@ -147,7 +147,7 @@ public class SignatureResolver {
         }
 
         Activator.getDefault().getLog().log(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-                "Can not resolve type name '" + typeName + "' for owner type " + owningType.getElementName()));
+                "Can not resolve type name '" + typeName + "' for owner type " + owningType.getElementName(), new Throwable()));
 
         return typeName;
     }
@@ -178,7 +178,7 @@ public class SignatureResolver {
         }
 
         Activator.getDefault().getLog().log(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-                "Can not resolve type name '" + identifier + "' for owner type " + owningType.getElementName()));
+                "Can not resolve type name '" + identifier + "' for owner type " + owningType.getElementName(), new Throwable()));
 
         return null;
     }

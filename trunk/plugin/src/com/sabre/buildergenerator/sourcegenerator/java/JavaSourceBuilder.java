@@ -16,7 +16,7 @@ public class JavaSourceBuilder extends JavaSourceBuilderBase<JavaSourceBuilder> 
 
 @SuppressWarnings("unchecked")
 class JavaSourceBuilderBase<GeneratorT extends JavaSourceBuilderBase> {
-    private com.sabre.buildergenerator.sourcegenerator.java.JavaSource instance;
+    private final com.sabre.buildergenerator.sourcegenerator.java.JavaSource instance;
 
     protected JavaSourceBuilderBase(com.sabre.buildergenerator.sourcegenerator.java.JavaSource aInstance) {
         instance = aInstance;
@@ -80,381 +80,381 @@ class JavaSourceBuilderBase<GeneratorT extends JavaSourceBuilderBase> {
             return (GeneratorT) JavaSourceBuilderBase.this;
         }
     }
-}
 
-@SuppressWarnings("unchecked")
-class ClazzBuilderBase<GeneratorT extends ClazzBuilderBase> {
-    private com.sabre.buildergenerator.sourcegenerator.java.Clazz instance;
+    @SuppressWarnings("unchecked")
+    public static class ClazzBuilderBase<GeneratorT extends ClazzBuilderBase> {
+        private final com.sabre.buildergenerator.sourcegenerator.java.Clazz instance;
 
-    protected ClazzBuilderBase(com.sabre.buildergenerator.sourcegenerator.java.Clazz aInstance) {
-        instance = aInstance;
-    }
-
-    protected com.sabre.buildergenerator.sourcegenerator.java.Clazz getInstance() {
-        return instance;
-    }
-
-    public GeneratorT withAnnotations(java.util.List<java.lang.String> aValue) {
-        instance.setAnnotations(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withAnnotation(java.lang.String aValue) {
-        if (instance.getAnnotations() == null) {
-            instance.setAnnotations(new java.util.ArrayList<java.lang.String>());
+        protected ClazzBuilderBase(com.sabre.buildergenerator.sourcegenerator.java.Clazz aInstance) {
+            instance = aInstance;
         }
 
-        ((java.util.ArrayList<java.lang.String>) instance.getAnnotations()).add(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withModifiers(int aValue) {
-        instance.setModifiers(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withName(java.lang.String aValue) {
-        instance.setName(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withDeclarations(java.util.List<com.sabre.buildergenerator.sourcegenerator.java.Statement> aValue) {
-        instance.setDeclarations(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withDeclaration(com.sabre.buildergenerator.sourcegenerator.java.Statement aValue) {
-        if (instance.getDeclarations() == null) {
-            instance
-                    .setDeclarations(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Statement>());
+        protected com.sabre.buildergenerator.sourcegenerator.java.Clazz getInstance() {
+            return instance;
         }
 
-        ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Statement>) instance.getDeclarations())
-                .add(aValue);
+        public GeneratorT withAnnotations(java.util.List<java.lang.String> aValue) {
+            instance.setAnnotations(aValue);
 
-        return (GeneratorT) this;
-    }
-
-    public DeclarationStatementBuilder withDeclaration() {
-        com.sabre.buildergenerator.sourcegenerator.java.Statement declaration = new com.sabre.buildergenerator.sourcegenerator.java.Statement();
-
-        return withDeclaration(declaration).new DeclarationStatementBuilder(declaration);
-    }
-
-    public class DeclarationStatementBuilder extends StatementBuilderBase<DeclarationStatementBuilder> {
-        public DeclarationStatementBuilder(com.sabre.buildergenerator.sourcegenerator.java.Statement aInstance) {
-            super(aInstance);
+            return (GeneratorT) this;
         }
 
-        public GeneratorT endDeclaration() {
-            return (GeneratorT) ClazzBuilderBase.this;
-        }
-    }
+        public GeneratorT withAnnotation(java.lang.String aValue) {
+            if (instance.getAnnotations() == null) {
+                instance.setAnnotations(new java.util.ArrayList<java.lang.String>());
+            }
 
-    public GeneratorT withMethods(java.util.List<com.sabre.buildergenerator.sourcegenerator.java.Method> aValue) {
-        instance.setMethods(aValue);
+            ((java.util.ArrayList<java.lang.String>) instance.getAnnotations()).add(aValue);
 
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withMethod(com.sabre.buildergenerator.sourcegenerator.java.Method aValue) {
-        if (instance.getMethods() == null) {
-            instance.setMethods(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Method>());
+            return (GeneratorT) this;
         }
 
-        ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Method>) instance.getMethods())
-                .add(aValue);
+        public GeneratorT withModifiers(int aValue) {
+            instance.setModifiers(aValue);
 
-        return (GeneratorT) this;
-    }
-
-    public MethodMethodBuilder withMethod() {
-        com.sabre.buildergenerator.sourcegenerator.java.Method method = new com.sabre.buildergenerator.sourcegenerator.java.Method();
-
-        return withMethod(method).new MethodMethodBuilder(method);
-    }
-
-    public class MethodMethodBuilder extends MethodBuilderBase<MethodMethodBuilder> {
-        public MethodMethodBuilder(com.sabre.buildergenerator.sourcegenerator.java.Method aInstance) {
-            super(aInstance);
+            return (GeneratorT) this;
         }
 
-        public GeneratorT endMethod() {
-            return (GeneratorT) ClazzBuilderBase.this;
-        }
-    }
+        public GeneratorT withName(java.lang.String aValue) {
+            instance.setName(aValue);
 
-    public GeneratorT withBaseClazz(java.lang.String aValue) {
-        instance.setBaseClazz(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withInterfaces(java.util.List<java.lang.String> aValue) {
-        instance.setInterfaces(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withInterface(java.lang.String aValue) {
-        if (instance.getInterfaces() == null) {
-            instance.setInterfaces(new java.util.ArrayList<java.lang.String>());
+            return (GeneratorT) this;
         }
 
-        ((java.util.ArrayList<java.lang.String>) instance.getInterfaces()).add(aValue);
+        public GeneratorT withDeclarations(java.util.List<com.sabre.buildergenerator.sourcegenerator.java.Statement> aValue) {
+            instance.setDeclarations(aValue);
 
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withTypeArgs(java.util.List<java.lang.String> aValue) {
-        instance.setTypeArgs(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withTypeArg(java.lang.String aValue) {
-        if (instance.getTypeArgs() == null) {
-            instance.setTypeArgs(new java.util.ArrayList<java.lang.String>());
+            return (GeneratorT) this;
         }
 
-        ((java.util.ArrayList<java.lang.String>) instance.getTypeArgs()).add(aValue);
+        public GeneratorT withDeclaration(com.sabre.buildergenerator.sourcegenerator.java.Statement aValue) {
+            if (instance.getDeclarations() == null) {
+                instance
+                        .setDeclarations(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Statement>());
+            }
 
-        return (GeneratorT) this;
-    }
+            ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Statement>) instance.getDeclarations())
+                    .add(aValue);
 
-    public GeneratorT withInnerClasses(java.util.List<com.sabre.buildergenerator.sourcegenerator.java.Clazz> aValue) {
-        instance.setInnerClasses(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withInnerClass(com.sabre.buildergenerator.sourcegenerator.java.Clazz aValue) {
-        if (instance.getInnerClasses() == null) {
-            instance.setInnerClasses(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Clazz>());
+            return (GeneratorT) this;
         }
 
-        ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Clazz>) instance.getInnerClasses())
-                .add(aValue);
+        public DeclarationStatementBuilder withDeclaration() {
+            com.sabre.buildergenerator.sourcegenerator.java.Statement declaration = new com.sabre.buildergenerator.sourcegenerator.java.Statement();
 
-        return (GeneratorT) this;
-    }
-
-    public InnerClassClazzBuilder withInnerClass() {
-        com.sabre.buildergenerator.sourcegenerator.java.Clazz innerClass = new com.sabre.buildergenerator.sourcegenerator.java.Clazz();
-
-        return withInnerClass(innerClass).new InnerClassClazzBuilder(innerClass);
-    }
-
-    public class InnerClassClazzBuilder extends ClazzBuilderBase<InnerClassClazzBuilder> {
-        public InnerClassClazzBuilder(com.sabre.buildergenerator.sourcegenerator.java.Clazz aInstance) {
-            super(aInstance);
+            return withDeclaration(declaration).new DeclarationStatementBuilder(declaration);
         }
 
-        public GeneratorT endInnerClass() {
-            return (GeneratorT) ClazzBuilderBase.this;
-        }
-    }
-}
+        public class DeclarationStatementBuilder extends StatementBuilderBase<DeclarationStatementBuilder> {
+            public DeclarationStatementBuilder(com.sabre.buildergenerator.sourcegenerator.java.Statement aInstance) {
+                super(aInstance);
+            }
 
-@SuppressWarnings("unchecked")
-class StatementBuilderBase<GeneratorT extends StatementBuilderBase> {
-    private com.sabre.buildergenerator.sourcegenerator.java.Statement instance;
-
-    protected StatementBuilderBase(com.sabre.buildergenerator.sourcegenerator.java.Statement aInstance) {
-        instance = aInstance;
-    }
-
-    protected com.sabre.buildergenerator.sourcegenerator.java.Statement getInstance() {
-        return instance;
-    }
-
-    public GeneratorT withStatement(java.lang.String aValue) {
-        instance.setStatement(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withParams(java.util.List<java.lang.Object> aValue) {
-        instance.setParams(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withParam(java.lang.Object aValue) {
-        if (instance.getParams() == null) {
-            instance.setParams(new java.util.ArrayList<java.lang.Object>());
+            public GeneratorT endDeclaration() {
+                return (GeneratorT) ClazzBuilderBase.this;
+            }
         }
 
-        ((java.util.ArrayList<java.lang.Object>) instance.getParams()).add(aValue);
+        public GeneratorT withMethods(java.util.List<com.sabre.buildergenerator.sourcegenerator.java.Method> aValue) {
+            instance.setMethods(aValue);
 
-        return (GeneratorT) this;
-    }
-}
-
-@SuppressWarnings("unchecked")
-class MethodBuilderBase<GeneratorT extends MethodBuilderBase> {
-    private com.sabre.buildergenerator.sourcegenerator.java.Method instance;
-
-    protected MethodBuilderBase(com.sabre.buildergenerator.sourcegenerator.java.Method aInstance) {
-        instance = aInstance;
-    }
-
-    protected com.sabre.buildergenerator.sourcegenerator.java.Method getInstance() {
-        return instance;
-    }
-
-    public GeneratorT withModifiers(int aValue) {
-        instance.setModifiers(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withReturnType(java.lang.String aValue) {
-        instance.setReturnType(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withName(java.lang.String aValue) {
-        instance.setName(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withParameters(
-            java.util.List<com.sabre.buildergenerator.sourcegenerator.java.MethodParameter> aValue) {
-        instance.setParameters(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withParameter(com.sabre.buildergenerator.sourcegenerator.java.MethodParameter aValue) {
-        if (instance.getParameters() == null) {
-            instance
-                    .setParameters(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.MethodParameter>());
+            return (GeneratorT) this;
         }
 
-        ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.MethodParameter>) instance
-                .getParameters()).add(aValue);
+        public GeneratorT withMethod(com.sabre.buildergenerator.sourcegenerator.java.Method aValue) {
+            if (instance.getMethods() == null) {
+                instance.setMethods(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Method>());
+            }
 
-        return (GeneratorT) this;
-    }
+            ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Method>) instance.getMethods())
+                    .add(aValue);
 
-    public ParameterMethodParameterBuilder withParameter() {
-        com.sabre.buildergenerator.sourcegenerator.java.MethodParameter parameter = new com.sabre.buildergenerator.sourcegenerator.java.MethodParameter();
-
-        return withParameter(parameter).new ParameterMethodParameterBuilder(parameter);
-    }
-
-    public class ParameterMethodParameterBuilder extends MethodParameterBuilderBase<ParameterMethodParameterBuilder> {
-        public ParameterMethodParameterBuilder(com.sabre.buildergenerator.sourcegenerator.java.MethodParameter aInstance) {
-            super(aInstance);
+            return (GeneratorT) this;
         }
 
-        public GeneratorT endParameter() {
-            return (GeneratorT) MethodBuilderBase.this;
+        public MethodMethodBuilder withMethod() {
+            com.sabre.buildergenerator.sourcegenerator.java.Method method = new com.sabre.buildergenerator.sourcegenerator.java.Method();
+
+            return withMethod(method).new MethodMethodBuilder(method);
+        }
+
+        public class MethodMethodBuilder extends MethodBuilderBase<MethodMethodBuilder> {
+            public MethodMethodBuilder(com.sabre.buildergenerator.sourcegenerator.java.Method aInstance) {
+                super(aInstance);
+            }
+
+            public GeneratorT endMethod() {
+                return (GeneratorT) ClazzBuilderBase.this;
+            }
+        }
+
+        public GeneratorT withBaseClazz(java.lang.String aValue) {
+            instance.setBaseClazz(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withInterfaces(java.util.List<java.lang.String> aValue) {
+            instance.setInterfaces(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withInterface(java.lang.String aValue) {
+            if (instance.getInterfaces() == null) {
+                instance.setInterfaces(new java.util.ArrayList<java.lang.String>());
+            }
+
+            ((java.util.ArrayList<java.lang.String>) instance.getInterfaces()).add(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withTypeArgs(java.util.List<java.lang.String> aValue) {
+            instance.setTypeArgs(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withTypeArg(java.lang.String aValue) {
+            if (instance.getTypeArgs() == null) {
+                instance.setTypeArgs(new java.util.ArrayList<java.lang.String>());
+            }
+
+            ((java.util.ArrayList<java.lang.String>) instance.getTypeArgs()).add(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withInnerClasses(java.util.List<com.sabre.buildergenerator.sourcegenerator.java.Clazz> aValue) {
+            instance.setInnerClasses(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withInnerClass(com.sabre.buildergenerator.sourcegenerator.java.Clazz aValue) {
+            if (instance.getInnerClasses() == null) {
+                instance.setInnerClasses(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Clazz>());
+            }
+
+            ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Clazz>) instance.getInnerClasses())
+                    .add(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public InnerClassClazzBuilder withInnerClass() {
+            com.sabre.buildergenerator.sourcegenerator.java.Clazz innerClass = new com.sabre.buildergenerator.sourcegenerator.java.Clazz();
+
+            return withInnerClass(innerClass).new InnerClassClazzBuilder(innerClass);
+        }
+
+        public class InnerClassClazzBuilder extends ClazzBuilderBase<InnerClassClazzBuilder> {
+            public InnerClassClazzBuilder(com.sabre.buildergenerator.sourcegenerator.java.Clazz aInstance) {
+                super(aInstance);
+            }
+
+            public GeneratorT endInnerClass() {
+                return (GeneratorT) ClazzBuilderBase.this;
+            }
         }
     }
 
-    public GeneratorT withExceptions(java.util.List<java.lang.String> aValue) {
-        instance.setExceptions(aValue);
+    @SuppressWarnings("unchecked")
+    public static class StatementBuilderBase<GeneratorT extends StatementBuilderBase> {
+        private final com.sabre.buildergenerator.sourcegenerator.java.Statement instance;
 
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withException(java.lang.String aValue) {
-        if (instance.getExceptions() == null) {
-            instance.setExceptions(new java.util.ArrayList<java.lang.String>());
+        protected StatementBuilderBase(com.sabre.buildergenerator.sourcegenerator.java.Statement aInstance) {
+            instance = aInstance;
         }
 
-        ((java.util.ArrayList<java.lang.String>) instance.getExceptions()).add(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withInstructions(java.util.List<com.sabre.buildergenerator.sourcegenerator.java.Statement> aValue) {
-        instance.setInstructions(aValue);
-
-        return (GeneratorT) this;
-    }
-
-    public GeneratorT withInstruction(com.sabre.buildergenerator.sourcegenerator.java.Statement aValue) {
-        if (instance.getInstructions() == null) {
-            instance
-                    .setInstructions(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Statement>());
+        protected com.sabre.buildergenerator.sourcegenerator.java.Statement getInstance() {
+            return instance;
         }
 
-        ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Statement>) instance.getInstructions())
-                .add(aValue);
+        public GeneratorT withStatement(java.lang.String aValue) {
+            instance.setStatement(aValue);
 
-        return (GeneratorT) this;
-    }
-
-    public InstructionStatementBuilder withInstruction() {
-        com.sabre.buildergenerator.sourcegenerator.java.Statement instruction = new com.sabre.buildergenerator.sourcegenerator.java.Statement();
-
-        return withInstruction(instruction).new InstructionStatementBuilder(instruction);
-    }
-
-    public class InstructionStatementBuilder extends StatementBuilderBase<InstructionStatementBuilder> {
-        public InstructionStatementBuilder(com.sabre.buildergenerator.sourcegenerator.java.Statement aInstance) {
-            super(aInstance);
+            return (GeneratorT) this;
         }
 
-        public GeneratorT endInstruction() {
-            return (GeneratorT) MethodBuilderBase.this;
+        public GeneratorT withParams(java.util.List<java.lang.Object> aValue) {
+            instance.setParams(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withParam(java.lang.Object aValue) {
+            if (instance.getParams() == null) {
+                instance.setParams(new java.util.ArrayList<java.lang.Object>());
+            }
+
+            ((java.util.ArrayList<java.lang.Object>) instance.getParams()).add(aValue);
+
+            return (GeneratorT) this;
         }
     }
 
-    public GeneratorT withReturnValue(com.sabre.buildergenerator.sourcegenerator.java.Statement aValue) {
-        instance.setReturnValue(aValue);
+    @SuppressWarnings("unchecked")
+    public static class MethodBuilderBase<GeneratorT extends MethodBuilderBase> {
+        private final com.sabre.buildergenerator.sourcegenerator.java.Method instance;
 
-        return (GeneratorT) this;
-    }
-
-    public ReturnValueStatementBuilder withReturnValue() {
-        com.sabre.buildergenerator.sourcegenerator.java.Statement returnValue = new com.sabre.buildergenerator.sourcegenerator.java.Statement();
-
-        return withReturnValue(returnValue).new ReturnValueStatementBuilder(returnValue);
-    }
-
-    public class ReturnValueStatementBuilder extends StatementBuilderBase<ReturnValueStatementBuilder> {
-        public ReturnValueStatementBuilder(com.sabre.buildergenerator.sourcegenerator.java.Statement aInstance) {
-            super(aInstance);
+        protected MethodBuilderBase(com.sabre.buildergenerator.sourcegenerator.java.Method aInstance) {
+            instance = aInstance;
         }
 
-        public GeneratorT endReturnValue() {
-            return (GeneratorT) MethodBuilderBase.this;
+        protected com.sabre.buildergenerator.sourcegenerator.java.Method getInstance() {
+            return instance;
+        }
+
+        public GeneratorT withModifiers(int aValue) {
+            instance.setModifiers(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withReturnType(java.lang.String aValue) {
+            instance.setReturnType(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withName(java.lang.String aValue) {
+            instance.setName(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withParameters(
+                java.util.List<com.sabre.buildergenerator.sourcegenerator.java.MethodParameter> aValue) {
+            instance.setParameters(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withParameter(com.sabre.buildergenerator.sourcegenerator.java.MethodParameter aValue) {
+            if (instance.getParameters() == null) {
+                instance
+                        .setParameters(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.MethodParameter>());
+            }
+
+            ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.MethodParameter>) instance
+                    .getParameters()).add(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public ParameterMethodParameterBuilder withParameter() {
+            com.sabre.buildergenerator.sourcegenerator.java.MethodParameter parameter = new com.sabre.buildergenerator.sourcegenerator.java.MethodParameter();
+
+            return withParameter(parameter).new ParameterMethodParameterBuilder(parameter);
+        }
+
+        public class ParameterMethodParameterBuilder extends MethodParameterBuilderBase<ParameterMethodParameterBuilder> {
+            public ParameterMethodParameterBuilder(com.sabre.buildergenerator.sourcegenerator.java.MethodParameter aInstance) {
+                super(aInstance);
+            }
+
+            public GeneratorT endParameter() {
+                return (GeneratorT) MethodBuilderBase.this;
+            }
+        }
+
+        public GeneratorT withExceptions(java.util.List<java.lang.String> aValue) {
+            instance.setExceptions(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withException(java.lang.String aValue) {
+            if (instance.getExceptions() == null) {
+                instance.setExceptions(new java.util.ArrayList<java.lang.String>());
+            }
+
+            ((java.util.ArrayList<java.lang.String>) instance.getExceptions()).add(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withInstructions(java.util.List<com.sabre.buildergenerator.sourcegenerator.java.Statement> aValue) {
+            instance.setInstructions(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withInstruction(com.sabre.buildergenerator.sourcegenerator.java.Statement aValue) {
+            if (instance.getInstructions() == null) {
+                instance
+                        .setInstructions(new java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Statement>());
+            }
+
+            ((java.util.ArrayList<com.sabre.buildergenerator.sourcegenerator.java.Statement>) instance.getInstructions())
+                    .add(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public InstructionStatementBuilder withInstruction() {
+            com.sabre.buildergenerator.sourcegenerator.java.Statement instruction = new com.sabre.buildergenerator.sourcegenerator.java.Statement();
+
+            return withInstruction(instruction).new InstructionStatementBuilder(instruction);
+        }
+
+        public class InstructionStatementBuilder extends StatementBuilderBase<InstructionStatementBuilder> {
+            public InstructionStatementBuilder(com.sabre.buildergenerator.sourcegenerator.java.Statement aInstance) {
+                super(aInstance);
+            }
+
+            public GeneratorT endInstruction() {
+                return (GeneratorT) MethodBuilderBase.this;
+            }
+        }
+
+        public GeneratorT withReturnValue(com.sabre.buildergenerator.sourcegenerator.java.Statement aValue) {
+            instance.setReturnValue(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public ReturnValueStatementBuilder withReturnValue() {
+            com.sabre.buildergenerator.sourcegenerator.java.Statement returnValue = new com.sabre.buildergenerator.sourcegenerator.java.Statement();
+
+            return withReturnValue(returnValue).new ReturnValueStatementBuilder(returnValue);
+        }
+
+        public class ReturnValueStatementBuilder extends StatementBuilderBase<ReturnValueStatementBuilder> {
+            public ReturnValueStatementBuilder(com.sabre.buildergenerator.sourcegenerator.java.Statement aInstance) {
+                super(aInstance);
+            }
+
+            public GeneratorT endReturnValue() {
+                return (GeneratorT) MethodBuilderBase.this;
+            }
         }
     }
-}
 
-@SuppressWarnings("unchecked")
-class MethodParameterBuilderBase<GeneratorT extends MethodParameterBuilderBase> {
-    private com.sabre.buildergenerator.sourcegenerator.java.MethodParameter instance;
+    @SuppressWarnings("unchecked")
+    public static class MethodParameterBuilderBase<GeneratorT extends MethodParameterBuilderBase> {
+        private final com.sabre.buildergenerator.sourcegenerator.java.MethodParameter instance;
 
-    protected MethodParameterBuilderBase(com.sabre.buildergenerator.sourcegenerator.java.MethodParameter aInstance) {
-        instance = aInstance;
-    }
+        protected MethodParameterBuilderBase(com.sabre.buildergenerator.sourcegenerator.java.MethodParameter aInstance) {
+            instance = aInstance;
+        }
 
-    protected com.sabre.buildergenerator.sourcegenerator.java.MethodParameter getInstance() {
-        return instance;
-    }
+        protected com.sabre.buildergenerator.sourcegenerator.java.MethodParameter getInstance() {
+            return instance;
+        }
 
-    public GeneratorT withType(java.lang.String aValue) {
-        instance.setType(aValue);
+        public GeneratorT withType(java.lang.String aValue) {
+            instance.setType(aValue);
 
-        return (GeneratorT) this;
-    }
+            return (GeneratorT) this;
+        }
 
-    public GeneratorT withName(java.lang.String aValue) {
-        instance.setName(aValue);
+        public GeneratorT withName(java.lang.String aValue) {
+            instance.setName(aValue);
 
-        return (GeneratorT) this;
+            return (GeneratorT) this;
+        }
     }
 }

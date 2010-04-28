@@ -56,19 +56,6 @@ public class GenerateBuilderAction {
 
 	private CompliantCompilationUnitTester compilationUnitTester = new CompliantCompilationUnitTester();
 
-	private boolean validateAndShowErrorMessageIfNeeded(IType type, Shell shell)
-			throws JavaModelException {
-		if (!compilationUnitTester.isTypeSupported(type)) {
-			MessageDialog.openError(shell, "Unsupported type selected",
-					"Unsupported type selected. Supported class has to: \n"
-							+ "Be public\n" + "Have non-arg constructor\n"
-							+ "Be non-abstract");
-
-			return false;
-		}
-
-		return true;
-	}
 
 	/**
 	 * Starts the generation procedure for the type
@@ -76,7 +63,7 @@ public class GenerateBuilderAction {
 	 * @param type
 	 *            a type that the generator is going to be invoked for
 	 * @param shell
-	 *            TODO
+	 * 			  the shell of the running component
 	 * @throws CoreException
 	 */
 	@SuppressWarnings("deprecation")
@@ -188,8 +175,22 @@ public class GenerateBuilderAction {
 			}
 		}
 	}
+	
+	private boolean validateAndShowErrorMessageIfNeeded(IType type, Shell shell)
+	throws JavaModelException {
+		if (!compilationUnitTester.isTypeSupported(type)) {
+			MessageDialog.openError(shell, "Unsupported type selected",
+					"Unsupported type selected. Supported class has to: \n"
+					+ "Be public\n" + "Have non-arg constructor\n"
+					+ "Be non-abstract");
+			
+			return false;
+		}
+		
+		return true;
+	}
 
-	public String generateSource(BuilderGenerator builderGenerator,
+	private String generateSource(BuilderGenerator builderGenerator,
 			final IType type, String packageName, String builderName,
 			final TypeTree selectedSetters, String setterPrefix,
 			String collectionSetterPrefix, String endPrefix, boolean doFormat)

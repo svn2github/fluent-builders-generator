@@ -110,6 +110,10 @@ public class GenerateBuilderAction {
                             builderPath = builderPath.append(builderClassName).addFileExtension("java");
 
                             IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(builderPath);
+                            
+                            if (file.exists()) {
+                            	file.delete(false, aMonitor);
+                            }
 
                             file.create(new StringBufferInputStream(source), false, aMonitor);
                         } catch (Throwable e) {

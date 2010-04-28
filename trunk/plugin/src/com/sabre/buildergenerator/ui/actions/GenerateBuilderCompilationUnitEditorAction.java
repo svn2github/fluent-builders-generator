@@ -83,26 +83,12 @@ public class GenerateBuilderCompilationUnitEditorAction implements IEditorAction
         }
     }
 
-    public void selectionChanged(IAction aAction, ISelection aSelection) {
-        try {
-            ICompilationUnit compilationUnit = getCurrentlyEditedCompilationUnit();
+	/**
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
+	 */
+	public void selectionChanged(IAction aAction, ISelection aSelection) {
+		
+	}
 
-            if (compilationUnitTester.isCompilationUnitSupported(compilationUnit)) {
-                enableAction(aAction);
-            } else {
-                // TODO throw not supported type exception
-                disableAction(aAction);
-            }
-        } catch (JavaModelException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private void disableAction(IAction aAction) {
-        aAction.setEnabled(false);
-    }
-
-    private void enableAction(IAction action) {
-        action.setEnabled(true);
-    }
 }

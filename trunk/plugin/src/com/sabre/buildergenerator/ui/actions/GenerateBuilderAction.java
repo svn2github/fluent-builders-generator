@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.io.StringBufferInputStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -37,8 +39,8 @@ import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvide
 import com.sabre.buildergenerator.ui.TreeNode;
 import com.sabre.buildergenerator.ui.TypeNode;
 import com.sabre.buildergenerator.ui.TypeTree;
+import com.sabre.buildergenerator.ui.actions.support.CompliantCompilationUnitTester;
 import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
-
 
 /**
  * Title: GenerateBuilderAction.java<br>
@@ -46,126 +48,177 @@ import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
  * Created: Dec 9, 2009<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
+ * 
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
 public class GenerateBuilderAction {
-    /**
-     * Starts the generation procedure for the type
-     *
-     * @param type
-     *  a type that the generator is going to be invoked for
-     * @param shell TODO
-     * @throws CoreException
-     */
-    @SuppressWarnings("deprecation")
-    public void execute(final IType type, final Shell shell, IRunnableContext runnableContext) throws Exception {
-        GenerateBuilderWizard wizard = new GenerateBuilderWizard(new BuilderGenerationProperties(type));
-        WizardDialog wizardDialog = new WizardDialog(shell, wizard);
 
-        wizardDialog.setMinimumPageSize(200, 500);
+	private CompliantCompilationUnitTester compilationUnitTester = new CompliantCompilationUnitTester();
 
-        if (wizardDialog.open() == Dialog.OK) {
-            final BuilderGenerationProperties properties = wizard.getBuilderGenerationProperties();
+	private boolean validateAndShowErrorMessageIfNeeded(IType type, Shell shell)
+			throws JavaModelException {
+		if (!compilationUnitTester.isTypeSupported(type)) {
+			MessageDialog.openError(shell, "Unsupported type selected",
+					"Unsupported type selected. Supported class has to: \n"
+							+ "Be public\n" + "Have non-arg constructor\n"
+							+ "Be non-abstract");
 
-            IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {
-                    public void run(IProgressMonitor aMonitor) throws InvocationTargetException, InterruptedException {
-                        try {
-                            aMonitor.beginTask("Generating class", 4);
+			return false;
+		}
 
-                            IPackageFragmentRoot selectedSourceFolder = properties.getSourceFolder();
+		return true;
+	}
 
-                            //                            IPackageFragment selectedPackage = properties.getPackage();
-                            String packageName = properties.getPackageName();
-                            String setterPrefix = properties.getMethodsPrefix();
-                            String collectionSetterPrefix = properties.getCollectionAddPrefix();
-                            String endPrefix = properties.getEndPrefix();
-                            String builderClassName = properties.getBuilderClassName();
-                            TypeTree selectedSetters = properties.getSettersTypeTree();
-                            boolean formatCode = properties.isFormatCode();
+	/**
+	 * Starts the generation procedure for the type
+	 * 
+	 * @param type
+	 *            a type that the generator is going to be invoked for
+	 * @param shell
+	 *            TODO
+	 * @throws CoreException
+	 */
+	@SuppressWarnings("deprecation")
+	public void execute(final IType type, final Shell shell,
+			IRunnableContext runnableContext) throws Exception {
+		
+		if (!validateAndShowErrorMessageIfNeeded(type, shell)) {
+			return;
+		}
+		
+		GenerateBuilderWizard wizard = new GenerateBuilderWizard(
+				new BuilderGenerationProperties(type));
+		WizardDialog wizardDialog = new WizardDialog(shell, wizard);
 
-                            // generate source code
+		wizardDialog.setMinimumPageSize(200, 500);
 
-                            //                            String packageName = selectedPackage.getElementName();
+		if (wizardDialog.open() == Dialog.OK) {
+			final BuilderGenerationProperties properties = wizard
+					.getBuilderGenerationProperties();
 
-                            aMonitor.worked(1);
+			IRunnableWithProgress runnableWithProgress = new IRunnableWithProgress() {
+				public void run(IProgressMonitor aMonitor)
+						throws InvocationTargetException, InterruptedException {
+					try {
+						aMonitor.beginTask("Generating class", 4);
 
-                            // creating package
-                            if (!selectedSourceFolder.getPackageFragment(packageName).exists()) {
-                                selectedSourceFolder.createPackageFragment(packageName, false, aMonitor);
-                            }
+						IPackageFragmentRoot selectedSourceFolder = properties
+								.getSourceFolder();
 
-                            String source = generateSource(new BuilderGenerator(), type, packageName, builderClassName, selectedSetters,
-                                    setterPrefix, collectionSetterPrefix, endPrefix, formatCode);
+						// IPackageFragment selectedPackage =
+						// properties.getPackage();
+						String packageName = properties.getPackageName();
+						String setterPrefix = properties.getMethodsPrefix();
+						String collectionSetterPrefix = properties
+								.getCollectionAddPrefix();
+						String endPrefix = properties.getEndPrefix();
+						String builderClassName = properties
+								.getBuilderClassName();
+						TypeTree selectedSetters = properties
+								.getSettersTypeTree();
+						boolean formatCode = properties.isFormatCode();
 
-                            aMonitor.worked(2);
+						// generate source code
 
-                            // create source file
-                            IPath builderPath = selectedSourceFolder.getPath();
+						// String packageName =
+						// selectedPackage.getElementName();
 
-                            for (String s : packageName.split("\\.")) {
-                                builderPath = builderPath.append(s);
-                            }
+						aMonitor.worked(1);
 
-                            builderPath = builderPath.append(builderClassName).addFileExtension("java");
+						// creating package
+						if (!selectedSourceFolder.getPackageFragment(
+								packageName).exists()) {
+							selectedSourceFolder.createPackageFragment(
+									packageName, false, aMonitor);
+						}
 
-                            IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(builderPath);
-                            
-                            if (file.exists()) {
-                            	file.delete(false, aMonitor);
-                            }
+						String source = generateSource(new BuilderGenerator(),
+								type, packageName, builderClassName,
+								selectedSetters, setterPrefix,
+								collectionSetterPrefix, endPrefix, formatCode);
 
-                            file.create(new StringBufferInputStream(source), false, aMonitor);
-                        } catch (Throwable e) {
-                            throw new InvocationTargetException(e);
-                        } finally {
-                            aMonitor.done();
-                        }
-                    }
-                };
+						aMonitor.worked(2);
 
-            try {
-                runnableContext.run(true, false, runnableWithProgress);
-            } catch (InvocationTargetException e) {
-                Throwable t = e.getTargetException();
-                StringWriter buf = new StringWriter();
-                t.printStackTrace(new PrintWriter(buf));
-                MessageDialog.openError(null, "Error", buf.toString());
-                t.printStackTrace();
-            } catch (InterruptedException e) {
-                StringWriter buf = new StringWriter();
-                e.printStackTrace(new PrintWriter(buf));
-                MessageDialog.openError(null, "Error", buf.toString());
-                e.printStackTrace();
-            } catch (Throwable e) {
-                StringWriter buf = new StringWriter();
-                e.printStackTrace(new PrintWriter(buf));
-                MessageDialog.openError(null, "Error", buf.toString());
-                e.printStackTrace();
-            }
-        }
-    }
+						// create source file
+						IPath builderPath = selectedSourceFolder.getPath();
 
-    public String generateSource(BuilderGenerator builderGenerator, final IType type, String packageName, String builderName, final TypeTree selectedSetters,
-            String setterPrefix, String collectionSetterPrefix, String endPrefix, boolean doFormat) throws Exception {
+						for (String s : packageName.split("\\.")) {
+							builderPath = builderPath.append(s);
+						}
 
-        MethodProvider methodProvider = new MethodProvider() {
-            public void process(MethodConsumer consumer) {
-                if (selectedSetters != null) {
-                    for (IType selectedType : selectedSetters.getSortedActiveTypes()) {
-                        TypeNode typeNode = selectedSetters.getNodeFor(selectedType);
-                        if (typeNode.isSelected()) {
-                            for (TreeNode<IMethod> methodNode : typeNode.getMethodNodes()) {
-                                if (methodNode.isSelected()) {
-                                    IMethod selectedMethod = methodNode.getElement();
-                                    consumer.nextMethod(selectedType, selectedMethod);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        };
-        return builderGenerator.generateSource(type, packageName, builderName, methodProvider, setterPrefix, collectionSetterPrefix, endPrefix, doFormat);
-    }
+						builderPath = builderPath.append(builderClassName)
+								.addFileExtension("java");
+
+						IFile file = ResourcesPlugin.getWorkspace().getRoot()
+								.getFile(builderPath);
+
+						if (file.exists()) {
+							file.delete(false, aMonitor);
+						}
+
+						file.create(new StringBufferInputStream(source), false,
+								aMonitor);
+					} catch (Throwable e) {
+						throw new InvocationTargetException(e);
+					} finally {
+						aMonitor.done();
+					}
+				}
+			};
+
+			try {
+				runnableContext.run(true, false, runnableWithProgress);
+			} catch (InvocationTargetException e) {
+				Throwable t = e.getTargetException();
+				StringWriter buf = new StringWriter();
+				t.printStackTrace(new PrintWriter(buf));
+				MessageDialog.openError(null, "Error", buf.toString());
+				t.printStackTrace();
+			} catch (InterruptedException e) {
+				StringWriter buf = new StringWriter();
+				e.printStackTrace(new PrintWriter(buf));
+				MessageDialog.openError(null, "Error", buf.toString());
+				e.printStackTrace();
+			} catch (Throwable e) {
+				StringWriter buf = new StringWriter();
+				e.printStackTrace(new PrintWriter(buf));
+				MessageDialog.openError(null, "Error", buf.toString());
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public String generateSource(BuilderGenerator builderGenerator,
+			final IType type, String packageName, String builderName,
+			final TypeTree selectedSetters, String setterPrefix,
+			String collectionSetterPrefix, String endPrefix, boolean doFormat)
+			throws Exception {
+
+		MethodProvider methodProvider = new MethodProvider() {
+			public void process(MethodConsumer consumer) {
+				if (selectedSetters != null) {
+					for (IType selectedType : selectedSetters
+							.getSortedActiveTypes()) {
+						TypeNode typeNode = selectedSetters
+								.getNodeFor(selectedType);
+						if (typeNode.isSelected()) {
+							for (TreeNode<IMethod> methodNode : typeNode
+									.getMethodNodes()) {
+								if (methodNode.isSelected()) {
+									IMethod selectedMethod = methodNode
+											.getElement();
+									consumer.nextMethod(selectedType,
+											selectedMethod);
+								}
+							}
+						}
+					}
+				}
+			}
+		};
+		return builderGenerator.generateSource(type, packageName, builderName,
+				methodProvider, setterPrefix, collectionSetterPrefix,
+				endPrefix, doFormat);
+	}
 }

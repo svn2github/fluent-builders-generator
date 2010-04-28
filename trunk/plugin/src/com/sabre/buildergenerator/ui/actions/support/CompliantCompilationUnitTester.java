@@ -17,74 +17,79 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-
 /**
  * Title: CompliantCompilationUnitTester.java<br>
  * Description: <br>
  * Created: Dec 9, 2009<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
+ * 
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
 
 public class CompliantCompilationUnitTester {
-    private final CompilationUnitSupport compilationUnitSupport;
+	private final CompilationUnitSupport compilationUnitSupport;
 
-    /**
+	/**
     *
     */
-    public CompliantCompilationUnitTester() {
-        this.compilationUnitSupport = new CompilationUnitSupport();
-    }
+	public CompliantCompilationUnitTester() {
+		this.compilationUnitSupport = new CompilationUnitSupport();
+	}
 
-    public boolean isCompilationUnitSupported(ICompilationUnit compilationUnit) throws JavaModelException {
-        if (compilationUnit.isStructureKnown()) {
-            return isTypeSupported(compilationUnitSupport.getTopLevelType(compilationUnit));
-        } else {
-            return false;
-        }
-    }
+	public boolean isCompilationUnitSupported(ICompilationUnit compilationUnit)
+			throws JavaModelException {
+		if (compilationUnit.isStructureKnown()) {
+			return isTypeSupported(compilationUnitSupport
+					.getTopLevelType(compilationUnit));
+		} else {
+			return false;
+		}
+	}
 
-    public boolean isTypeSupported(IType type) throws JavaModelException {
-        boolean supported = true;
+	public boolean isTypeSupported(IType type) throws JavaModelException {
+		boolean supported = true;
 
-        supported &= checkFlags(type);
-        supported &= checkContructor(type);
+		supported &= checkFlags(type);
+		supported &= checkContructor(type);
 
-        return supported;
-    }
+		return supported;
+	}
 
-    /**
-     * @param aType
-     * @param aSupported
-     * @return
-     * @throws JavaModelException
-     */
-    private boolean checkContructor(IType aType) throws JavaModelException {
-        boolean hasDefinedConstructor = false;
-        boolean hasNonParameterConstructor = false;
+	/**
+	 * @param aType
+	 * @param aSupported
+	 * @return
+	 * @throws JavaModelException
+	 */
+	private boolean checkContructor(IType aType) throws JavaModelException {
+		boolean hasDefinedConstructor = false;
+		boolean hasNonParameterConstructor = false;
 
-        for (IMethod method : aType.getMethods()) {
-            if (method.isConstructor()) {
-                hasDefinedConstructor = true;
+		for (IMethod method : aType.getMethods()) {
+			if (method.isConstructor()) {
+				hasDefinedConstructor = true;
 
-                if (method.getParameterNames().length == 0) {
-                    hasNonParameterConstructor = true;
-                }
-            }
-        }
+				if (method.getParameterNames().length == 0) {
+					hasNonParameterConstructor = true;
+				}
+			}
+		}
 
-        if (hasDefinedConstructor && (!hasNonParameterConstructor)) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+		if (hasDefinedConstructor && (!hasNonParameterConstructor)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 
-    private boolean checkFlags(IType type) throws JavaModelException {
-        int flags = type.getFlags();
+	private boolean checkFlags(IType type) throws JavaModelException {
+		int flags = type.getFlags();
 
-        return !Flags.isAbstract(flags) && Flags.isPublic(flags);
-    }
+		return !Flags.isInterface(flags) && !Flags.isAbstract(flags)
+				&& !Flags.isEnum(flags) && !Flags.isAnnotation(flags)
+				&& Flags.isPublic(flags);
+	}
 }

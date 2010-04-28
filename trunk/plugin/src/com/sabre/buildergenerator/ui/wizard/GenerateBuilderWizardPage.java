@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
@@ -79,10 +78,14 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 	private Text packageNameText;
 	private Text prefixText;
 
-	private final BuilderGenerationProperties properties;
+	final BuilderGenerationProperties properties;
 
 	private CheckboxTreeViewer selectedSettersTreeViewer;
 	private Text sourceFolderNameText;
+	
+	private TypeNameValidator typeNameValidator;
+	
+	private ErrorCreator errorCreator;
 
 	/**
 	 * @param wizardPageName
@@ -96,6 +99,9 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 		this.setTitle("Generate builder");
 		this
 				.setDescription("Generates builder for supplied class using it's properties");
+		
+		this.errorCreator = new ErrorCreator();
+		this.typeNameValidator = new TypeNameValidator(getJavaProject(), errorCreator);
 	}
 
 	/**
@@ -123,9 +129,24 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 			createCheckboxTreeViewer(mainComposite);
 
 			setControl(mainComposite);
+			
 		} catch (JavaModelException ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	/**
+	 * Come up with the name problem if there is one 
+	 */
+	@Override
+	public void setVisible(boolean aVisible) {
+		super.setVisible(aVisible);
+		
+		handleStatus(validateBuilderFQNameAlreadyExists());
+	}
+
+	private IStatus validateBuilderFQNameAlreadyExists() {
+		return typeNameValidator.checkBuilderWithSuchNameAlreadyExists(constructFullyQualifiedName());
 	}
 
 	/**
@@ -172,7 +193,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 			public void modifyText(ModifyEvent aE) {
 				properties.setEndPrefix(endPrefixText.getText());
 
-				handleStatus(prefixChanged("End method prefix", properties
+				handleStatus(methodPrefixChanged("End method prefix", properties
 						.getEndPrefix(), false));
 			}
 		});
@@ -198,7 +219,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 				String collectionAddPrefix = text.getText();
 
 				properties.setCollectionAddPrefix(collectionAddPrefix);
-				handleStatus(prefixChanged("Collection add prefix",
+				handleStatus(methodPrefixChanged("Collection add prefix",
 						collectionAddPrefix, true));
 			}
 		});
@@ -289,13 +310,13 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 					for (IType type : settersTypeTree.getSortedActiveTypes()) {
 						settersTypeTree.getNodeFor(type).setSelected(true);
 					}
-					
+
 					selectedSettersTreeViewer.refresh();
 
 					for (IType type : settersTypeTree.getSortedActiveTypes()) {
 						settersTypeTree.getNodeFor(type).setSelected(true);
 					}
-					
+
 					transferClickedNodes(settersTypeTree);
 					selectedSettersTreeViewer.refresh();
 				}
@@ -355,7 +376,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 					selectedSettersTreeViewer.setGrayChecked(type, true);
 				}
 
-			} 
+			}
 		}
 	}
 
@@ -411,32 +432,23 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 		}
 	}
 
-	private IStatus createError(String message) {
-		return new Status(Status.ERROR, Activator.PLUGIN_ID, message);
+	public String constructFullyQualifiedName() {
+		String typeName = builderClassNameText.getText();
+		String packageName = packageNameText.getText();
+		
+		if (packageName.length() > 0) {
+			typeName = packageName + "." + typeName;
+		}
+		
+		return typeName;
 	}
-
+	
 	private IStatus typeNameChanged() {
-		IStatus status = null;
-
-		String typeName = properties.getBuilderClassName();
-
-		// must not be empty
-		if (typeName != null && typeName.length() == 0) {
-			return createError("Type name can't be empty");
-		}
-
-		if (typeName.indexOf('.') != -1) {
-			return createError("You've typed in qualified name");
-		}
-
-		String[] compliance = getSourceComplianceLevels(getJavaProject());
-		IStatus val = JavaConventions.validateJavaTypeName(typeName,
-				compliance[0], compliance[1]);
-
-		if (val.getSeverity() == IStatus.ERROR) {
-			return createError("Invalid type name: " + val.getMessage());
-		} else if (val.getSeverity() == IStatus.WARNING) {
-			return createWarning(val.getMessage());
+		IStatus status;
+		status = typeNameValidator.validateTypeName(builderClassNameText.getText());
+		
+		if (status == null) {
+			status = validateBuilderFQNameAlreadyExists();
 		}
 
 		return status;
@@ -445,7 +457,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 	/**
 	 * @return
 	 */
-	private IJavaProject getJavaProject() {
+	IJavaProject getJavaProject() {
 		return properties.getType().getJavaProject();
 	}
 
@@ -476,11 +488,6 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 		return strings.toArray(new String[strings.size()]);
 	}
 
-	private Status createWarning(String message) {
-		return new Status(Status.WARNING, Activator.PLUGIN_ID,
-				"Discouraged type name: " + message);
-	}
-
 	/**
 	 * A prefix for the method has been changed - generic method
 	 * 
@@ -492,53 +499,28 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 	 * 
 	 * @return
 	 */
-	private IStatus prefixChanged(String fieldName, String prefix,
+	private IStatus methodPrefixChanged(String fieldName, String prefix,
 			boolean canBeEmpty) {
 		// can be empty but if not have to comply with java method name
 		if (prefix.length() != 0) {
-			String[] compliance = getSourceComplianceLevels(getJavaProject());
+			String[] compliance = TypeNameValidator.getSourceComplianceLevels(getJavaProject());
 			IStatus val = JavaConventions.validateMethodName(prefix + "XXX",
 					compliance[0], compliance[1]);
 
 			if (val != null) {
 				if (val.getSeverity() == IStatus.ERROR) {
-					return createError(val.getMessage());
+					return errorCreator.createError(val.getMessage());
 				} else if (val.getSeverity() == IStatus.WARNING) {
-					return createWarning(val.getMessage());
+					return errorCreator.createWarning(val.getMessage());
 				}
 			}
 		} else if (!canBeEmpty) {
-			return createError("Field " + fieldName + " can't be left empty");
+			return errorCreator.createError("Field " + fieldName + " can't be left empty");
 		}
 
 		return null;
 	}
 
-	/**
-	 * copied from jdt
-	 * 
-	 * @param context
-	 *            an {@link IJavaElement} or <code>null</code>
-	 * @return a <code>String[]</code> whose <code>[0]</code> is the
-	 *         {@link JavaCore#COMPILER_SOURCE} and whose <code>[1]</code> is
-	 *         the {@link JavaCore#COMPILER_COMPLIANCE} level at the given
-	 *         <code>context</code>.
-	 */
-	private static String[] getSourceComplianceLevels(IJavaElement context) {
-		if (context != null) {
-			IJavaProject javaProject = context.getJavaProject();
-
-			if (javaProject != null) {
-				return new String[] {
-						javaProject.getOption(JavaCore.COMPILER_SOURCE, true),
-						javaProject.getOption(JavaCore.COMPILER_COMPLIANCE,
-								true) };
-			}
-		}
-
-		return new String[] { JavaCore.getOption(JavaCore.COMPILER_SOURCE),
-				JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE) };
-	}
 
 	/**
 	 * @param aMainComposite
@@ -561,7 +543,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 				String prefix = text.getText();
 
 				properties.setMethodsPrefix(prefix);
-				handleStatus(prefixChanged("prefix", prefix, true));
+				handleStatus(methodPrefixChanged("prefix", prefix, true));
 			}
 		});
 	}
@@ -683,9 +665,9 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 	 */
 	public boolean isValid() {
 		try {
-			IStatus prefixStatus = prefixChanged("prefix", properties
+			IStatus prefixStatus = methodPrefixChanged("prefix", properties
 					.getMethodsPrefix(), true);
-			IStatus collectionAddPrefixStatus = prefixChanged(
+			IStatus collectionAddPrefixStatus = methodPrefixChanged(
 					"Collection add prefix", properties
 							.getCollectionAddPrefix(), true);
 			IStatus typeNameStatus = typeNameChanged();
@@ -704,6 +686,10 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 									ex));
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	public boolean builderFQNameIsUnique() {
+		return validateBuilderFQNameAlreadyExists() == null;
 	}
 
 	/**

@@ -93,6 +93,26 @@ public class TypeNameValidator {
 		}
 	}
 
+	public IStatus validateMethodPrefix(String fieldName, String prefix, boolean canBeEmpty) {
+		if (prefix.length() != 0) {
+			String[] compliance = TypeNameValidator.getSourceComplianceLevels(project);
+			IStatus val = JavaConventions.validateMethodName(prefix + "XXX",
+					compliance[0], compliance[1]);
+	
+			if (val != null) {
+				if (val.getSeverity() == IStatus.ERROR) {
+					return errorCreator.createError(val.getMessage());
+				} else if (val.getSeverity() == IStatus.WARNING) {
+					return errorCreator.createWarning(val.getMessage());
+				}
+			}
+		} else if (!canBeEmpty) {
+			return errorCreator.createError("Field " + fieldName + " can't be left empty");
+		} 
+		
+		return null;
+	}
+
 	/**
 	 * copied from jdt
 	 * 

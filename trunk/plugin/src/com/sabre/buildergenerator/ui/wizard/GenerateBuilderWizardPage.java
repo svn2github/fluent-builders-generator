@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
@@ -85,7 +84,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 	
 	private TypeNameValidator typeNameValidator;
 	
-	private ErrorCreator errorCreator;
+	ErrorCreator errorCreator;
 
 	/**
 	 * @param wizardPageName
@@ -502,25 +501,9 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 	private IStatus methodPrefixChanged(String fieldName, String prefix,
 			boolean canBeEmpty) {
 		// can be empty but if not have to comply with java method name
-		if (prefix.length() != 0) {
-			String[] compliance = TypeNameValidator.getSourceComplianceLevels(getJavaProject());
-			IStatus val = JavaConventions.validateMethodName(prefix + "XXX",
-					compliance[0], compliance[1]);
-
-			if (val != null) {
-				if (val.getSeverity() == IStatus.ERROR) {
-					return errorCreator.createError(val.getMessage());
-				} else if (val.getSeverity() == IStatus.WARNING) {
-					return errorCreator.createWarning(val.getMessage());
-				}
-			}
-		} else if (!canBeEmpty) {
-			return errorCreator.createError("Field " + fieldName + " can't be left empty");
-		}
-
-		return null;
+		return typeNameValidator.validateMethodPrefix(fieldName, prefix,
+		canBeEmpty);
 	}
-
 
 	/**
 	 * @param aMainComposite

@@ -48,18 +48,18 @@ import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
  * Created: Dec 9, 2009<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
 public class GenerateBuilderAction {
 
-	private CompliantCompilationUnitTester compilationUnitTester = new CompliantCompilationUnitTester();
+	private final CompliantCompilationUnitTester compilationUnitTester = new CompliantCompilationUnitTester();
 
 
 	/**
 	 * Starts the generation procedure for the type
-	 * 
+	 *
 	 * @param type
 	 *            a type that the generator is going to be invoked for
 	 * @param shell
@@ -69,11 +69,11 @@ public class GenerateBuilderAction {
 	@SuppressWarnings("deprecation")
 	public void execute(final IType type, final Shell shell,
 			IRunnableContext runnableContext) throws Exception {
-		
+
 		if (!validateAndShowErrorMessageIfNeeded(type, shell)) {
 			return;
 		}
-		
+
 		GenerateBuilderWizard wizard = new GenerateBuilderWizard(
 				new BuilderGenerationProperties(type));
 		WizardDialog wizardDialog = new WizardDialog(shell, wizard);
@@ -175,7 +175,7 @@ public class GenerateBuilderAction {
 			}
 		}
 	}
-	
+
 	private boolean validateAndShowErrorMessageIfNeeded(IType type, Shell shell)
 	throws JavaModelException {
 		if (!compilationUnitTester.isTypeSupported(type)) {
@@ -183,10 +183,10 @@ public class GenerateBuilderAction {
 					"Unsupported type selected. Supported class has to: \n"
 					+ "Be public\n" + "Have non-arg constructor\n"
 					+ "Be non-abstract");
-			
+
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -199,18 +199,13 @@ public class GenerateBuilderAction {
 		MethodProvider methodProvider = new MethodProvider() {
 			public void process(MethodConsumer consumer) {
 				if (selectedSetters != null) {
-					for (IType selectedType : selectedSetters
-							.getSortedActiveTypes()) {
-						TypeNode typeNode = selectedSetters
-								.getNodeFor(selectedType);
+					for (IType selectedType : selectedSetters.getSortedActiveTypes()) {
+						TypeNode typeNode = selectedSetters.getNodeFor(selectedType);
 						if (typeNode.isSelected()) {
-							for (TreeNode<IMethod> methodNode : typeNode
-									.getMethodNodes()) {
+							for (TreeNode<IMethod> methodNode : typeNode.getMethodNodes()) {
 								if (methodNode.isSelected()) {
-									IMethod selectedMethod = methodNode
-											.getElement();
-									consumer.nextMethod(selectedType,
-											selectedMethod);
+									IMethod selectedMethod = methodNode.getElement();
+									consumer.nextMethod(selectedType, selectedMethod);
 								}
 							}
 						}

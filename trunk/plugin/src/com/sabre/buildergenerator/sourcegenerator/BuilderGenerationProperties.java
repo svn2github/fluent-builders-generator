@@ -20,9 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import com.sabre.buildergenerator.ui.TypeTree;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -44,7 +42,7 @@ public class BuilderGenerationProperties {
     private boolean generateComments;
     private String methodsPrefix;
     private String packageName;
-    private Set<IMethod> selectedMethods;
+    private Map<IType, Collection<IMethod>> selectedMethods;
     private IPackageFragmentRoot sourceFolder;
     private IType type;
     private TypeTree settersTypeTree;
@@ -90,15 +88,8 @@ public class BuilderGenerationProperties {
     * @return
     * @throws JavaModelException
     */
-    private Set<IMethod> getAllSetters(IType aType) throws Exception {
-        Set<IMethod> result = new HashSet<IMethod>();
-        Map<IType, Collection<IMethod>> map = TypeHelper.findSetterMethodsForAllTypesReferenced(aType);
-
-        for (Collection<IMethod> methods : map.values()) {
-            result.addAll(methods);
-        }
-
-        return result;
+    private Map<IType, Collection<IMethod>> getAllSetters(IType aType) throws Exception {
+        return TypeHelper.findSetterMethodsForAllTypesReferenced(aType);
     }
 
     /**
@@ -151,7 +142,7 @@ public class BuilderGenerationProperties {
     /**
      * @return the selectedMethods
      */
-    public Set<IMethod> getSelectedMethods() {
+    public Map<IType, Collection<IMethod>> getSelectedMethods() {
         return selectedMethods;
     }
 
@@ -221,7 +212,7 @@ public class BuilderGenerationProperties {
     /**
      * @param aSelectedMethods the selectedMethods to set
      */
-    public void setSelectedMethods(Set<IMethod> aSelectedMethods) {
+    public void setSelectedMethods(Map<IType, Collection<IMethod>> aSelectedMethods) {
         selectedMethods = aSelectedMethods;
     }
 

@@ -14,9 +14,9 @@ import com.sabre.buildergenerator.sourcegenerator.TypeHelper;
 /**
  * Non static class that routes the methods into the static methods of
  * {@link TypeHelper}
- * 
+ *
  * @author kubek2k
- * 
+ *
  */
 public class TypeHelperRouter {
 
@@ -60,21 +60,17 @@ public class TypeHelperRouter {
 
 	public SetType resolveSetterSetType(IMethod method) throws Exception {
 		String typeUnresolvedSignature = method.getParameterTypes()[0];
-		String typeSignature = SignatureResolver.resolveSignature(method
-				.getDeclaringType(), typeUnresolvedSignature);
+		IType owningType = method.getDeclaringType();
+        String typeSignature = SignatureResolver.resolveSignature(owningType, typeUnresolvedSignature);
 
 		if (isSimpleTypeSignature(typeSignature)) {
 			return new SetType();
 		} else {
-
-			if (TypeHelper.isCollection(method.getDeclaringType(),
-					typeSignature)) {
-				typeSignature = TypeHelper
-						.getTypeParameterSignature(typeSignature);
+			if (TypeHelper.isCollection(owningType, typeSignature)) {
+				typeSignature = TypeHelper.getTypeParameterSignature(typeSignature);
 			}
-			
-			return new SetType(SignatureResolver.resolveType(method.getDeclaringType(),
-					typeSignature));
+
+			return new SetType(SignatureResolver.resolveType(owningType, typeSignature));
 		}
 	}
 
@@ -95,7 +91,7 @@ public class TypeHelperRouter {
 
 		/**
 		 * Constructor for complex type
-		 * 
+		 *
 		 * @param type
 		 */
 		SetType(IType type) {

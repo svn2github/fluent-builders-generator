@@ -11,12 +11,9 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
-import com.sabre.buildergenerator.Activator;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 import com.sabre.buildergenerator.sourcegenerator.TypeHelper.MethodInspector;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
@@ -190,29 +187,29 @@ public class BuilderGenerator {
         TypeHelper.findSetterMethods(resolvedType, new MethodInspector() {
                 public void nextMethod(IType methodOwnerType, IMethod method,
                     Map<String, String> parameterSubstitution) throws Exception {
-                    Activator.getDefault().getLog().log(new Status(IStatus.OK, Activator.PLUGIN_ID, "nextMethod method=" + method.getElementName() + " type=" + methodOwnerType.getElementName()));
+                    //Activator.getDefault().getLog().log(new Status(IStatus.OK, Activator.PLUGIN_ID, "nextMethod method=" + method.getElementName() + " type=" + methodOwnerType.getElementName()));
 
                     String fieldName = fieldNameFromSetter(method);
 
                     try {
                         String parameterTypeSignature = method.getParameterTypes()[0];
                         String qualifiedParameterTypeSignature = SignatureResolver.resolveTypeWithParameterMapping(
-                                methodOwnerType, parameterTypeSignature, parameterSubstitution);
+                                resolvedType, parameterTypeSignature, parameterSubstitution);
 
                         String[] exceptionTypes;
 
                         exceptionTypes = method.getExceptionTypes();
 
                         for (int i = 0; i < exceptionTypes.length; i++) {
-                            exceptionTypes[i] = SignatureResolver.resolveTypeWithParameterMapping(methodOwnerType,
+                            exceptionTypes[i] = SignatureResolver.resolveTypeWithParameterMapping(resolvedType,
                                 exceptionTypes[i], parameterSubstitution);
                             exceptionTypes[i] = SignatureResolver.signatureToTypeName(exceptionTypes[i]);
                         }
 
-                        generateSimpleSetter(generator, methodOwnerType, exceptionTypes, fieldName, qualifiedParameterTypeSignature);
-                        generateCollectionAdder(generator, methodOwnerType, exceptionTypes, fieldName, qualifiedParameterTypeSignature);
-                        generateCollectionBuilder(generator, methodOwnerType, exceptionTypes, fieldName, qualifiedParameterTypeSignature);
-                        generateFieldBuilder(generator, methodOwnerType, exceptionTypes, fieldName, qualifiedParameterTypeSignature);
+                        generateSimpleSetter(generator, resolvedType, exceptionTypes, fieldName, qualifiedParameterTypeSignature);
+                        generateCollectionAdder(generator, resolvedType, exceptionTypes, fieldName, qualifiedParameterTypeSignature);
+                        generateCollectionBuilder(generator, resolvedType, exceptionTypes, fieldName, qualifiedParameterTypeSignature);
+                        generateFieldBuilder(generator, resolvedType, exceptionTypes, fieldName, qualifiedParameterTypeSignature);
                     } catch (JavaModelException e) {
                     }
                 }

@@ -13,7 +13,6 @@ package com.sabre.buildergenerator.ui.wizard;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
@@ -60,7 +59,7 @@ import com.sabre.buildergenerator.ui.TypeTree;
  * Created: Dec 9, 2009<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
@@ -81,9 +80,9 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 	private CheckboxTreeViewer selectedSettersTreeViewer;
 	private Text sourceFolderNameText;
-	
-	private TypeNameValidator typeNameValidator;
-	
+
+	private final TypeNameValidator typeNameValidator;
+
 	ErrorCreator errorCreator;
 
 	/**
@@ -96,16 +95,15 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 		this.properties = properties;
 
 		this.setTitle("Generate builder");
-		this
-				.setDescription("Generates builder for supplied class using it's properties");
-		
+		this.setDescription("Generates builder for supplied class using it's properties");
+
 		this.errorCreator = new ErrorCreator();
 		this.typeNameValidator = new TypeNameValidator(getJavaProject(), errorCreator);
 	}
 
 	/**
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite aParent) {
@@ -128,19 +126,19 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 			createCheckboxTreeViewer(mainComposite);
 
 			setControl(mainComposite);
-			
+
 		} catch (JavaModelException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
-	
+
 	/**
-	 * Come up with the name problem if there is one 
+	 * Come up with the name problem if there is one
 	 */
 	@Override
 	public void setVisible(boolean aVisible) {
 		super.setVisible(aVisible);
-		
+
 		handleStatus(validateBuilderFQNameAlreadyExists());
 	}
 
@@ -265,14 +263,25 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 						private void methodClicked(IMethod element,
 								boolean newState) {
-							// method has to be somewhere inside a type - assume
-							IType owningType = element.getDeclaringType();
-							TypeNode typeNode = settersTypeTree
-									.getNodeFor(owningType);
+						    // method has to be somewhere inside a type - assume
+						    IType owningType = null;
+						    for (IType type : properties.getSelectedMethods().keySet()) {
+						        if (properties.getSelectedMethods().get(type).contains(element)) {
+						            owningType = type;
+						            break;
+						        }
+						    }
 
-							TreeNode<IMethod> methodNode = typeNode
-									.getMethodNodeFor(element);
-							methodNode.setSelected(newState);
+						    if (owningType != null) {
+    							TypeNode typeNode = settersTypeTree
+    									.getNodeFor(owningType);
+
+    							if (typeNode != null) {
+        							TreeNode<IMethod> methodNode = typeNode
+        									.getMethodNodeFor(element);
+        							methodNode.setSelected(newState);
+    							}
+						    }
 						}
 
 						private void typeClicked(IType element, boolean newState) {
@@ -434,18 +443,18 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 	public String constructFullyQualifiedName() {
 		String typeName = builderClassNameText.getText();
 		String packageName = packageNameText.getText();
-		
+
 		if (packageName.length() > 0) {
 			typeName = packageName + "." + typeName;
 		}
-		
+
 		return typeName;
 	}
-	
+
 	private IStatus typeNameChanged() {
 		IStatus status;
 		status = typeNameValidator.validateTypeName(builderClassNameText.getText());
-		
+
 		if (status == null) {
 			status = validateBuilderFQNameAlreadyExists();
 		}
@@ -489,13 +498,13 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 	/**
 	 * A prefix for the method has been changed - generic method
-	 * 
+	 *
 	 * @param fieldName
 	 *            TODO
 	 * @param prefix
 	 * @param canBeEmpty
 	 *            TODO
-	 * 
+	 *
 	 * @return
 	 */
 	private IStatus methodPrefixChanged(String fieldName, String prefix,
@@ -670,7 +679,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 			throw new RuntimeException(ex);
 		}
 	}
-	
+
 	public boolean builderFQNameIsUnique() {
 		return validateBuilderFQNameAlreadyExists() == null;
 	}

@@ -106,11 +106,11 @@ public class BuilderSourceGenerator {
         out = printWriter;
     }
 
-    public void generateBuilderClass(String aBuildClassDescriptor, String aPackageForBuilder, String aBuilderClassName, String[] typeParamNames) {
+    public void generateBuilderClass(String aBuildClassType, String aPackageForBuilder, String aBuilderClassName, String[] typeParamNames) {
         builderPackage = aPackageForBuilder;
 
-        buildClassName = getClassName(aBuildClassDescriptor);
-        buildClassType = imports.getUnqualified(aBuildClassDescriptor, nonTypeNames, builderPackage);
+        buildClassName = getClassName(aBuildClassType);
+        buildClassType = imports.getUnqualified(aBuildClassType, nonTypeNames, builderPackage);
         builderClassName = aBuilderClassName;
 
         String baseClass = buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName;
@@ -138,7 +138,7 @@ public class BuilderSourceGenerator {
         innerClassBuilderBase = topClassBuilder;
     }
 
-    public void generateBuilderBaseClass(String buildClassDescriptor, IType type, boolean isTopLevel) throws JavaModelException {
+    public void generateBuilderBaseClass(String buildClassType, IType type, boolean isTopLevel) throws JavaModelException {
         ITypeParameter[] typeParameters = type.getTypeParameters();
 
         nonTypeNames = new HashSet<String>();
@@ -146,8 +146,8 @@ public class BuilderSourceGenerator {
             nonTypeNames.add(typeParam.getElementName());
         }
 
-        innerBuildClassName = getClassName(buildClassDescriptor);
-        innerBuildClassType = imports.getUnqualified(buildClassDescriptor, nonTypeNames, builderPackage);
+        innerBuildClassName = getClassName(buildClassType);
+        innerBuildClassType = imports.getUnqualified(buildClassType, nonTypeNames, builderPackage);
         innerBuilderClassName = innerBuildClassName + BUILDER_BASE_SUFFIX;
 
         // class definition, for example:
@@ -192,39 +192,39 @@ public class BuilderSourceGenerator {
             .endMethod();
     }
 
-    public void addFieldSetter(String fieldName, String fieldTypeDescriptor, String[] exceptions) {
+    public void addFieldSetter(String fieldName, String fieldType, String[] exceptions) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
-        String type = imports.getUnqualified(fieldTypeDescriptor,nonTypeNames, builderPackage);
+        String type = imports.getUnqualified(fieldType,nonTypeNames, builderPackage);
         generateSimpleSetter(fieldName, type, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
     }
 
-    public void addFieldBuilder(String fieldName, String fieldTypeDescriptor, String[] exceptions, String[] typeParamNames) {
+    public void addFieldBuilder(String fieldName, String fieldType, String[] exceptions, String[] typeParamNames) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
-        String fieldClassName = getClassName(fieldTypeDescriptor);
-        String fieldType = imports.getUnqualified(fieldTypeDescriptor, nonTypeNames, builderPackage);
+        String fieldClassName = getClassName(fieldType);
+        String fieldUType = imports.getUnqualified(fieldType, nonTypeNames, builderPackage);
         String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
         String fieldBuilderName = toUpperCaseStart(fieldName + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(setterPrefix, fieldName);
 
-        generateBuilderSetter(fieldName, fieldType, methodName, exceptionTypes, fieldBuilderName,
+        generateBuilderSetter(fieldName, fieldUType, methodName, exceptionTypes, fieldBuilderName,
                 innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, typeParamNames, true);
     }
 
-    public void addCollectionElementSetter(String fieldName, String fieldTypeDescriptor, String elementName,
-            String elementTypeDescriptor, String collectionContainerTypeDecriptor, String[] exceptions) {
+    public void addCollectionElementSetter(String fieldName, String elementName, String elementType,
+            String collectionContainerTypeDecriptor, String[] exceptions) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
-        String elementType = imports.getUnqualified(elementTypeDescriptor, nonTypeNames, builderPackage);
+        String elementUType = imports.getUnqualified(elementType, nonTypeNames, builderPackage);
 
         String collectionContainerType = imports.getUnqualified(collectionContainerTypeDecriptor, nonTypeNames, builderPackage);
         generateCollectionElementSetter(fieldName, collectionContainerType, elementName,
-                elementType, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
+                elementUType, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
     }
 
-    public void addCollectionElementBuilder(String fieldName, String fieldTypeDescriptor, String elementName,
-            String elementTypeDescriptor, String[] exceptions, String[] typeParams) {
+    public void addCollectionElementBuilder(String elementName, String elementType, String[] exceptions,
+            String[] typeParams) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
-        String elementType = imports.getUnqualified(elementTypeDescriptor, nonTypeNames, builderPackage);
-        String fieldClassName = getClassName(elementTypeDescriptor);
+        String elementUType = imports.getUnqualified(elementType, nonTypeNames, builderPackage);
+        String fieldClassName = getClassName(elementType);
         String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
         String fieldBuilderName = toUpperCaseStart(elementName + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(collectionElementSetterPrefix, elementName);
@@ -232,12 +232,12 @@ public class BuilderSourceGenerator {
             typeParams[i] = imports.getUnqualified(typeParams[i], nonTypeNames, builderPackage);
         }
 
-        generateBuilderSetter(elementName, elementType, methodName, exceptionTypes, fieldBuilderName,
+        generateBuilderSetter(elementName, elementUType, methodName, exceptionTypes, fieldBuilderName,
                 innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, typeParams, true);
     }
 
     private void generateBuilderSetter(String fieldName, String fieldType, String methodName,
-            String[] exceptions, String fieldBuilderName, String baseBuilderName, String builderClassName2,
+            String[] exceptions, String fieldBuilderName, String baseBuilderName, String builderClassName,
             String builderType, String[] typeParams, boolean castBuilderType) {
         String baseClass = baseBuilderName + "<" + fieldBuilderName;
         for (String typeParam : typeParams) {
@@ -258,7 +258,7 @@ public class BuilderSourceGenerator {
                     .withInstruction().withStatement("super(aInstance);").endInstruction()
                 .endMethod()
                 .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withReturnType(builderType).withName(prefixed(endPrefix, fieldName))
-                    .withReturnValue().withStatement(castBuilderType ? "(%s) %s.this" : "this").withParam(builderType).withParam(builderClassName2).endReturnValue()
+                    .withReturnValue().withStatement(castBuilderType ? "(%s) %s.this" : "this").withParam(builderType).withParam(builderClassName).endReturnValue()
                 .endMethod()
             .endInnerClass();
     }

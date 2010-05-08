@@ -228,7 +228,6 @@ public class BuilderGenerator {
         String fieldName, String resolvedFieldTypeSignature) throws Exception {
         boolean isFieldACollection = TypeHelper.isCollection(enclosingType, resolvedFieldTypeSignature);
         if (isFieldACollection && isSetterRequestedForField(enclosingType, fieldName)) {
-            String fieldType = SignatureResolver.signatureToTypeName(resolvedFieldTypeSignature);
             String elementTypeSignature = TypeHelper.getTypeParameterSignature(resolvedFieldTypeSignature);
             String elementType = SignatureResolver.signatureToTypeName(elementTypeSignature);
             String elementName = pluralToSingle(fieldName);
@@ -236,7 +235,7 @@ public class BuilderGenerator {
             String fieldTypeErasureSignature = Signature.getTypeErasure(resolvedFieldTypeSignature);
             String concreteCollectionType = abstractToConcreteCollectionType(fieldTypeErasureSignature);
 
-            generator.addCollectionElementSetter(fieldName, fieldType, elementName, elementType, concreteCollectionType, exceptionTypes);
+            generator.addCollectionElementSetter(fieldName, elementName, elementType, concreteCollectionType, exceptionTypes);
         }
     }
 
@@ -244,7 +243,6 @@ public class BuilderGenerator {
         String[] exceptionTypes, String fieldName, String resolvedFieldTypeSignature) throws Exception {
         boolean isFieldACollection = TypeHelper.isCollection(enclosingType, resolvedFieldTypeSignature);
         if (isFieldACollection && isSetterRequestedForField(enclosingType, fieldName)) {
-            String fieldType = SignatureResolver.signatureToTypeName(resolvedFieldTypeSignature);
             String elementTypeSignature = TypeHelper.getTypeParameterSignature(resolvedFieldTypeSignature);
             String elementType = SignatureResolver.signatureToTypeName(elementTypeSignature);
             String elementName = pluralToSingle(fieldName);
@@ -257,7 +255,7 @@ public class BuilderGenerator {
             }
 
             if (isSourceClass(enclosingType, elementTypeSignature) && isBuilderRequestedForType(elementTypeSignature)) {
-                generator.addCollectionElementBuilder(fieldName, fieldType, elementName, elementType, exceptionTypes, typeParams);
+                generator.addCollectionElementBuilder(elementName, elementType, exceptionTypes, typeParams);
                 addTypeToGenerateInnerBuilder(Signature.getTypeErasure(elementTypeSignature));
             }
         }

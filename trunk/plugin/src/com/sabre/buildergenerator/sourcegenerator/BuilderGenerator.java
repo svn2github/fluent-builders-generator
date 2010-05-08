@@ -59,7 +59,7 @@ public class BuilderGenerator {
         typesAndFieldsToGenerate = retrieveTypesAndFieldsToGenerate(methodProvider);
 
         // create source builder
-        final AbstractBuilderSourceGenerator<String> generator = new BuilderSourceGenerator();
+        final BuilderSourceGenerator generator = new BuilderSourceGenerator();
 
         generator.setSetterPrefix(setterPrefix);
         generator.setCollectionElementSetterPrefix(collectionSetterPrefix);
@@ -165,7 +165,7 @@ public class BuilderGenerator {
         return isSetterRequestedForField(enclosingTypeSignature, fieldName);
     }
 
-    private void generateBuilderBaseClasses(final AbstractBuilderSourceGenerator<String> generator, final IType enclosingType)
+    private void generateBuilderBaseClasses(final BuilderSourceGenerator generator, final IType enclosingType)
         throws Exception {
         while (!typesToGenerateInnerBuilders.isEmpty()) {
             String typeSgn = typesToGenerateInnerBuilders.iterator().next();
@@ -180,7 +180,7 @@ public class BuilderGenerator {
         }
     }
 
-    private void generateBuilderBaseClass(final AbstractBuilderSourceGenerator<String> generator, String type,
+    private void generateBuilderBaseClass(final BuilderSourceGenerator generator, String type,
             final IType resolvedType, boolean isTopLevel) throws JavaModelException, Exception {
         generator.generateBuilderBaseClass(type, resolvedType, isTopLevel); // following methods might add elements to typesUsed
 
@@ -216,7 +216,7 @@ public class BuilderGenerator {
             });
     }
 
-    private void generateSimpleSetter(AbstractBuilderSourceGenerator<String> generator, IType enclosingType, String[] exceptionTypes, String fieldName,
+    private void generateSimpleSetter(BuilderSourceGenerator generator, IType enclosingType, String[] exceptionTypes, String fieldName,
         String fieldTypeSignature) {
         if (isSetterRequestedForField(enclosingType, fieldName)) {
             String fieldType = SignatureResolver.signatureToTypeName(fieldTypeSignature);
@@ -224,7 +224,7 @@ public class BuilderGenerator {
         }
     }
 
-    private void generateCollectionAdder(AbstractBuilderSourceGenerator<String> generator, IType enclosingType, String[] exceptionTypes,
+    private void generateCollectionAdder(BuilderSourceGenerator generator, IType enclosingType, String[] exceptionTypes,
         String fieldName, String resolvedFieldTypeSignature) throws Exception {
         boolean isFieldACollection = TypeHelper.isCollection(enclosingType, resolvedFieldTypeSignature);
         if (isFieldACollection && isSetterRequestedForField(enclosingType, fieldName)) {
@@ -234,13 +234,13 @@ public class BuilderGenerator {
             String elementName = pluralToSingle(fieldName);
 
             String fieldTypeErasureSignature = Signature.getTypeErasure(resolvedFieldTypeSignature);
-            String concreteCollectionType =  abstractToConcreteCollectionType(fieldTypeErasureSignature);
+            String concreteCollectionType = abstractToConcreteCollectionType(fieldTypeErasureSignature);
 
             generator.addCollectionElementSetter(fieldName, fieldType, elementName, elementType, concreteCollectionType, exceptionTypes);
         }
     }
 
-    private void generateCollectionBuilder(AbstractBuilderSourceGenerator<String> generator, IType enclosingType,
+    private void generateCollectionBuilder(BuilderSourceGenerator generator, IType enclosingType,
         String[] exceptionTypes, String fieldName, String resolvedFieldTypeSignature) throws Exception {
         boolean isFieldACollection = TypeHelper.isCollection(enclosingType, resolvedFieldTypeSignature);
         if (isFieldACollection && isSetterRequestedForField(enclosingType, fieldName)) {
@@ -263,7 +263,7 @@ public class BuilderGenerator {
         }
     }
 
-    private void generateFieldBuilder(AbstractBuilderSourceGenerator<String> generator, IType enclosingType,
+    private void generateFieldBuilder(BuilderSourceGenerator generator, IType enclosingType,
         String[] exceptionTypes, String fieldName, String resolvedFieldTypeSignature)
         throws Exception {
         String fieldType = SignatureResolver.signatureToTypeName(resolvedFieldTypeSignature);

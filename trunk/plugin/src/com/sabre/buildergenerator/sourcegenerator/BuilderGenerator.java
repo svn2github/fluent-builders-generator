@@ -72,14 +72,17 @@ public class BuilderGenerator {
         // retrieve type parameter names
         ITypeParameter[] typeParameters = type.getTypeParameters();
         String[] typeParamNames = new String[typeParameters.length];
+        String[] typeParamSrc = new String[typeParameters.length];
         int i = 0;
         for (ITypeParameter typeParameter : typeParameters) {
-            typeParamNames[i++] = typeParameter.getElementName();
+            typeParamNames[i] = typeParameter.getElementName();
+            typeParamSrc[i] = typeParameter.getSource();
+            i++;
         }
 
         // generate source
         String typeQName = type.getFullyQualifiedName();
-        generator.generateBuilderClass(typeQName, packageName, builderName, typeParamNames);
+        generator.generateBuilderClass(typeQName, packageName, builderName, typeParamNames, typeParamSrc);
 
         generateBuilderBaseClass(generator, typeQName, type, true);
         generateBuilderBaseClasses(generator, type);

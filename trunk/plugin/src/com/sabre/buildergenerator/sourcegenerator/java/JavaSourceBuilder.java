@@ -319,6 +319,22 @@ class JavaSourceBuilderBase<GeneratorT extends JavaSourceBuilderBase> {
             return (GeneratorT) this;
         }
 
+        public GeneratorT withTypeArgs(java.util.List<java.lang.String> aValue) {
+            instance.setTypeArgs(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withTypeArg(java.lang.String aValue) {
+            if (instance.getTypeArgs() == null) {
+                instance.setTypeArgs(new java.util.ArrayList<java.lang.String>());
+            }
+
+            ((java.util.ArrayList<java.lang.String>) instance.getTypeArgs()).add(aValue);
+
+            return (GeneratorT) this;
+        }
+
         public GeneratorT withName(java.lang.String aValue) {
             instance.setName(aValue);
 

@@ -16,6 +16,7 @@ import java.util.List;
 
 public class Method {
     private int modifiers;
+    private List<String> typeArgs = new ArrayList<String>();
     private String returnType;
     private String name;
     private List<MethodParameter> parameters = new ArrayList<MethodParameter>();
@@ -29,6 +30,14 @@ public class Method {
 
     public void setModifiers(int modifiers) {
         this.modifiers = modifiers;
+    }
+
+    public List<String> getTypeArgs() {
+        return typeArgs;
+    }
+
+    public void setTypeArgs(List<String> typeArgs) {
+        this.typeArgs = typeArgs;
     }
 
     public String getReturnType() {
@@ -90,6 +99,18 @@ public class Method {
         }
         if ((modifiers & JavaSource.MODIFIER_STATIC) != 0) {
             w.out.print("static ");
+        }
+        if (!typeArgs.isEmpty()) {
+            w.out.print("<");
+            boolean first = true;
+            for (String arg : typeArgs) {
+                if (!first) {
+                    w.out.print(", ");
+                }
+                first = false;
+                w.out.print(arg);
+            }
+            w.out.print("> ");
         }
         if (returnType != null) {
             w.out.print(returnType);

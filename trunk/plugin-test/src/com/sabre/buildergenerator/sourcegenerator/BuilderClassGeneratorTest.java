@@ -1082,4 +1082,49 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
         assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
+
+    public void testGenerateBuilderForGeneric() throws Exception {
+        // given
+        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("Generic")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("import java.util.List;")
+            .withSourceLine("")
+            .withSourceLine("public class Generic<T> {")
+            .withSourceLine("    private List<T> elements;")
+            .withSourceLine("")
+            .withSourceLine("    public List<T> getElements() {")
+            .withSourceLine("        return elements;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setElements(List<T> aElements) {")
+            .withSourceLine("        elements = aElements;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+
+        // when
+        String builderSource = generator.generateSource(builderClass, "testpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+
+        // then
+        buildJavaSource().forPackage("testpkg").forClassName("GeneratedBuilder")
+            .withSourceLine(builderSource)
+            .buildType();
+
+        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+            .withSourceLine("package test;")
+            .withSourceLine("")
+            .withSourceLine("import testpkg.Generic;")
+            .withSourceLine("import testpkg.GeneratedBuilder;")
+            .withSourceLine("")
+            .withSourceLine("public class MainClass {")
+            .withSourceLine("    public static void main(String[] args) {")
+            .withSourceLine("        Generic<String> o = GeneratedBuilder.<String>generic().withAddedElement(\"abc\").build();")
+            .withSourceLine("        assert o.getElements().get(0).equals(\"abc\");")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+    }
 }

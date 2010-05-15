@@ -106,38 +106,59 @@ public class BuilderSourceGenerator {
         out = printWriter;
     }
 
-    public void generateBuilderClass(String aBuildClassType, String aPackageForBuilder, String aBuilderClassName, String[] typeParamNames) {
+    public void generateBuilderClass(String aBuildClassType, String aPackageForBuilder, String aBuilderClassName, String[] typeParamNames, String[] typeParamBounds) {
         builderPackage = aPackageForBuilder;
 
         buildClassName = getClassName(aBuildClassType);
         buildClassType = imports.getUnqualified(aBuildClassType, nonTypeNames, builderPackage);
         builderClassName = aBuilderClassName;
 
-        String baseClass = buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName;
+        // type params
+        String typeParams = "";
+        if (typeParamNames != null && typeParamNames.length > 0) {
+            typeParams = "<";
+            boolean isFirst = true;
+            for (String typeParamName : typeParamNames) {
+                if (!isFirst) {
+                    typeParams += ", ";
+                }
+                typeParams += typeParamName;
+                isFirst = false;
+            }
+            typeParams += ">";
+        }
+
+        // base class type
+        String baseClass = buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName + typeParams;
         for (String typeParamName : typeParamNames) {
             baseClass += ", " + typeParamName;
         }
         baseClass += ">";
+
+        // generate class
         if (aPackageForBuilder != null && aPackageForBuilder.length() > 0) {
             javaSourceBuilder.withPackge(aPackageForBuilder);
         }
-        topClassBuilder = javaSourceBuilder.withClazz().withModifiers(JavaSource.MODIFIER_PUBLIC).withName(builderClassName).withBaseClazz(baseClass)
+        topClassBuilder = javaSourceBuilder.withClazz().withModifiers(JavaSource.MODIFIER_PUBLIC)
+                .withName(builderClassName).withTypeArgs(Arrays.asList(typeParamBounds)).withBaseClazz(baseClass)
             // static create metod
-            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC + JavaSource.MODIFIER_STATIC).withName(toLowerCaseStart(buildClassName)).withReturnType(builderClassName)
-                .withReturnValue().withStatement("new " + builderClassName + "()").withParam(builderClassName).endReturnValue()
+            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC + JavaSource.MODIFIER_STATIC).withTypeArgs(Arrays.asList(typeParamBounds))
+                .withName(toLowerCaseStart(buildClassName)).withReturnType(builderClassName + typeParams)
+                .withReturnValue().withStatement("new " + builderClassName + typeParams + "()").withParam(builderClassName).endReturnValue()
             .endMethod()
             // default constructor
             .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName(builderClassName)
-                .withInstruction().withStatement("super(new %s());").withParam(buildClassType).endInstruction()
+                .withInstruction().withStatement("super(new %s());").withParam(buildClassType + typeParams).endInstruction()
             .endMethod()
             // build()
-            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName("build").withReturnType(buildClassType)
+            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName("build").withReturnType(buildClassType + typeParams)
                 .withReturnValue().withStatement("getInstance()").endReturnValue()
             .endMethod();
         javaSourceBuilder = topClassBuilder.endClazz();
         innerClassBuilderBase = topClassBuilder;
     }
 
+    // TODO: remove usage of IType
     public void generateBuilderBaseClass(String buildClassType, IType type, boolean isTopLevel) throws JavaModelException {
         ITypeParameter[] typeParameters = type.getTypeParameters();
 
@@ -170,13 +191,29 @@ public class BuilderSourceGenerator {
         }
     }
 
+    // TODO: remove usage of ITypeParameter
     private void generateBuilderBaseClassBody(JavaSourceBuilder.ClazzBuilderBase<?> innerClassBuilderBase, ITypeParameter[] typeParameters)
             throws JavaModelException {
         String typeArg = BUILDER_TYPE_ARG_NAME + " extends " + innerBuilderClassName;
-        innerClassBuilderBase
-            .withName(innerBuilderClassName).withTypeArg(typeArg);
-        for (ITypeParameter param : typeParameters) {
-            innerClassBuilderBase.withTypeArg(param.getSource());
+
+        // type params
+        String typeParams = "";
+        if (typeParameters != null && typeParameters.length > 0) {
+            typeParams = "<";
+            boolean isFirst = true;
+            for (ITypeParameter typeParam : typeParameters) {
+                if (!isFirst) {
+                    typeParams += ", ";
+                }
+                typeParams += typeParam.getElementName();
+                isFirst = false;
+            }
+            typeParams += ">";
+        }
+
+        innerClassBuilderBase.withName(innerBuilderClassName).withTypeArg(typeArg);
+        for (ITypeParameter typeParam : typeParameters) {
+            innerClassBuilderBase.withTypeArg(typeParam.getSource());
         }
         innerClassBuilderBase
             // instance variable
@@ -187,7 +224,7 @@ public class BuilderSourceGenerator {
                 .withInstruction().withStatement("instance = aInstance;").endInstruction()
             .endMethod()
             // getInstance()
-            .withMethod().withModifiers(JavaSource.MODIFIER_PROTECTED).withReturnType(innerBuildClassType).withName("getInstance")
+            .withMethod().withModifiers(JavaSource.MODIFIER_PROTECTED).withReturnType(innerBuildClassType + typeParams).withName("getInstance")
                 .withReturnValue().withStatement("instance").endReturnValue()
             .endMethod();
     }

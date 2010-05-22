@@ -810,7 +810,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
 
-    public void testGenerateBuilderForGenerics() throws Exception {
+    public void testGenerateBuilderForParametrizedTypes() throws Exception {
         // given
         IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
@@ -1103,10 +1103,10 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "testpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
 
         // then
-        buildJavaSource().forPackage("testpkg").forClassName("GeneratedBuilder")
+        buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
             .withSourceLine(builderSource)
             .buildType();
 
@@ -1114,7 +1114,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.Generic;")
-            .withSourceLine("import testpkg.GeneratedBuilder;")
+            .withSourceLine("import builderpkg.GeneratedBuilder;")
             .withSourceLine("")
             .withSourceLine("public class MainClass {")
             .withSourceLine("    public static void main(String[] args) {")

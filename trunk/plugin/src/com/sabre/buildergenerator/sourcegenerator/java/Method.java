@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Method {
+    private List<String> annotations = new ArrayList<String>();
     private int modifiers;
     private List<String> typeArgs = new ArrayList<String>();
     private String returnType;
@@ -23,6 +24,14 @@ public class Method {
     private List<String> exceptions = new ArrayList<String>();
     private List<Statement> instructions = new ArrayList<Statement>();
     private Statement returnValue;
+
+    public List<String> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<String> annotations) {
+        this.annotations = annotations;
+    }
 
     public int getModifiers() {
         return modifiers;
@@ -89,6 +98,10 @@ public class Method {
     }
 
     public void print(IndentWriter w) {
+        for (String annotation : annotations) {
+            w.out.print(w.indent);
+            w.out.println(annotation);
+        }
         w.out.print(w.indent);
         if ((modifiers & JavaSource.MODIFIER_PUBLIC) != 0) {
             w.out.print("public ");

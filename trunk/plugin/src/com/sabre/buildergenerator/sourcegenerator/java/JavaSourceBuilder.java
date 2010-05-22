@@ -81,7 +81,6 @@ class JavaSourceBuilderBase<GeneratorT extends JavaSourceBuilderBase> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static class ClazzBuilderBase<GeneratorT extends ClazzBuilderBase> {
         private final com.sabre.buildergenerator.sourcegenerator.java.Clazz instance;
 
@@ -260,7 +259,6 @@ class JavaSourceBuilderBase<GeneratorT extends JavaSourceBuilderBase> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static class StatementBuilderBase<GeneratorT extends StatementBuilderBase> {
         private final com.sabre.buildergenerator.sourcegenerator.java.Statement instance;
 
@@ -295,7 +293,6 @@ class JavaSourceBuilderBase<GeneratorT extends JavaSourceBuilderBase> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static class MethodBuilderBase<GeneratorT extends MethodBuilderBase> {
         private final com.sabre.buildergenerator.sourcegenerator.java.Method instance;
 
@@ -305,6 +302,22 @@ class JavaSourceBuilderBase<GeneratorT extends JavaSourceBuilderBase> {
 
         protected com.sabre.buildergenerator.sourcegenerator.java.Method getInstance() {
             return instance;
+        }
+
+        public GeneratorT withAnnotations(java.util.List<java.lang.String> aValue) {
+            instance.setAnnotations(aValue);
+
+            return (GeneratorT) this;
+        }
+
+        public GeneratorT withAnnotation(java.lang.String aValue) {
+            if (instance.getAnnotations() == null) {
+                instance.setAnnotations(new java.util.ArrayList<java.lang.String>());
+            }
+
+            ((java.util.ArrayList<java.lang.String>) instance.getAnnotations()).add(aValue);
+
+            return (GeneratorT) this;
         }
 
         public GeneratorT withModifiers(int aValue) {
@@ -449,7 +462,6 @@ class JavaSourceBuilderBase<GeneratorT extends JavaSourceBuilderBase> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static class MethodParameterBuilderBase<GeneratorT extends MethodParameterBuilderBase> {
         private final com.sabre.buildergenerator.sourcegenerator.java.MethodParameter instance;
 

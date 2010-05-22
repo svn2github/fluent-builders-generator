@@ -213,6 +213,7 @@ public class GenerateBuilderAction {
 				}
 			}
 		};
+		methodProvider = null;
 		return builderGenerator.generateSource(type, packageName, builderName,
 				methodProvider, setterPrefix, collectionSetterPrefix,
 				endPrefix, doFormat);

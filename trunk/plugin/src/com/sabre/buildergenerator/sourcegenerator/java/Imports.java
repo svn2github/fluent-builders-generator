@@ -93,7 +93,11 @@ public class Imports {
             if (imports.contains(qualifiedClassName)) {         // already imported: return class type
                 return unqualifiedType;
             } else if (importedClasses.contains(className)) {   // name conflict: return full type
-                return qualifiedType;
+                if (!isPackage("java.lang", qualifiedClassName) && !isPackage(packageName, qualifiedClassName)) {
+                    return qualifiedType;
+                } else {
+                    return unqualifiedType;
+                }
             } else {                                            // not imported: register import, register class name, return class type
                 if (!isPackage("java.lang", qualifiedClassName) && !isPackage(packageName, qualifiedClassName)) {
                     imports.add(qualifiedClassName);

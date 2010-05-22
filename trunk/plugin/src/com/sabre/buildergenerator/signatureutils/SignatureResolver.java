@@ -139,7 +139,7 @@ public class SignatureResolver {
         return typeSignature;
     }
 
-    private static String resolveTypeName(IType owningType, String typeName) throws JavaModelException {
+    public static String resolveTypeName(IType owningType, String typeName) throws JavaModelException {
         String[][] resolvedType = owningType.resolveType(typeName);
 
         if (resolvedType != null && resolvedType.length > 0) {

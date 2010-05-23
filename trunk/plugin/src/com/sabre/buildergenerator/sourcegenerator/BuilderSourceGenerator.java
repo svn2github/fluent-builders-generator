@@ -19,7 +19,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
-import com.sabre.buildergenerator.signatureutils.SignatureResolver;
+import com.sabre.buildergenerator.signatureutils.TypeResolver;
 import com.sabre.buildergenerator.sourcegenerator.java.Imports;
 import com.sabre.buildergenerator.sourcegenerator.java.IndentWriter;
 import com.sabre.buildergenerator.sourcegenerator.java.JavaSource;
@@ -212,7 +212,7 @@ public class BuilderSourceGenerator {
                 param += toString(" & ", bounds, new StringRetriever<String>() {
                     public String toString(String bound) {
                         try {
-                            String t = SignatureResolver.resolveTypeName(type, bound);
+                            String t = TypeResolver.resolveTypeName(type, bound);
                             return imports.getUnqualified(t, nonTypeNames, builderPackage);
                         } catch(Exception e) {
                             return "";

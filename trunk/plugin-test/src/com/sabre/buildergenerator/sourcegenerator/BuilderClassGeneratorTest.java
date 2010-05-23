@@ -1127,4 +1127,98 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
         assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
+
+    public void testGenerateBuilderForGenericComplex() throws Exception {
+        // given
+        buildJavaSource().forPackage("testpkg").forClassName("Room")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("import java.util.List;")
+            .withSourceLine("")
+            .withSourceLine("public class Room<P extends Property, RP extends RatePlan> {")
+            .withSourceLine("    private P property;")
+            .withSourceLine("    private List<RP> ratePlans;")
+            .withSourceLine("")
+            .withSourceLine("    public P getProperty() {")
+            .withSourceLine("        return property;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setProperty(P aProperty) {")
+            .withSourceLine("        property = aProperty;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public List<RP> getRatePlans() {")
+            .withSourceLine("        return ratePlans;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setRatePlans(List<RP> aRatePlans) {")
+            .withSourceLine("        ratePlans = aRatePlans;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+        buildJavaSource().forPackage("testpkg").forClassName("RatePlan")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class RatePlan<R extends Room> {")
+            .withSourceLine("    private R room;")
+            .withSourceLine("")
+            .withSourceLine("    public R getRoom() {")
+            .withSourceLine("        return room;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setRoom(R aRoom) {")
+            .withSourceLine("        room = aRoom;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("Property")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("import java.util.List;")
+            .withSourceLine("")
+            .withSourceLine("public class Property<R extends Room, RP extends RatePlan> {")
+            .withSourceLine("    private List<R> rooms;")
+            .withSourceLine("")
+            .withSourceLine("    public List<R> getRooms() {")
+            .withSourceLine("        return rooms;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setRooms(List<R> aRooms) {")
+            .withSourceLine("        rooms = aRooms;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+
+        // when
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+
+        // then
+        buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
+            .withSourceLine(builderSource)
+            .buildType();
+
+        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+            .withSourceLine("package test;")
+            .withSourceLine("")
+            .withSourceLine("import testpkg.Property;")
+            .withSourceLine("import testpkg.Room;")
+            .withSourceLine("import testpkg.RatePlan;")
+            .withSourceLine("import builderpkg.GeneratedBuilder;")
+            .withSourceLine("")
+            .withSourceLine("public class MainClass {")
+            .withSourceLine("    public static void main(String[] args) {")
+            .withSourceLine("        Property<?, ?> property = GeneratedBuilder.property().withAddedRoom(null).build();")
+//            .withSourceLine("        Property property = GeneratedBuilder.property().withAddedRoom()")
+//            .withSourceLine("                                            .withAddedRatePlan()")
+//            .withSourceLine("                                            .endRatePlan()")
+//            .withSourceLine("                                            .endRoom().build();")
+//            .withSourceLine("        assert property.getRooms().size() == 1;")
+//            .withSourceLine("        assert property.getRooms().get(0).getName().equals(\"room1\");")
+//            .withSourceLine("        assert property.getRooms().get(0).getRatePlans().size() == 1;")
+//            .withSourceLine("        assert property.getRooms().get(0).getRatePlans().get(0).getName().equals(\"ratePlan1\");")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+    }
 }

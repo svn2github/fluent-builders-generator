@@ -9,10 +9,9 @@
  *    Sabre Polska sp. z o.o. - initial implementation during Hackday
  */
 
-package com.sabre.buildergenerator.sourcegenerator;
+package com.sabre.buildergenerator.typeutils;
 
-import com.sabre.buildergenerator.signatureutils.SignatureResolver;
-
+import com.sabre.buildergenerator.signatureutils.TypeResolver;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
@@ -37,8 +36,11 @@ import java.util.Set;
 public class TypeHelper {
     private static final String OBJECT_SIGNATURE = "Qjava.lang.Object;";
     private static final String COLLECTION_INTERFACE_NAME = "java.util.Collection";
+    private static final String SETTER_PREFIX = "set";
 
-    public static Map<IType, Collection<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
+    private final TypeResolver typeResolver = new TypeResolver();
+
+    public Map<IType, Collection<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
         final Map<IType, Collection<IMethod>> result = new HashMap<IType, Collection<IMethod>>();
         final Set<IType> types = new HashSet<IType>();
         types.add(type);
@@ -51,14 +53,14 @@ public class TypeHelper {
                 public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution)
                         throws Exception {
                     String parameterTypeSignature = method.getParameterTypes()[0];
-                    String qualifiedParameterTypeSignature = SignatureResolver.resolveTypeWithParameterMapping(
+                    String qualifiedParameterTypeSignature = typeResolver.resolveTypeWithParameterMapping(
                             methodOwnerType, parameterTypeSignature, parameterSubstitution);
                     IType newType = null;
                     if (isCollection(methodOwnerType, qualifiedParameterTypeSignature)) {
                         String innerTypeSignature = getTypeParameterSignature(qualifiedParameterTypeSignature);
-                        newType = SignatureResolver.resolveType(methodOwnerType, innerTypeSignature);
+                        newType = typeResolver.resolveType(methodOwnerType, innerTypeSignature);
                     } else {
-                        newType = SignatureResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
+                        newType = typeResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
                     }
 
                     inspectSetter(nextType, method, newType);
@@ -81,20 +83,20 @@ public class TypeHelper {
         return result;
     }
 
-    public static boolean isCollection(IType owningType, String typeSignature) throws Exception {
+    public boolean isCollection(IType owningType, String typeSignature) throws Exception {
         return implementsInterface(owningType, typeSignature, COLLECTION_INTERFACE_NAME);
     }
 
-    public static boolean isCollection(IType type) throws Exception {
+    public boolean isCollection(IType type) throws Exception {
         return implementsInterface(type, COLLECTION_INTERFACE_NAME);
     }
 
-    public static boolean implementsInterface(IType owningType, String typeSignature, String interfaceName) throws Exception {
-        IType type = SignatureResolver.resolveType(owningType, typeSignature);
+    public boolean implementsInterface(IType owningType, String typeSignature, String interfaceName) throws Exception {
+        IType type = typeResolver.resolveType(owningType, typeSignature);
         return type != null ? implementsInterface(type, interfaceName) : false;
     }
 
-    public static boolean implementsInterface(IType type, String interfaceName) throws JavaModelException {
+    public boolean implementsInterface(IType type, String interfaceName) throws JavaModelException {
         ITypeHierarchy supertypeHierarchy = type.newSupertypeHierarchy(null);
         IType[] superInterfaces = supertypeHierarchy.getAllInterfaces();
         for (IType interfaceType : superInterfaces) {
@@ -105,12 +107,12 @@ public class TypeHelper {
         return false;
     }
 
-    public static boolean hasSuperType(IType owningType, String typeSignature, String superTypeName) throws Exception {
-        IType type = SignatureResolver.resolveType(owningType, typeSignature);
+    public boolean hasSuperType(IType owningType, String typeSignature, String superTypeName) throws Exception {
+        IType type = typeResolver.resolveType(owningType, typeSignature);
         return type != null ? hasSuperType(type, superTypeName) : false;
     }
 
-    public static boolean hasSuperType(IType type, String superTypeName) throws JavaModelException {
+    public boolean hasSuperType(IType type, String superTypeName) throws JavaModelException {
         ITypeHierarchy supertypeHierarchy = type.newSupertypeHierarchy(null);
         IType[] superTypes = supertypeHierarchy.getAllTypes();
         for (IType superType : superTypes) {
@@ -121,7 +123,7 @@ public class TypeHelper {
         return false;
     }
 
-    public static String getTypeParameterSignature(String resolvedTypeSignature) {
+    public String getTypeParameterSignature(String resolvedTypeSignature) {
         String[] typeArguments = Signature.getTypeArguments(resolvedTypeSignature);
         if (typeArguments != null && typeArguments.length == 1) {
             String fieldTypeArgumentSignature = typeArguments[0];
@@ -135,14 +137,14 @@ public class TypeHelper {
         return null;
     }
 
-    public static Collection<IMethod> findSetterMethods(IType type) throws JavaModelException {
+    public Collection<IMethod> findSetterMethods(IType type) throws JavaModelException {
         Collection<IMethod> methods = findAllMethods(type);
         Collection<IMethod> setterMethods = filterSetterMethods(methods);
 
         return setterMethods;
     }
 
-    private static Collection<IMethod> filterSetterMethods(Collection<IMethod> methods) throws JavaModelException {
+    private Collection<IMethod> filterSetterMethods(Collection<IMethod> methods) throws JavaModelException {
         List<IMethod> setterMethods = new ArrayList<IMethod>();
 
         for (IMethod method : methods) {
@@ -154,13 +156,13 @@ public class TypeHelper {
         return setterMethods;
     }
 
-    private static boolean isSetterMethod(IMethod method) throws JavaModelException {
-        return method.getElementName().startsWith(BuilderGenerator.SETTER_PREFIX)
+    private boolean isSetterMethod(IMethod method) throws JavaModelException {
+        return method.getElementName().startsWith(SETTER_PREFIX)
             && method.getReturnType().equals(Signature.SIG_VOID) && method.getParameterTypes().length == 1
             && Flags.isPublic(method.getFlags());
     }
 
-    private static Collection<IMethod> findAllMethods(IType type) throws JavaModelException {
+    private Collection<IMethod> findAllMethods(IType type) throws JavaModelException {
         List<IMethod> methods = new ArrayList<IMethod>(Arrays.asList(type.getMethods()));
 
         ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
@@ -181,7 +183,7 @@ public class TypeHelper {
         return methods;
     }
 
-    public static void walkHierarchyTree(IType type, TypeInspector inspector) throws Exception {
+    public void walkHierarchyTree(IType type, TypeInspector inspector) throws Exception {
         Map<String, String> typeParameterMapping = new HashMap<String, String>();
 
         inspector.nextSuperType(Signature.createTypeSignature(type.getFullyQualifiedName(), true), type,
@@ -191,9 +193,9 @@ public class TypeHelper {
         IType superType = type;
 
         while ((superclassTypeSignature = superType.getSuperclassTypeSignature()) != null) {
-            String resolvedTypeSignature = SignatureResolver.resolveSignature(superType, superclassTypeSignature);
+            String resolvedTypeSignature = typeResolver.resolveSignature(superType, superclassTypeSignature);
 
-            superType = SignatureResolver.resolveType(superType, Signature.getTypeErasure(resolvedTypeSignature));
+            superType = typeResolver.resolveType(superType, Signature.getTypeErasure(resolvedTypeSignature));
 
             if (superType == null) {
                 break;
@@ -204,7 +206,7 @@ public class TypeHelper {
         }
     }
 
-    public static void findSetterMethods(IType type, final MethodInspector inspector) throws Exception {
+    public void findSetterMethods(IType type, final MethodInspector inspector) throws Exception {
         walkHierarchyTree(type, new TypeInspector() {
                 public void nextSuperType(String fullSignature, IType superType,
                     Map<String, String> typeParameterMapping) throws Exception {
@@ -220,7 +222,7 @@ public class TypeHelper {
             });
     }
 
-    private static Map<String, String> addParameterMappings(Map<String, String> typeParameterMapping, IType type,
+    private Map<String, String> addParameterMappings(Map<String, String> typeParameterMapping, IType type,
         String resolvedTypeSignature) throws JavaModelException {
         if (typeParameterMapping == null) {
             typeParameterMapping = new HashMap<String, String>();
@@ -236,12 +238,12 @@ public class TypeHelper {
         return typeParameterMapping;
     }
 
-    static interface MethodInspector {
+    public static interface MethodInspector {
         public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution)
             throws Exception;
     }
 
-    static interface TypeInspector {
+    public static interface TypeInspector {
         public void nextSuperType(String fullSignature, IType superType, Map<String, String> parameterSubstitution)
             throws Exception;
     }

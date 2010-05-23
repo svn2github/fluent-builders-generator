@@ -11,10 +11,10 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
+import com.sabre.buildergenerator.javamodelhelper.ModelHelper;
+import com.sabre.buildergenerator.javamodelhelper.ModelHelper.MethodInspector;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
-import com.sabre.buildergenerator.signatureutils.TypeResolver;
-import com.sabre.buildergenerator.typeutils.TypeHelper;
-import com.sabre.buildergenerator.typeutils.TypeHelper.MethodInspector;
+import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -45,8 +45,8 @@ public class BuilderGenerator {
     private final Set<String> typesAlradyGeneratedInnerBuilders = new HashSet<String>();
     private final Set<String> typesToGenerateInnerBuilders = new HashSet<String>();
     private Map<String, Set<String>> typesAndFieldsToGenerate;
-    private final TypeHelper typeHelper = new TypeHelper();
-    private final TypeResolver typeResolver = new TypeResolver();
+    private final ModelHelper typeHelper = new ModelHelper();
+    private final SignatureResolver typeResolver = new SignatureResolver();
 
     public static interface MethodProvider {
         void process(MethodConsumer consumer);
@@ -76,17 +76,17 @@ public class BuilderGenerator {
         // retrieve type parameter names
         ITypeParameter[] typeParameters = type.getTypeParameters();
         String[] typeParamNames = new String[typeParameters.length];
-        String[] typeParamSrc = new String[typeParameters.length];
+        String[][] typeParamBounds = new String[typeParameters.length][];
         int i = 0;
         for (ITypeParameter typeParameter : typeParameters) {
             typeParamNames[i] = typeParameter.getElementName();
-            typeParamSrc[i] = typeParameter.getSource();
+            typeParamBounds[i] = typeParameter.getBounds();
             i++;
         }
 
         // generate source
         String typeQName = type.getFullyQualifiedName();
-        generator.generateBuilderClass(typeQName, packageName, builderName, typeParamNames, typeParamSrc);
+        generator.generateBuilderClass(type, typeQName, packageName, builderName, typeParamNames, typeParamBounds);
 
         generateBuilderBaseClass(generator, typeQName, type, true);
         generateBuilderBaseClasses(generator, type);
@@ -254,16 +254,16 @@ public class BuilderGenerator {
             String elementType = typeResolver.signatureToTypeName(elementTypeSignature);
             String elementName = pluralToSingle(fieldName);
 
-            String[] typeParams = Signature.getTypeArguments(elementTypeSignature);
+            String[] typeArgs = Signature.getTypeArguments(elementTypeSignature);
 
-            for (int i = 0; i < typeParams.length; i++) {
-                String sig = typeResolver.resolveSignature(enclosingType, typeParams[i]);
-                typeParams[i] = typeResolver.signatureToTypeName(sig);
+            for (int i = 0; i < typeArgs.length; i++) {
+                String sig = typeResolver.resolveSignature(enclosingType, typeArgs[i]);
+                typeArgs[i] = typeResolver.signatureToTypeName(sig);
             }
 
             if (isSourceClass(enclosingType, elementTypeSignature) && isBuilderRequestedForType(elementTypeSignature)) {
                 String[] exceptionTypes = signaturesToTypes(exceptionSignatures);
-                generator.addCollectionElementBuilder(elementName, elementType, exceptionTypes, typeParams);
+                generator.addCollectionElementBuilder(elementName, elementType, exceptionTypes, typeArgs);
                 addTypeToGenerateInnerBuilder(Signature.getTypeErasure(elementTypeSignature));
             }
         }
@@ -274,17 +274,17 @@ public class BuilderGenerator {
         throws Exception {
         String fieldType = typeResolver.signatureToTypeName(resolvedFieldTypeSignature);
 
-        String[] typeParams = Signature.getTypeArguments(resolvedFieldTypeSignature);
-        for (int i = 0; i < typeParams.length; i++) {
-            String sig = typeResolver.resolveSignature(enclosingType, typeParams[i]);
-            typeParams[i] = typeResolver.signatureToTypeName(sig);
+        String[] typeArgs = Signature.getTypeArguments(resolvedFieldTypeSignature);
+        for (int i = 0; i < typeArgs.length; i++) {
+            String sig = typeResolver.resolveSignature(enclosingType, typeArgs[i]);
+            typeArgs[i] = typeResolver.signatureToTypeName(sig);
         }
 
         if (isSourceClass(enclosingType, resolvedFieldTypeSignature)
                 && isSetterRequestedForField(enclosingType, fieldName)
                 && isBuilderRequestedForType(resolvedFieldTypeSignature)) {
             String[] exceptionTypes = signaturesToTypes(exceptionSignatures);
-            generator.addFieldBuilder(fieldName, fieldType, exceptionTypes, typeParams);
+            generator.addFieldBuilder(fieldName, fieldType, exceptionTypes, typeArgs);
             addTypeToGenerateInnerBuilder(Signature.getTypeErasure(resolvedFieldTypeSignature));
         }
     }

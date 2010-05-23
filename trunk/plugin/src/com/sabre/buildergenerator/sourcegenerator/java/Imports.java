@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.sabre.buildergenerator.typeutils.TypeResolver;
+
 public class Imports {
     private static final Set<String> simpleTypes = new HashSet<String>();
 
@@ -43,12 +45,7 @@ public class Imports {
      */
     public String getUnqualified(String qualifiedTypeName, Set<String> nonTypeNames, String packageName) {
         // remove spaces
-        qualifiedTypeName = qualifiedTypeName
-        .replaceAll(" +extends +", "=extends=")
-        .replaceAll(" +super +", "=super=")
-        .replaceAll(" +capture +of +", "=capture=of=")
-        .replaceAll(" ", "")
-        .replaceAll("=", " ");
+        qualifiedTypeName = TypeResolver.normalizeType(qualifiedTypeName);
 
         return doGetUnqualified(qualifiedTypeName, nonTypeNames, packageName);
     }
@@ -58,7 +55,7 @@ public class Imports {
      */
     public String doGetUnqualified(String qualifiedTypeName, final Set<String> nonTypeNames, final String packageName) {
         String classname = register(qualifiedTypeName, nonTypeNames, packageName);
-        return processTypeParams(classname, new TypeProcessor() {
+        return TypeResolver.processTypeParams(classname, new TypeResolver.TypeProcessor() {
 
             public String processType(String param) {
                 StringBuilder buf = new StringBuilder();
@@ -171,53 +168,4 @@ public class Imports {
         }
     }
 
-    /**
-     * Calls callback on all type parameters. Replaces parameters with processed strings.
-     *
-     * for type "package.MyType<java.lang.String,? extends package.MyBase>.MyInner<package.MyGeneric<String>>"
-     * parameters are:
-     * - "java.lang.String"
-     * - "? extends package.MyBase"
-     * - "package.MyGeneric<String>"
-     *
-     * @param qualifiedTypeName type to extract parameters
-     * @param proc callback
-     * @return processed type description
-     */
-    private String processTypeParams(String qualifiedTypeName, TypeProcessor proc) {
-        StringBuilder buf = new StringBuilder();
-        int depth = 0;
-        int beg = 0;
-        int i = 0;
-        for (char c : qualifiedTypeName.toCharArray()) {
-            if (c == '<') {
-                depth++;
-                if (depth == 1) {
-                    buf.append(qualifiedTypeName.substring(beg, i));
-                    buf.append('<');
-                    beg = i + 1;
-                }
-            } else if (c == '>') {
-                if (depth == 1) {
-                    buf.append(proc.processType(qualifiedTypeName.substring(beg, i)));
-                    buf.append('>');
-                    beg = i + 1;
-                }
-                depth--;
-            } else if (c == ',' && depth == 1) {
-                buf.append(proc.processType(qualifiedTypeName.substring(beg, i)));
-                buf.append(", ");
-                beg = i + 1;
-            }
-            i++;
-        }
-        if (beg < qualifiedTypeName.length()) {
-            buf.append(qualifiedTypeName.substring(beg));
-        }
-        return buf.toString();
-    }
-
-    static interface TypeProcessor {
-        String processType(String type);
-    }
 }

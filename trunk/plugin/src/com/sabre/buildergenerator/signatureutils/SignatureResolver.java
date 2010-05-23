@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.Signature;
 import java.util.Map;
 
 
-public class TypeResolver {
+public class SignatureResolver {
     /**
      * @param typeSignature
      * @return

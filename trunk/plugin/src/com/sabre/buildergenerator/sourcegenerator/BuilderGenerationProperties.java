@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.sabre.buildergenerator.typeutils.TypeHelper;
+import com.sabre.buildergenerator.javamodelhelper.ModelHelper;
 import com.sabre.buildergenerator.ui.TypeTree;
 
 import java.util.Collection;
@@ -47,7 +47,7 @@ public class BuilderGenerationProperties {
     private IPackageFragmentRoot sourceFolder;
     private IType type;
     private TypeTree settersTypeTree;
-    private final TypeHelper typeHelper = new TypeHelper();
+    private final ModelHelper typeHelper = new ModelHelper();
 
     /**
      * @param aType

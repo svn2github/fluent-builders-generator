@@ -5,13 +5,13 @@ import org.eclipse.jdt.core.Signature;
 
 import com.sabre.buildergenerator.JdtTestCase;
 
-public class TypeResolverTest extends JdtTestCase {
-    private TypeResolver typeResolver;
+public class SignatureResolverTest extends JdtTestCase {
+    private SignatureResolver typeResolver;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        typeResolver = new TypeResolver();
+        typeResolver = new SignatureResolver();
     }
 
     @Override

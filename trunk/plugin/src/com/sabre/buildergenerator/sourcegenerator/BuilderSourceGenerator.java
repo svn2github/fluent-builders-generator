@@ -19,11 +19,11 @@ import java.util.Set;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
-import com.sabre.buildergenerator.signatureutils.TypeResolver;
 import com.sabre.buildergenerator.sourcegenerator.java.Imports;
 import com.sabre.buildergenerator.sourcegenerator.java.IndentWriter;
 import com.sabre.buildergenerator.sourcegenerator.java.JavaSource;
 import com.sabre.buildergenerator.sourcegenerator.java.JavaSourceBuilder;
+import com.sabre.buildergenerator.typeutils.TypeResolver;
 
 
 public class BuilderSourceGenerator {
@@ -106,27 +106,48 @@ public class BuilderSourceGenerator {
         out = printWriter;
     }
 
-    public void generateBuilderClass(String aBuildClassType, String aPackageForBuilder, String aBuilderClassName, String[] typeParamNames, String[] typeParamSrc) {
+    public void generateBuilderClass(final IType owningType, String aBuildClassType, String aPackageForBuilder, String aBuilderClassName, String[] typeParamNames, String[][] typeParamBounds) {
         builderPackage = aPackageForBuilder;
 
         buildClassName = getClassName(aBuildClassType);
         buildClassType = imports.getUnqualified(aBuildClassType, nonTypeNames, builderPackage);
         builderClassName = aBuilderClassName;
 
-        // type params
-        String typeParams = "";
+        // type parameters
+        String[] typeParams = new String[typeParamBounds.length];
+        int i = 0;
+        for (String[] bounds : typeParamBounds) {
+            typeParams[i] = typeParamNames[i];
+            if (bounds != null && bounds.length > 0) {
+                typeParams[i] += " extends ";
+                typeParams[i] += toString(" & ", bounds, new StringRetriever<String>() {
+                    public String toString(String bound) {
+                        try {
+                            bound = TypeResolver.resolveType(owningType, bound);
+                            return imports.getUnqualified(bound, nonTypeNames, builderPackage);
+                        } catch(Exception e) {
+                            return "";
+                        }
+                    }
+                });
+            }
+            i++;
+        }
+
+        // type arguments
+        String typeArgs = "";
         if (typeParamNames != null && typeParamNames.length > 0) {
-            typeParams = "<";
-            typeParams += toString(", ", typeParamNames, new StringRetriever<String>() {
+            typeArgs = "<";
+            typeArgs += toString(", ", typeParamNames, new StringRetriever<String>() {
                 public String toString(String typeParamName) {
                     return typeParamName;
                 }
             });
-            typeParams += ">";
+            typeArgs += ">";
         }
 
         // base class type
-        String baseClass = buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName + typeParams;
+        String baseClass = buildClassName + BUILDER_BASE_SUFFIX + "<" + builderClassName + typeArgs;
         for (String typeParamName : typeParamNames) {
             baseClass += ", " + typeParamName;
         }
@@ -137,18 +158,18 @@ public class BuilderSourceGenerator {
             javaSourceBuilder.withPackge(aPackageForBuilder);
         }
         topClassBuilder = javaSourceBuilder.withClazz().withModifiers(JavaSource.MODIFIER_PUBLIC)
-                .withName(builderClassName).withTypeArgs(Arrays.asList(typeParamSrc)).withBaseClazz(baseClass)
+                .withName(builderClassName).withTypeArgs(Arrays.asList(typeParams)).withBaseClazz(baseClass)
             // static create metod
-            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC + JavaSource.MODIFIER_STATIC).withTypeArgs(Arrays.asList(typeParamSrc))
-                .withName(toLowerCaseStart(buildClassName)).withReturnType(builderClassName + typeParams)
-                .withReturnValue().withStatement("new " + builderClassName + typeParams + "()").withParam(builderClassName).endReturnValue()
+            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC + JavaSource.MODIFIER_STATIC).withTypeArgs(Arrays.asList(typeParams))
+                .withName(toLowerCaseStart(buildClassName)).withReturnType(builderClassName + typeArgs)
+                .withReturnValue().withStatement("new " + builderClassName + typeArgs + "()").withParam(builderClassName).endReturnValue()
             .endMethod()
             // default constructor
             .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName(builderClassName)
-                .withInstruction().withStatement("super(new %s());").withParam(buildClassType + typeParams).endInstruction()
+                .withInstruction().withStatement("super(new %s());").withParam(buildClassType + typeArgs).endInstruction()
             .endMethod()
             // build()
-            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName("build").withReturnType(buildClassType + typeParams)
+            .withMethod().withModifiers(JavaSource.MODIFIER_PUBLIC).withName("build").withReturnType(buildClassType + typeArgs)
                 .withReturnValue().withStatement("getInstance()").endReturnValue()
             .endMethod();
         javaSourceBuilder = topClassBuilder.endClazz();
@@ -211,8 +232,8 @@ public class BuilderSourceGenerator {
                 param += toString(" & ", bounds, new StringRetriever<String>() {
                     public String toString(String bound) {
                         try {
-                            String t = TypeResolver.resolveTypeName(type, bound);
-                            return imports.getUnqualified(t, nonTypeNames, builderPackage);
+                            bound = TypeResolver.resolveType(type, bound);
+                            return imports.getUnqualified(bound, nonTypeNames, builderPackage);
                         } catch(Exception e) {
                             return "";
                         }
@@ -268,19 +289,19 @@ public class BuilderSourceGenerator {
         generateSimpleSetter(fieldName, type, exceptionTypes, BUILDER_TYPE_ARG_NAME, true);
     }
 
-    public void addFieldBuilder(String fieldName, String fieldType, String[] exceptions, String[] typeParams) {
+    public void addFieldBuilder(String fieldName, String fieldType, String[] exceptions, String[] typeArgs) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
         String fieldClassName = getClassName(fieldType);
         String fieldUType = imports.getUnqualified(fieldType, nonTypeNames, builderPackage);
         String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
         String fieldBuilderName = toUpperCaseStart(fieldName + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(setterPrefix, fieldName);
-        for (int i = 0; i < typeParams.length;i++) {
-            typeParams[i] = imports.getUnqualified(typeParams[i], nonTypeNames, builderPackage);
+        for (int i = 0; i < typeArgs.length;i++) {
+            typeArgs[i] = imports.getUnqualified(typeArgs[i], nonTypeNames, builderPackage);
         }
 
         generateBuilderSetter(fieldName, fieldUType, methodName, exceptionTypes, fieldBuilderName,
-                innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, typeParams, true);
+                innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, typeArgs, true);
     }
 
     public void addCollectionElementSetter(String fieldName, String elementName, String elementType,
@@ -294,19 +315,19 @@ public class BuilderSourceGenerator {
     }
 
     public void addCollectionElementBuilder(String elementName, String elementType, String[] exceptions,
-            String[] typeParams) {
+            String[] typeArgs) {
         String[] exceptionTypes = getExceptionTypes(exceptions);
         String elementUType = imports.getUnqualified(elementType, nonTypeNames, builderPackage);
         String fieldClassName = getClassName(elementType);
         String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
         String fieldBuilderName = toUpperCaseStart(elementName + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(collectionElementSetterPrefix, elementName);
-        for (int i = 0; i < typeParams.length;i++) {
-            typeParams[i] = imports.getUnqualified(typeParams[i], nonTypeNames, builderPackage);
+        for (int i = 0; i < typeArgs.length;i++) {
+            typeArgs[i] = imports.getUnqualified(typeArgs[i], nonTypeNames, builderPackage);
         }
 
         generateBuilderSetter(elementName, elementUType, methodName, exceptionTypes, fieldBuilderName,
-                innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, typeParams, true);
+                innerBuilderName, innerBuilderClassName, BUILDER_TYPE_ARG_NAME, typeArgs, true);
     }
 
     private void generateBuilderSetter(String fieldName, String fieldType, String methodName,

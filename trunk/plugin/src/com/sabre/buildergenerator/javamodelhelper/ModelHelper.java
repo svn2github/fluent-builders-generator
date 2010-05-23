@@ -9,9 +9,9 @@
  *    Sabre Polska sp. z o.o. - initial implementation during Hackday
  */
 
-package com.sabre.buildergenerator.typeutils;
+package com.sabre.buildergenerator.javamodelhelper;
 
-import com.sabre.buildergenerator.signatureutils.TypeResolver;
+import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
@@ -33,12 +33,12 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class TypeHelper {
+public class ModelHelper {
     private static final String OBJECT_SIGNATURE = "Qjava.lang.Object;";
     private static final String COLLECTION_INTERFACE_NAME = "java.util.Collection";
     private static final String SETTER_PREFIX = "set";
 
-    private final TypeResolver typeResolver = new TypeResolver();
+    private final SignatureResolver typeResolver = new SignatureResolver();
 
     public Map<IType, Collection<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
         final Map<IType, Collection<IMethod>> result = new HashMap<IType, Collection<IMethod>>();

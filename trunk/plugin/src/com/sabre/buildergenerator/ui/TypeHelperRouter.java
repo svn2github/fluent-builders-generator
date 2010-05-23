@@ -7,20 +7,20 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import com.sabre.buildergenerator.javamodelhelper.ModelHelper;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
-import com.sabre.buildergenerator.signatureutils.TypeResolver;
-import com.sabre.buildergenerator.typeutils.TypeHelper;
+import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
 /**
  * Non static class that routes the methods into the static methods of
- * {@link TypeHelper}
+ * {@link ModelHelper}
  *
  * @author kubek2k
  *
  */
 public class TypeHelperRouter {
-    private final TypeHelper typeHelper = new TypeHelper();
-    private final TypeResolver typeResolver = new TypeResolver();
+    private final ModelHelper modelHelper = new ModelHelper();
+    private final SignatureResolver signatureResolver = new SignatureResolver();
 
 	public boolean isArray(String signature) {
 		return signature.charAt(0) == Signature.C_ARRAY;
@@ -44,7 +44,7 @@ public class TypeHelperRouter {
 	}
 
 	public Collection<IMethod> findSetterMethods(IType type) throws Exception {
-		return typeHelper.findSetterMethods(type);
+		return modelHelper.findSetterMethods(type);
 	}
 
 	// public String resolveSetTypeSignature(IMethod method)
@@ -63,22 +63,22 @@ public class TypeHelperRouter {
 	public SetType resolveSetterSetType(IMethod method) throws Exception {
 		String typeUnresolvedSignature = method.getParameterTypes()[0];
 		IType owningType = method.getDeclaringType();
-        String typeSignature = typeResolver.resolveSignature(owningType, typeUnresolvedSignature);
+        String typeSignature = signatureResolver.resolveSignature(owningType, typeUnresolvedSignature);
 
 		if (isSimpleTypeSignature(typeSignature)) {
 			return new SetType();
 		} else {
-			if (typeHelper.isCollection(owningType, typeSignature)) {
-				typeSignature = typeHelper.getTypeParameterSignature(typeSignature);
+			if (modelHelper.isCollection(owningType, typeSignature)) {
+				typeSignature = modelHelper.getTypeParameterSignature(typeSignature);
 			}
 
-			return new SetType(typeResolver.resolveType(owningType, typeSignature));
+			return new SetType(signatureResolver.resolveType(owningType, typeSignature));
 		}
 	}
 
 	public IType resolveSignature(IType owningType, String signature)
 			throws JavaModelException, SignatureParserException {
-		return typeResolver.resolveType(owningType, signature);
+		return signatureResolver.resolveType(owningType, signature);
 	}
 
 	public static class SetType {

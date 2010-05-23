@@ -189,20 +189,19 @@ public class BuilderSourceGenerator {
     // TODO: remove usage of ITypeParameter
     private void generateBuilderBaseClassBody(JavaSourceBuilder.ClazzBuilderBase<?> innerClassBuilderBase, final IType type, ITypeParameter[] typeParameters)
             throws JavaModelException {
-        String typeArg = BUILDER_TYPE_ARG_NAME + " extends " + innerBuilderClassName;
-
-        // type params
-        String typeParams = "";
+        // type argument list
+        String typeArgList = "";
         if (typeParameters != null && typeParameters.length > 0) {
-            typeParams = "<";
-            typeParams += toString(", ", typeParameters, new StringRetriever<ITypeParameter>() {
+            typeArgList += toString(", ", typeParameters, new StringRetriever<ITypeParameter>() {
                 public String toString(ITypeParameter typeParam) {
                     return typeParam.getElementName();
                 }
             });
-            typeParams += ">";
         }
 
+        // class header
+        String typeArg = BUILDER_TYPE_ARG_NAME + " extends " + innerBuilderClassName + "<" + BUILDER_TYPE_ARG_NAME
+                + (typeArgList.length() > 0 ? ", " + typeArgList : "") + ">";
         innerClassBuilderBase.withName(innerBuilderClassName).withTypeArg(typeArg);
         for (ITypeParameter typeParam : typeParameters) {
             String param = typeParam.getElementName();
@@ -222,16 +221,24 @@ public class BuilderSourceGenerator {
             }
             innerClassBuilderBase.withTypeArg(param);
         }
+
+        // type arguments
+        String typeArgs = "";
+        if (typeArgList != null && typeArgList.length() > 0) {
+            typeArgs = "<" + typeArgList +  ">";
+        }
+
+        // class members
         innerClassBuilderBase
             // instance variable
-            .withDeclaration().withStatement("private %s instance;").withParam(innerBuildClassType + typeParams).endDeclaration()
+            .withDeclaration().withStatement("private %s instance;").withParam(innerBuildClassType + typeArgs).endDeclaration()
             // protected constructor that assigns the instance variable
             .withMethod().withModifiers(JavaSource.MODIFIER_PROTECTED).withName(innerBuilderClassName)
-                .withParameter().withType(innerBuildClassType + typeParams).withName("aInstance").endParameter()
+                .withParameter().withType(innerBuildClassType + typeArgs).withName("aInstance").endParameter()
                 .withInstruction().withStatement("instance = aInstance;").endInstruction()
             .endMethod()
             // getInstance()
-            .withMethod().withModifiers(JavaSource.MODIFIER_PROTECTED).withReturnType(innerBuildClassType + typeParams).withName("getInstance")
+            .withMethod().withModifiers(JavaSource.MODIFIER_PROTECTED).withReturnType(innerBuildClassType + typeArgs).withName("getInstance")
                 .withReturnValue().withStatement("instance").endReturnValue()
             .endMethod();
     }

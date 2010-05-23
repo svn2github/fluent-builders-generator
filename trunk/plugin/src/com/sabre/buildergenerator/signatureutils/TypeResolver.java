@@ -21,11 +21,6 @@ import static org.eclipse.jdt.core.Signature.C_LONG;
 import static org.eclipse.jdt.core.Signature.C_SHORT;
 import static org.eclipse.jdt.core.Signature.C_VOID;
 
-import com.sabre.buildergenerator.Activator;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -285,9 +280,6 @@ public class TypeResolver {
         if (resolvedType != null && resolvedType.length > 0) {
             return owningType.getJavaProject().findType(resolvedType[0][0], resolvedType[0][1]);
         }
-
-        Activator.getDefault().getLog().log(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-                "Can not resolve type name '" + identifier + "' for owner type " + owningType.getElementName(), new Throwable()));
 
         return null;
     }

@@ -181,9 +181,11 @@ public class BuilderGenerator {
 
             final IType resolvedType = typeResolver.resolveType(enclosingType, typeSgn);
 
-            generateBuilderBaseClass(generator, typeSpec, resolvedType, false);
-            typesToGenerateInnerBuilders.remove(typeSgn);
-            typesAlradyGeneratedInnerBuilders.add(typeSgn);
+            if (resolvedType != null) {
+                generateBuilderBaseClass(generator, typeSpec, resolvedType, false);
+                typesToGenerateInnerBuilders.remove(typeSgn);
+                typesAlradyGeneratedInnerBuilders.add(typeSgn);
+            }
         }
     }
 
@@ -194,7 +196,6 @@ public class BuilderGenerator {
         typeHelper.findSetterMethods(resolvedType, new MethodInspector() {
                 public void nextMethod(IType methodOwnerType, IMethod method,
                     Map<String, String> parameterSubstitution) throws Exception {
-                    //Activator.getDefault().getLog().log(new Status(IStatus.OK, Activator.PLUGIN_ID, "nextMethod method=" + method.getElementName() + " type=" + methodOwnerType.getElementName()));
 
                     String fieldName = fieldNameFromSetter(method);
 

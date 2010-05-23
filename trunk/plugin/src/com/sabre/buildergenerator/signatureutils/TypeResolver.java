@@ -258,9 +258,6 @@ public class TypeResolver {
             return resolvedType[0][0] + "." + resolvedType[0][1];
         }
 
-        Activator.getDefault().getLog().log(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-                "Can not resolve type name '" + typeName + "' for owner type " + owningType.getElementName(), new Throwable()));
-
         return typeName;
     }
 

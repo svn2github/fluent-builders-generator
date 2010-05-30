@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -99,7 +100,7 @@ public class BuilderGenerator {
         if (doFormat) {
             builderSource = formatSource(builderSource);
         }
-
+        
         return builderSource;
     }
 

@@ -146,6 +146,7 @@ public class GenerateBuilderAction {
 
 						file.create(new StringBufferInputStream(source), false,
 								aMonitor);
+						
 					} catch (Throwable e) {
 						throw new InvocationTargetException(e);
 					} finally {

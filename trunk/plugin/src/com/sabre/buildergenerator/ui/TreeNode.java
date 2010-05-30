@@ -12,7 +12,6 @@
 
 package com.sabre.buildergenerator.ui;
 
-
 /**
  * Title: TreeNode.java<br>
  * Description: <br>
@@ -24,57 +23,69 @@ package com.sabre.buildergenerator.ui;
  */
 
 public class TreeNode<ElementType> {
+    private boolean collapsed = false;
+    private ElementType element;
 
-	private ElementType element;
-	
-	private TypeNode parentTypeNode;
+    private TypeNode parentTypeNode;
 
-	private boolean selected = true;
-	
-	/**
-	 * @param element
-	 * @param parentTypeNode TODO
+    private boolean selected = true;
+
+    /**
+     * @param element the element type that we have inside
+     * @param parentTypeNode parent
+     */
+    public TreeNode(ElementType element, TypeNode parentTypeNode) {
+        this.element = element;
+        this.parentTypeNode = parentTypeNode;
+    }
+
+    /**
+     * @return the element
+     */
+    public ElementType getElement() {
+        return element;
+    }
+
+    public TypeNode getParentNode() {
+        return parentTypeNode;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean b) {
+        if (getParentNode() != null && !getParentNode().isActive()) {
+            throw new IllegalStateException("Can't select setter of inactive type");
+        }
+
+        this.selected = b;
+    }
+    
+    /**
+	 * @return the collapsed
 	 */
-	public TreeNode(ElementType element, TypeNode parentTypeNode) {
-		this.element = element;
-		this.parentTypeNode = parentTypeNode ;
+	public boolean isCollapsed() {
+		return collapsed;
 	}
 
-	/**
-	 * @return the element
-	 */
-	public ElementType getElement() {
-		return element;
+	public void collapse() {
+		collapsed = true;
 	}
 	
-	public TypeNode getParentNode() {
-		return parentTypeNode;
-	}
-
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean b) {
-		if (getParentNode() != null && !getParentNode().isActive()) {
-			throw new IllegalStateException("Can't select setter of inactive type");
-		}
-		
-		this.selected = b;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return getElement().equals(((TreeNode)obj).getElement());
-	}
-
-	/**
-	 * (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return getElement().hashCode();
+	public void expand() {
+		collapsed = false;
 	}
 	
+	@Override public boolean equals(Object obj) {
+        return getElement().equals(((TreeNode) obj).getElement());
+    }
+
+    /**
+     * (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override public int hashCode() {
+        return getElement().hashCode();
+    }
 }

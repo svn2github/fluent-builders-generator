@@ -164,7 +164,6 @@ public class SignatureResolver {
     public String resolveSignature(final IType owningType, String signature) throws SignatureParserException,
         JavaModelException {
         final StringBuilder out = new StringBuilder();
-        final boolean[] wereErrors = new boolean[1];
 
         // create parser that resolves all unresolved types names encountered
         SignatureParser parser = new SignatureParser(signature, new SignatureBuilder(out) {
@@ -184,11 +183,7 @@ public class SignatureResolver {
                             throw new ExceptionWrapper(e);
                         }
 
-                        if (identifier != null) {
-                            super.startUnresolvedType(identifier);
-                        } else {
-                            wereErrors[0] = true;
-                        }
+                        super.startUnresolvedType(identifier);
                     }
 
                     @Override public void innerType(String identifier) throws ExceptionWrapper {
@@ -200,11 +195,7 @@ public class SignatureResolver {
                             }
                         }
 
-                        if (identifier != null) {
-                            super.innerType(identifier);
-                        } else {
-                            wereErrors[0] = true;
-                        }
+                        super.innerType(identifier);
                     }
                 });
 
@@ -218,11 +209,7 @@ public class SignatureResolver {
         }
 
         // return resolved signature
-        if (!wereErrors[0]) {
-            return out.toString();
-        } else {
-            return null;
-        }
+        return out.toString();
     }
 
     /**
@@ -280,12 +267,6 @@ public class SignatureResolver {
             }
         }
 
-        if (t == null) {
-            Activator.getDefault().getLog().log(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-                    "couldn't resolve type '" + typeName + "' (for owning type '"
-                    + (owningType != null ? owningType.getFullyQualifiedParameterizedName() : "<null>") + "')"));
-        }
-
         return t;
     }
 
@@ -296,7 +277,7 @@ public class SignatureResolver {
             return resolvedType[0][0] + "." + resolvedType[0][1];
         }
 
-        return null;
+        return typeName;
     }
 
     private static IType findRelativeToHierarchy(final IType owningType, String identifier) throws JavaModelException {

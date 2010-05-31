@@ -210,15 +210,6 @@ public class BuilderGenerator {
                         String qualifiedParameterTypeSignature = typeResolver.resolveTypeWithParameterMapping(
                                 methodOwnerType, parameterTypeSignature, parameterSubstitution);
 
-                        if (qualifiedParameterTypeSignature == null) {
-                            Activator.getDefault().getLog().log(
-                                new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-                                    "couldn't handle field '" + fieldName + "' for type '"
-                                    + resolvedType.getFullyQualifiedParameterizedName() + "'"));
-
-                            return;
-                        }
-
                         String[] exceptionSignatures = method.getExceptionTypes();
 
                         for (int i = 0; i < exceptionSignatures.length; i++) {

@@ -12,6 +12,7 @@
 package com.sabre.buildergenerator.javamodelhelper;
 
 import com.sabre.buildergenerator.signatureutils.SignatureResolver;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
@@ -43,41 +44,48 @@ public class ModelHelper {
     public Map<IType, Collection<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
         final Map<IType, Collection<IMethod>> result = new HashMap<IType, Collection<IMethod>>();
         final Set<IType> types = new HashSet<IType>();
+
         types.add(type);
 
         while (!types.isEmpty()) {
             Iterator<IType> iterator = types.iterator();
             final IType nextType = iterator.next();
+
             iterator.remove();
             findSetterMethods(nextType, new MethodInspector() {
-                public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution)
-                        throws Exception {
-                    String parameterTypeSignature = method.getParameterTypes()[0];
-                    String qualifiedParameterTypeSignature = typeResolver.resolveTypeWithParameterMapping(
-                            methodOwnerType, parameterTypeSignature, parameterSubstitution);
-                    IType newType = null;
-                    if (isCollection(methodOwnerType, qualifiedParameterTypeSignature)) {
-                        String innerTypeSignature = getTypeParameterSignature(qualifiedParameterTypeSignature);
-                        newType = typeResolver.resolveType(methodOwnerType, innerTypeSignature);
-                    } else {
-                        newType = typeResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
+                    public void nextMethod(IType methodOwnerType, IMethod method,
+                        Map<String, String> parameterSubstitution) throws Exception {
+                        String parameterTypeSignature = method.getParameterTypes()[0];
+                        String qualifiedParameterTypeSignature = typeResolver.resolveTypeWithParameterMapping(
+                                methodOwnerType, parameterTypeSignature, parameterSubstitution);
+                        IType newType = null;
+
+                        if (isCollection(methodOwnerType, qualifiedParameterTypeSignature)) {
+                            String innerTypeSignature = getTypeParameterSignature(qualifiedParameterTypeSignature);
+
+                            newType = typeResolver.resolveType(methodOwnerType, innerTypeSignature);
+                        } else {
+                            newType = typeResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
+                        }
+
+                        inspectSetter(nextType, method, newType);
                     }
 
-                    inspectSetter(nextType, method, newType);
-                }
+                    private void inspectSetter(final IType nextType, IMethod method, IType newType) {
+                        Collection<IMethod> methods = result.get(nextType);
 
-                private void inspectSetter(final IType nextType, IMethod method, IType newType) {
-                    Collection<IMethod> methods = result.get(nextType);
-                    if (methods == null) {
-                        methods = new ArrayList<IMethod>();
-                        result.put(nextType, methods);
+                        if (methods == null) {
+                            methods = new ArrayList<IMethod>();
+                            result.put(nextType, methods);
+                        }
+
+                        methods.add(method);
+
+                        if (newType != null) {
+                            types.add(newType);
+                        }
                     }
-                    methods.add(method);
-                    if (newType != null) {
-                        types.add(newType);
-                    }
-                }
-            });
+                });
         }
 
         return result;
@@ -93,47 +101,57 @@ public class ModelHelper {
 
     public boolean implementsInterface(IType owningType, String typeSignature, String interfaceName) throws Exception {
         IType type = typeResolver.resolveType(owningType, typeSignature);
+
         return type != null ? implementsInterface(type, interfaceName) : false;
     }
 
     public boolean implementsInterface(IType type, String interfaceName) throws JavaModelException {
         ITypeHierarchy supertypeHierarchy = type.newSupertypeHierarchy(null);
         IType[] superInterfaces = supertypeHierarchy.getAllInterfaces();
+
         for (IType interfaceType : superInterfaces) {
             if (interfaceType.getFullyQualifiedName().equals(interfaceName)) {
                 return true;
             }
         }
+
         return false;
     }
 
     public boolean hasSuperType(IType owningType, String typeSignature, String superTypeName) throws Exception {
         IType type = typeResolver.resolveType(owningType, typeSignature);
+
         return type != null ? hasSuperType(type, superTypeName) : false;
     }
 
     public boolean hasSuperType(IType type, String superTypeName) throws JavaModelException {
         ITypeHierarchy supertypeHierarchy = type.newSupertypeHierarchy(null);
         IType[] superTypes = supertypeHierarchy.getAllTypes();
+
         for (IType superType : superTypes) {
             if (superType.getFullyQualifiedName().equals(superTypeName)) {
                 return true;
             }
         }
+
         return false;
     }
 
     public String getTypeParameterSignature(String resolvedTypeSignature) {
         String[] typeArguments = Signature.getTypeArguments(resolvedTypeSignature);
+
         if (typeArguments != null && typeArguments.length == 1) {
             String fieldTypeArgumentSignature = typeArguments[0];
-            return fieldTypeArgumentSignature.charAt(0) == Signature.C_EXTENDS
-                    || fieldTypeArgumentSignature.charAt(0) == Signature.C_SUPER
-                    || fieldTypeArgumentSignature.charAt(0) == Signature.C_CAPTURE
-                    ? fieldTypeArgumentSignature.substring(1)
-                    : fieldTypeArgumentSignature.equals(String.valueOf(Signature.C_STAR)) ? OBJECT_SIGNATURE
-                            : fieldTypeArgumentSignature;
+
+            return
+                fieldTypeArgumentSignature.charAt(0) == Signature.C_EXTENDS
+                || fieldTypeArgumentSignature.charAt(0) == Signature.C_SUPER
+                || fieldTypeArgumentSignature.charAt(0) == Signature.C_CAPTURE
+                ? fieldTypeArgumentSignature.substring(1)
+                : fieldTypeArgumentSignature.equals(String.valueOf(Signature.C_STAR)) ? OBJECT_SIGNATURE
+                                                                                      : fieldTypeArgumentSignature;
         }
+
         return null;
     }
 
@@ -157,9 +175,8 @@ public class ModelHelper {
     }
 
     private boolean isSetterMethod(IMethod method) throws JavaModelException {
-        return method.getElementName().startsWith(SETTER_PREFIX)
-            && method.getReturnType().equals(Signature.SIG_VOID) && method.getParameterTypes().length == 1
-            && Flags.isPublic(method.getFlags());
+        return method.getElementName().startsWith(SETTER_PREFIX) && method.getReturnType().equals(Signature.SIG_VOID)
+            && method.getParameterTypes().length == 1 && Flags.isPublic(method.getFlags());
     }
 
     private Collection<IMethod> findAllMethods(IType type) throws JavaModelException {

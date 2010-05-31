@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/builder_generator_eclipse_feature_1.0.3.jar" id="builder_generator_eclipse_feature" version="1.0.3"/>
+   <feature url="features/builder_generator_eclipse_feature_1.0.4.jar" id="builder_generator_eclipse_feature" version="1.0.4"/>
 </site>

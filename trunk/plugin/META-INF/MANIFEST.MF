@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Builder_generator_eclipse_plugin Plug-in
 Bundle-SymbolicName: builder_generator_eclipse_plugin;singleton:=true
-Bundle-Version: 1.0.3
+Bundle-Version: 1.0.4
 Bundle-Activator: com.sabre.buildergenerator.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

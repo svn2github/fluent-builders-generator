@@ -11,10 +11,14 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
+import com.sabre.buildergenerator.Activator;
 import com.sabre.buildergenerator.javamodelhelper.ModelHelper;
 import com.sabre.buildergenerator.javamodelhelper.ModelHelper.MethodInspector;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.signatureutils.SignatureResolver;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -23,7 +27,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -178,15 +181,18 @@ public class BuilderGenerator {
         throws Exception {
         while (!typesToGenerateInnerBuilders.isEmpty()) {
             String typeSgn = typesToGenerateInnerBuilders.iterator().next();
-            String typeSpec = typeResolver.signatureToTypeName(typeResolver.resolveSignature(enclosingType, typeSgn));
 
             final IType resolvedType = typeResolver.resolveType(enclosingType, typeSgn);
 
             if (resolvedType != null) {
+                String typeSpec = typeResolver.signatureToTypeName(typeResolver.resolveSignature(enclosingType,
+                            typeSgn));
+
                 generateBuilderBaseClass(generator, typeSpec, resolvedType, false);
-                typesToGenerateInnerBuilders.remove(typeSgn);
-                typesAlradyGeneratedInnerBuilders.add(typeSgn);
             }
+
+            typesToGenerateInnerBuilders.remove(typeSgn);
+            typesAlradyGeneratedInnerBuilders.add(typeSgn);
         }
     }
 
@@ -202,24 +208,37 @@ public class BuilderGenerator {
                     try {
                         String parameterTypeSignature = method.getParameterTypes()[0];
                         String qualifiedParameterTypeSignature = typeResolver.resolveTypeWithParameterMapping(
-                                resolvedType, parameterTypeSignature, parameterSubstitution);
+                                methodOwnerType, parameterTypeSignature, parameterSubstitution);
+
+                        if (qualifiedParameterTypeSignature == null) {
+                            Activator.getDefault().getLog().log(
+                                new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+                                    "couldn't handle field '" + fieldName + "' for type '"
+                                    + resolvedType.getFullyQualifiedParameterizedName() + "'"));
+
+                            return;
+                        }
 
                         String[] exceptionSignatures = method.getExceptionTypes();
 
                         for (int i = 0; i < exceptionSignatures.length; i++) {
-                            exceptionSignatures[i] = typeResolver.resolveTypeWithParameterMapping(resolvedType,
+                            exceptionSignatures[i] = typeResolver.resolveTypeWithParameterMapping(methodOwnerType,
                                     exceptionSignatures[i], parameterSubstitution);
                         }
 
-                        generateSimpleSetter(generator, resolvedType, exceptionSignatures, fieldName,
+                        generateSimpleSetter(generator, methodOwnerType, exceptionSignatures, fieldName,
                             qualifiedParameterTypeSignature);
-                        generateCollectionAdder(generator, resolvedType, exceptionSignatures, fieldName,
+                        generateCollectionAdder(generator, methodOwnerType, exceptionSignatures, fieldName,
                             qualifiedParameterTypeSignature);
-                        generateCollectionBuilder(generator, resolvedType, exceptionSignatures, fieldName,
+                        generateCollectionBuilder(generator, methodOwnerType, exceptionSignatures, fieldName,
                             qualifiedParameterTypeSignature);
-                        generateFieldBuilder(generator, resolvedType, exceptionSignatures, fieldName,
+                        generateFieldBuilder(generator, methodOwnerType, exceptionSignatures, fieldName,
                             qualifiedParameterTypeSignature);
                     } catch (JavaModelException e) {
+                        Activator.getDefault().getLog().log(
+                            new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+                                "couldn't handle field '" + fieldName + "' for type '"
+                                + resolvedType.getFullyQualifiedParameterizedName() + "'", e));
                     }
                 }
             });
@@ -305,13 +324,13 @@ public class BuilderGenerator {
     private String abstractToConcreteCollectionType(String collectionTypeErasureSignature) {
         String concreteCollectionType;
 
-        if (collectionTypeErasureSignature.equals("Qjava.util.Collection;")) {
+        if (collectionTypeErasureSignature.matches("[QL]java.util.Collection;")) {
             concreteCollectionType = "java.util.ArrayList";
-        } else if (collectionTypeErasureSignature.equals("Qjava.util.List;")) {
+        } else if (collectionTypeErasureSignature.matches("[QL]java.util.List;")) {
             concreteCollectionType = "java.util.ArrayList";
-        } else if (collectionTypeErasureSignature.equals("Qjava.util.Set;")) {
+        } else if (collectionTypeErasureSignature.matches("[QL]java.util.Set;")) {
             concreteCollectionType = "java.util.HashSet";
-        } else if (collectionTypeErasureSignature.equals("Qjava.util.SortedSet;")) {
+        } else if (collectionTypeErasureSignature.matches("[QL]java.util.SortedSet;")) {
             concreteCollectionType = "java.util.TreeSet";
         } else {
             concreteCollectionType = typeResolver.signatureToTypeName(collectionTypeErasureSignature);

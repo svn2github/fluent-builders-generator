@@ -83,6 +83,8 @@ public class SignatureParser {
             expectChar(C_NAME_END);
             listener.endType();
             break;
+        default:
+            throw new SignatureParserException(input, pos);
         }
     }
 

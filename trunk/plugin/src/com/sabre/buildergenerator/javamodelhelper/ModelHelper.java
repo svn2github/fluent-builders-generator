@@ -11,9 +11,13 @@
 
 package com.sabre.buildergenerator.javamodelhelper;
 
+import com.sabre.buildergenerator.Activator;
+import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
@@ -38,6 +42,7 @@ public class ModelHelper {
     private static final String OBJECT_SIGNATURE = "Qjava.lang.Object;";
     private static final String COLLECTION_INTERFACE_NAME = "java.util.Collection";
     private static final String SETTER_PREFIX = "set";
+    private SignatureResolver signatureResolver = new SignatureResolver();
 
     private final SignatureResolver typeResolver = new SignatureResolver();
 
@@ -60,15 +65,22 @@ public class ModelHelper {
                                 methodOwnerType, parameterTypeSignature, parameterSubstitution);
                         IType newType = null;
 
-                        if (isCollection(methodOwnerType, qualifiedParameterTypeSignature)) {
-                            String innerTypeSignature = getTypeParameterSignature(qualifiedParameterTypeSignature);
+                        if (qualifiedParameterTypeSignature != null) {
+                            if (isCollection(methodOwnerType, qualifiedParameterTypeSignature)) {
+                                String innerTypeSignature = getTypeParameterSignature(qualifiedParameterTypeSignature);
 
-                            newType = typeResolver.resolveType(methodOwnerType, innerTypeSignature);
+                                newType = typeResolver.resolveType(methodOwnerType, innerTypeSignature);
+                            } else {
+                                newType = typeResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
+                            }
+
+                            inspectSetter(nextType, method, newType);
                         } else {
-                            newType = typeResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
+                            Activator.getDefault().getLog().log(
+                                new Status(IStatus.WARNING, Activator.PLUGIN_ID,
+                                    "couldn't resolve setter parameter type '" + parameterTypeSignature
+                                    + "' for method '" + method.getElementName() + "'"));
                         }
-
-                        inspectSetter(nextType, method, newType);
                     }
 
                     private void inspectSetter(final IType nextType, IMethod method, IType newType) {
@@ -240,7 +252,7 @@ public class ModelHelper {
     }
 
     private Map<String, String> addParameterMappings(Map<String, String> typeParameterMapping, IType type,
-        String resolvedTypeSignature) throws JavaModelException {
+        String resolvedTypeSignature) throws JavaModelException, SignatureParserException {
         if (typeParameterMapping == null) {
             typeParameterMapping = new HashMap<String, String>();
         }
@@ -249,7 +261,11 @@ public class ModelHelper {
         int i = 0;
 
         for (ITypeParameter typeParameter : type.getTypeParameters()) {
-            typeParameterMapping.put(typeParameter.getElementName(), typeArguments[i++]);
+            final String resolvedSignature = signatureResolver.resolveSignature(type, typeArguments[i]);
+
+            if (resolvedSignature != null) {
+                typeParameterMapping.put(typeParameter.getElementName(), resolvedSignature);
+            }
         }
 
         return typeParameterMapping;

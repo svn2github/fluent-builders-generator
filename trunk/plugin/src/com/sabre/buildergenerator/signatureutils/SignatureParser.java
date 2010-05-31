@@ -53,7 +53,7 @@ public class SignatureParser {
         case C_CAPTURE:
             nextChar();
             listener.captureOf();
-            parseTypeSignature();
+            parseTypeArgument();
             break;
         case C_TYPE_VARIABLE:
             nextChar();
@@ -82,6 +82,11 @@ public class SignatureParser {
             }
             expectChar(C_NAME_END);
             listener.endType();
+            break;
+        case C_STAR:
+        case C_EXTENDS:
+        case C_SUPER:
+            nextChar();
             break;
         default:
             throw new SignatureParserException(input, pos);

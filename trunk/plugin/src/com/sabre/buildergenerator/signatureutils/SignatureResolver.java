@@ -254,15 +254,13 @@ public class SignatureResolver {
      */
     public String resolveTypeWithParameterMapping(IType owningType, String typeSignature,
         Map<String, String> typeParameterMapping) throws JavaModelException, SignatureParserException {
-        typeSignature = resolveSignature(owningType, typeSignature);
+        for (String key : typeParameterMapping.keySet()) {
+            String keySignature = Signature.createTypeSignature(key, false);
 
-        if (typeSignature != null) {
-            for (String key : typeParameterMapping.keySet()) {
-                String keySignature = Signature.createTypeSignature(key, false);
-
-                typeSignature = typeSignature.replaceAll(keySignature, typeParameterMapping.get(key));
-            }
+            typeSignature = typeSignature.replaceAll(keySignature, typeParameterMapping.get(key));
         }
+
+        typeSignature = resolveSignature(owningType, typeSignature);
 
         return typeSignature;
     }

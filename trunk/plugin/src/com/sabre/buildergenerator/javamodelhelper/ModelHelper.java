@@ -42,7 +42,7 @@ public class ModelHelper {
     private static final String OBJECT_SIGNATURE = "Qjava.lang.Object;";
     private static final String COLLECTION_INTERFACE_NAME = "java.util.Collection";
     private static final String SETTER_PREFIX = "set";
-    private SignatureResolver signatureResolver = new SignatureResolver();
+    private final SignatureResolver signatureResolver = new SignatureResolver();
 
     private final SignatureResolver typeResolver = new SignatureResolver();
 
@@ -261,7 +261,7 @@ public class ModelHelper {
         int i = 0;
 
         for (ITypeParameter typeParameter : type.getTypeParameters()) {
-            final String resolvedSignature = signatureResolver.resolveSignature(type, typeArguments[i]);
+            final String resolvedSignature = signatureResolver.resolveSignature(type, typeArguments[i++]);
 
             if (resolvedSignature != null) {
                 typeParameterMapping.put(typeParameter.getElementName(), resolvedSignature);

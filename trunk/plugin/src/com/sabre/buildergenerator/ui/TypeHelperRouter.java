@@ -1,6 +1,7 @@
 package com.sabre.buildergenerator.ui;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -43,8 +44,8 @@ public class TypeHelperRouter {
 		return false;
 	}
 
-	public Collection<IMethod> findSetterMethods(IType type) throws Exception {
-		return modelHelper.findSetterMethods(type);
+	public Map<IType, Collection<IMethod>> findSetterMethods(IType type) throws Exception {
+		return modelHelper.findSetterMethodsForAllTypesReferenced(type);
 	}
 
 	// public String resolveSetTypeSignature(IMethod method)

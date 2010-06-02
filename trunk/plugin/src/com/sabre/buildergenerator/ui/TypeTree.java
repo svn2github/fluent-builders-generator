@@ -14,6 +14,7 @@
 package com.sabre.buildergenerator.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class TypeTree {
 			+ "java\\.util\\.LinkedList|java\\.util\\.TreeSet)\\<.*$";
 	private final Map<IType, TypeNode> typeNodes;
 	private final TypeHelperRouter typeHelperRouter;
+	private final Map<IType, Collection<IMethod>> setterMethods;
 
 	/**
 	 * @param aType
@@ -57,9 +59,9 @@ public class TypeTree {
 			throws Exception {
 		this.typeNodes = new LinkedHashMap<IType, TypeNode>();
 		this.typeHelperRouter = typeHelperRouter;
+		this.setterMethods = typeHelperRouter.findSetterMethods(aType);
 
-		processType(new RootTypeNode(aType, typeHelperRouter
-				.findSetterMethods(aType)));
+        processType(new RootTypeNode(aType, setterMethods.get(aType)));
 
 		for (TypeNode typeNode : typeNodes.values()) {
 			for (MethodNode methodNode : typeNode.getMethodNodes()) {
@@ -95,8 +97,7 @@ public class TypeTree {
 	}
 
 	private TypeNode createTypeNode(IType setType) throws Exception {
-		return new TypeNode(setType, typeHelperRouter
-				.findSetterMethods(setType));
+		return new TypeNode(setType, setterMethods.get(setType));
 	}
 
 	private void processCollection(IType setType) throws Exception {

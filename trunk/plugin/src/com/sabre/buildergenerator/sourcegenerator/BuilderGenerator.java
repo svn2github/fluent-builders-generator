@@ -87,6 +87,8 @@ public class BuilderGenerator {
         generator.generateBuilderClass(type, typeQName, packageName, builderName, typeParamNames, typeParamBounds);
 
         generateBuilderBaseClass(generator, typeQName, type, true);
+        typesAlradyGeneratedInnerBuilders.add(Signature.createTypeSignature(typeQName, false));
+
         generateBuilderBaseClasses(generator, type);
         generator.finish();
         sw.flush();
@@ -217,14 +219,16 @@ public class BuilderGenerator {
                                     exceptionSignatures[i], parameterSubstitution);
                         }
 
-                        generateSimpleSetter(generator, methodOwnerType, exceptionSignatures, fieldName,
-                            qualifiedParameterTypeSignature);
-                        generateCollectionAdder(generator, methodOwnerType, exceptionSignatures, fieldName,
-                            qualifiedParameterTypeSignature);
-                        generateCollectionBuilder(generator, methodOwnerType, exceptionSignatures, fieldName,
-                            qualifiedParameterTypeSignature);
-                        generateFieldBuilder(generator, methodOwnerType, exceptionSignatures, fieldName,
-                            qualifiedParameterTypeSignature);
+                        if (isSetterRequestedForField(resolvedType, fieldName)) {
+                            generateSimpleSetter(generator, methodOwnerType, exceptionSignatures, fieldName,
+                                qualifiedParameterTypeSignature);
+                            generateCollectionAdder(generator, methodOwnerType, exceptionSignatures, fieldName,
+                                qualifiedParameterTypeSignature);
+                            generateCollectionBuilder(generator, methodOwnerType, exceptionSignatures, fieldName,
+                                qualifiedParameterTypeSignature);
+                            generateFieldBuilder(generator, methodOwnerType, exceptionSignatures, fieldName,
+                                qualifiedParameterTypeSignature);
+                        }
                     } catch (JavaModelException e) {
                         Activator.getDefault().getLog().log(
                             new Status(IStatus.ERROR, Activator.PLUGIN_ID,
@@ -237,19 +241,17 @@ public class BuilderGenerator {
 
     private void generateSimpleSetter(BuilderSourceGenerator generator, IType enclosingType,
         String[] exceptionSignatures, String fieldName, String fieldTypeSignature) {
-        if (isSetterRequestedForField(enclosingType, fieldName)) {
-            String fieldType = typeResolver.signatureToTypeName(fieldTypeSignature);
-            String[] exceptionTypes = signaturesToTypes(exceptionSignatures);
+        String fieldType = typeResolver.signatureToTypeName(fieldTypeSignature);
+        String[] exceptionTypes = signaturesToTypes(exceptionSignatures);
 
-            generator.addFieldSetter(fieldName, fieldType, exceptionTypes);
-        }
+        generator.addFieldSetter(fieldName, fieldType, exceptionTypes);
     }
 
     private void generateCollectionAdder(BuilderSourceGenerator generator, IType enclosingType,
         String[] exceptionSignatures, String fieldName, String resolvedFieldTypeSignature) throws Exception {
         boolean isFieldACollection = typeHelper.isCollection(enclosingType, resolvedFieldTypeSignature);
 
-        if (isFieldACollection && isSetterRequestedForField(enclosingType, fieldName)) {
+        if (isFieldACollection) {
             String elementTypeSignature = typeHelper.getTypeParameterSignature(resolvedFieldTypeSignature);
             String elementType = typeResolver.signatureToTypeName(elementTypeSignature);
             String elementName = pluralToSingle(fieldName);
@@ -268,7 +270,7 @@ public class BuilderGenerator {
         String[] exceptionSignatures, String fieldName, String resolvedFieldTypeSignature) throws Exception {
         boolean isFieldACollection = typeHelper.isCollection(enclosingType, resolvedFieldTypeSignature);
 
-        if (isFieldACollection && isSetterRequestedForField(enclosingType, fieldName)) {
+        if (isFieldACollection) {
             String elementTypeSignature = typeHelper.getTypeParameterSignature(resolvedFieldTypeSignature);
             String elementType = typeResolver.signatureToTypeName(elementTypeSignature);
             String elementName = pluralToSingle(fieldName);
@@ -303,7 +305,6 @@ public class BuilderGenerator {
         }
 
         if (isSourceClass(enclosingType, resolvedFieldTypeSignature)
-                && isSetterRequestedForField(enclosingType, fieldName)
                 && isBuilderRequestedForType(resolvedFieldTypeSignature)) {
             String[] exceptionTypes = signaturesToTypes(exceptionSignatures);
 

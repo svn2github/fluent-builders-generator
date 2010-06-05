@@ -44,6 +44,7 @@ public class ModelHelper {
 
     public Map<IType, Collection<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
         final Map<IType, Collection<IMethod>> result = new HashMap<IType, Collection<IMethod>>();
+        final Set<IType> typesDone = new HashSet<IType>();
         final Set<IType> types = new HashSet<IType>();
 
         types.add(type);
@@ -53,6 +54,7 @@ public class ModelHelper {
             final IType nextType = iterator.next();
 
             iterator.remove();
+            typesDone.add(nextType);
             findSetterMethods(nextType, new MethodInspector() {
                     public void nextMethod(IType methodOwnerType, IMethod method,
                         Map<String, String> parameterSubstitution) throws Exception {
@@ -82,7 +84,7 @@ public class ModelHelper {
 
                         methods.add(method);
 
-                        if (newType != null) {
+                        if (newType != null && !typesDone.contains(newType)) {
                             types.add(newType);
                         }
                     }

@@ -11,7 +11,6 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -19,9 +18,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.sabre.buildergenerator.javamodelhelper.ModelHelper;
 import com.sabre.buildergenerator.ui.TypeTree;
-
-import java.util.Collection;
-import java.util.Map;
 
 
 /**
@@ -43,7 +39,6 @@ public class BuilderGenerationProperties {
     private boolean generateComments;
     private String methodsPrefix;
     private String packageName;
-    private Map<IType, Collection<IMethod>> selectedMethods;
     private IPackageFragmentRoot sourceFolder;
     private IType type;
     private TypeTree settersTypeTree;
@@ -67,7 +62,6 @@ public class BuilderGenerationProperties {
         collectionAddPrefix = "withAdded";
         endPrefix = "end";
 
-        selectedMethods = getAllSetters(aType);
         sourceFolder = getSourceFolder(aPackage);
     }
 
@@ -83,15 +77,6 @@ public class BuilderGenerationProperties {
      */
     public void setFormatCode(boolean aFormatCode) {
         formatCode = aFormatCode;
-    }
-
-    /**
-    * @param aType
-    * @return
-    * @throws JavaModelException
-    */
-    private Map<IType, Collection<IMethod>> getAllSetters(IType aType) throws Exception {
-        return typeHelper.findSetterMethodsForAllTypesReferenced(aType);
     }
 
     /**
@@ -139,13 +124,6 @@ public class BuilderGenerationProperties {
      */
     public String getMethodsPrefix() {
         return methodsPrefix;
-    }
-
-    /**
-     * @return the selectedMethods
-     */
-    public Map<IType, Collection<IMethod>> getSelectedMethods() {
-        return selectedMethods;
     }
 
     /**
@@ -209,13 +187,6 @@ public class BuilderGenerationProperties {
      */
     public void setMethodsPrefix(String aMethodsPrefix) {
         methodsPrefix = aMethodsPrefix;
-    }
-
-    /**
-     * @param aSelectedMethods the selectedMethods to set
-     */
-    public void setSelectedMethods(Map<IType, Collection<IMethod>> aSelectedMethods) {
-        selectedMethods = aSelectedMethods;
     }
 
     /**

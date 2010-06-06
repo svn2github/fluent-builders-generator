@@ -29,12 +29,18 @@ public class TypeNodeTest extends TestCase {
 	public void testShouldBeActiveIfThereIsAtLeastOneSelectedMethodNodePointingAtIt() {
 		TypeNode typeNode = new TypeNode(type, Collections.<IMethod> emptySet());
 
+		TypeNode methodsParentTypeNode = mock(TypeNode.class);
+		when(methodsParentTypeNode.isActive()).thenReturn(true);
+
 		MethodNode methodNode = mock(MethodNode.class);
 		when(methodNode.isSelected()).thenReturn(false);
+		when(methodNode.getParentNode()).thenReturn(methodsParentTypeNode);
 		typeNode.addPointingMethodNode(methodNode);
 
 		methodNode = mock(MethodNode.class);
 		when(methodNode.isSelected()).thenReturn(true);
+		when(methodNode.getParentNode()).thenReturn(methodsParentTypeNode
+				);
 		typeNode.addPointingMethodNode(methodNode);
 
 		assertTrue(typeNode.isActive());
@@ -64,9 +70,12 @@ public class TypeNodeTest extends TestCase {
 		IMethod method = mock(IMethod.class);
 		TypeNode typeNode = new TypeNode(type, createSet(method));
 
+		TypeNode methodParentTypeNode = mock(TypeNode.class);
+		when(methodParentTypeNode.isActive()).thenReturn(true);
 		// ensure type node is active
 		MethodNode pointingMethodNode = mock(MethodNode.class);
 		when(pointingMethodNode.isSelected()).thenReturn(true);
+		when(pointingMethodNode.getParentNode()).thenReturn(methodParentTypeNode);
 		typeNode.addPointingMethodNode(pointingMethodNode);
 
 		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {
@@ -85,8 +94,12 @@ public class TypeNodeTest extends TestCase {
 		TypeNode typeNode = new TypeNode(type, createSet(method));
 
 		// ensure type node is active
+		TypeNode methodParentTypeNode = mock(TypeNode.class);
+		when(methodParentTypeNode.isActive()).thenReturn(true);
+		
 		MethodNode pointingMethodNode = mock(MethodNode.class);
 		when(pointingMethodNode.isSelected()).thenReturn(true);
+		when(pointingMethodNode.getParentNode()).thenReturn(methodParentTypeNode);
 		typeNode.addPointingMethodNode(pointingMethodNode);
 
 		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {

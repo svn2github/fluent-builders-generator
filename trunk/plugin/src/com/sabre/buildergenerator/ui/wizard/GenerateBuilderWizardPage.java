@@ -66,6 +66,39 @@ import com.sabre.buildergenerator.ui.TypeTree;
  * @version $Rev$: , $Date$: , $Author$:
  */
 class GenerateBuilderWizardPage extends NewElementWizardPage {
+	private final class SettersTypeTreeCheckStateListener implements
+			ICheckStateListener {
+		private final TypeTree settersTypeTree;
+
+		private SettersTypeTreeCheckStateListener(TypeTree settersTypeTree) {
+			this.settersTypeTree = settersTypeTree;
+		}
+
+		public void checkStateChanged(
+				CheckStateChangedEvent event) {
+
+			((TreeNode<?>) ((TreeNode<?>) event.getElement()))
+					.setSelected(event.getChecked());
+
+			transferTreeModelToUI(settersTypeTree);
+		}
+	}
+
+	private final class SettersTypeTreeExpansionListener implements
+			ITreeViewerListener {
+		private TreeNode<?> getTreeNode(TreeExpansionEvent event) {
+			return (TreeNode<?>) event.getElement();
+		}
+
+		public void treeCollapsed(TreeExpansionEvent aEvent) {
+			getTreeNode(aEvent).collapse();
+		}
+
+		public void treeExpanded(TreeExpansionEvent aEvent) {
+			getTreeNode(aEvent).expand();
+		}
+	}
+
 	private final class AcitveTypeNodesViewerFilter extends ViewerFilter {
 		@Override
 		public boolean select(Viewer viewer, Object parentElement,
@@ -260,34 +293,10 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 					.setFilters(new ViewerFilter[] { new AcitveTypeNodesViewerFilter() });
 
 			selectedSettersTreeViewer
-					.addTreeListener(new ITreeViewerListener() {
-
-						private TreeNode<?> getTreeNode(TreeExpansionEvent event) {
-							return (TreeNode<?>) event.getElement();
-						}
-
-						public void treeCollapsed(TreeExpansionEvent aEvent) {
-							getTreeNode(aEvent).collapse();
-						}
-
-						public void treeExpanded(TreeExpansionEvent aEvent) {
-							getTreeNode(aEvent).expand();
-						}
-
-					});
+					.addTreeListener(new SettersTypeTreeExpansionListener());
 
 			selectedSettersTreeViewer
-					.addCheckStateListener(new ICheckStateListener() {
-						public void checkStateChanged(
-								CheckStateChangedEvent event) {
-
-							((TreeNode<?>) ((TreeNode<?>) event.getElement()))
-									.setSelected(event.getChecked());
-
-							transferTreeModelToUI(settersTypeTree);
-						}
-
-					});
+					.addCheckStateListener(new SettersTypeTreeCheckStateListener(settersTypeTree));
 
 			Object someInput = new Object();
 
@@ -444,9 +453,6 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 		return label;
 	}
 
-	/**
-	 * @param aMainComposite
-	 */
 	private void createBuilderNamePart(Composite aMainComposite) {
 		createLabel(aMainComposite, "Builder class name");
 

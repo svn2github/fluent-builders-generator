@@ -1,15 +1,10 @@
 package com.sabre.buildergenerator.ui.wizard;
 
-import java.util.ArrayList;
-import java.util.Set;
-
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.sabre.buildergenerator.ui.MethodNode;
-import com.sabre.buildergenerator.ui.TreeNode;
+import com.sabre.buildergenerator.ui.TypeNode;
 import com.sabre.buildergenerator.ui.TypeTree;
 
 public class SettersTypeTreeContentTreeProvider implements ITreeContentProvider {
@@ -29,42 +24,32 @@ public class SettersTypeTreeContentTreeProvider implements ITreeContentProvider 
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IType) {
-			return getIMethodsFromTypeNode((IType) parentElement);
+		if (parentElement instanceof TypeNode) {
+			return ((TypeNode) parentElement).getMethodNodes().toArray();
 		}
 
 		return null;
 	}
 
 	public Object getParent(Object element) {
-		if (element instanceof IMethod) {
-			return ((IMethod)element).getParent();
+		if (element instanceof MethodNode) {
+			return ((MethodNode) element).getParentNode();
 		} else {
 			return null;
 		}
-		
+
 	}
 
 	public boolean hasChildren(Object element) {
-		return element instanceof IType;
+		return element instanceof TypeNode;
 	}
 
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof IType) {
-			return getIMethodsFromTypeNode((IType) inputElement);
+		if (inputElement instanceof TypeNode) {
+			return ((TypeNode) inputElement).getMethodNodes().toArray();
 		} else {
-			return settersTypeTree.getSortedActiveTypes();
+			return settersTypeTree.getSortedTypesNodes();
 		}
-	}
-
-	private Object[] getIMethodsFromTypeNode(IType typeNode) {
-		Set<MethodNode> methodNodes = settersTypeTree.getNodeFor(typeNode)
-				.getMethodNodes();
-		ArrayList<IMethod> iMethods = new ArrayList<IMethod>(methodNodes.size());
-		for (TreeNode<IMethod> methodNode : methodNodes) {
-			iMethods.add(methodNode.getElement());
-		}
-		return iMethods.toArray();
 	}
 
 }

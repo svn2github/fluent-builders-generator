@@ -106,4 +106,7 @@ public class TypeNode extends TreeNode<IType> {
 				"No such method node for that method");
 	}
 
+	public String toString() {
+		return getElement().getFullyQualifiedName().toString();
+	}
 }

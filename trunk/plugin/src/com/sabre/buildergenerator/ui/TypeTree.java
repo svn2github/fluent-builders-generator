@@ -136,10 +136,12 @@ public class TypeTree {
 		return typeNodes.get(aBaseType);
 	}
 
+	@Deprecated
 	public IType[] getSortedTypes() {
 		return typeNodes.keySet().toArray(new IType[typeNodes.keySet().size()]);
 	}
 
+	@Deprecated
 	public IType[] getSortedActiveTypes() {
 		List<IType> activeTypes = new ArrayList<IType>(typeNodes.keySet()
 				.size());
@@ -151,4 +153,9 @@ public class TypeTree {
 
 		return activeTypes.toArray(new IType[activeTypes.size()]);
 	}
+	
+	public TypeNode [] getSortedTypesNodes() {
+		return typeNodes.values().toArray(new TypeNode[typeNodes.size()]);
+	}
+	
 }

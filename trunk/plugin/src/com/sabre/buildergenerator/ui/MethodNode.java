@@ -27,10 +27,15 @@ import org.eclipse.jdt.core.IMethod;
 public class MethodNode extends TreeNode<IMethod> {
 
 	/**
-	 * @param aElement
+	 * @param aElement	
 	 * @param parentTypeNode TODO
 	 */
 	public MethodNode(IMethod aElement, TypeNode parentTypeNode) {
 		super(aElement, parentTypeNode);
+	}
+
+	@Override
+	public String toString() {
+		return getParentNode().toString() + "#" + getElement().getElementName();
 	}
 }

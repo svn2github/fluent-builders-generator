@@ -9,8 +9,9 @@ import org.eclipse.jdt.core.IMethod;
 public class MethodNodeTest extends TestCase {
 	private TypeNode parentNode;
 	private IMethod method;
-	
-	public void setUp() {
+
+	@Override
+    public void setUp() {
 		parentNode = mock(TypeNode.class);
 		method = mock(IMethod.class);
 	}

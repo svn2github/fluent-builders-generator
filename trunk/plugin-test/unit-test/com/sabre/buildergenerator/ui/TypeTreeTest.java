@@ -16,7 +16,6 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +25,7 @@ import junit.framework.TestCase;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
+import com.sabre.buildergenerator.javamodelhelper.ModelHelper.TypeMethods;
 import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
 
 /**
@@ -43,11 +43,11 @@ public class TypeTreeTest extends TestCase {
 	private IType baseType;
 	private IMethod method;
 	private TypeHelperRouter typeHelperRouter;
-	private Map<IType, Collection<IMethod>> baseTypeMethods;
+	private Map<IType, TypeMethods> baseTypeMethods;
 
-	private Map<IType, Collection<IMethod>> createBaseTypeMethodsMap() {
-	    HashMap<IType, Collection<IMethod>> map = new HashMap<IType, Collection<IMethod>>();
-	    map.put(baseType, asList(method));
+	private Map<IType, TypeMethods> createBaseTypeMethodsMap() {
+	    HashMap<IType, TypeMethods> map = new HashMap<IType, TypeMethods>();
+	    map.put(baseType, new TypeMethods(asList(method), Collections.<String, String> emptyMap()));
 		return map;
 	}
 
@@ -64,7 +64,7 @@ public class TypeTreeTest extends TestCase {
 
 	public void testRootNodeShouldBeAlwaysMarkedAsActive() throws Exception {
 		when(typeHelperRouter.findSetterMethods(baseType))
-				.thenReturn(Collections.<IType, Collection<IMethod>> emptyMap());
+				.thenReturn(Collections.<IType, TypeMethods> emptyMap());
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
 		assertTrue(typeTree.getNodeFor(baseType).isActive());
@@ -72,7 +72,7 @@ public class TypeTreeTest extends TestCase {
 
 	public void testShouldExposeBaseTypeAsRootNode() throws Exception {
 		when(typeHelperRouter.findSetterMethods(baseType))
-				.thenReturn(Collections.<IType, Collection<IMethod>> emptyMap());
+				.thenReturn(Collections.<IType, TypeMethods> emptyMap());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 		assertNotNull(typeTree.getNodeFor(baseType));
@@ -82,7 +82,7 @@ public class TypeTreeTest extends TestCase {
 			throws Exception {
 		IType complexType = mock(IType.class);
 
-		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(new SetType(complexType));
+		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(new SetType(complexType));
 		when(complexType.isClass()).thenReturn(true);
 		when(complexType.getFullyQualifiedName()).thenReturn("A");
 
@@ -96,7 +96,7 @@ public class TypeTreeTest extends TestCase {
 
 	public void testShouldExposeSimpleTypesSettersOfTheTypeAsMethodNode()
 			throws Exception {
-		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(new SetType());
+		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(new SetType());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
@@ -110,7 +110,7 @@ public class TypeTreeTest extends TestCase {
 		IType binaryType = mock(IType.class);
 		when(binaryType.isClass()).thenReturn(true);
 		when(binaryType.isBinary()).thenReturn(true);
-		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(new SetType(binaryType));
+		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(new SetType(binaryType));
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
@@ -128,7 +128,7 @@ public class TypeTreeTest extends TestCase {
 		when(collectionType.getFullyQualifiedName()).thenReturn(
 				collectionFullyQName);
 
-		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(
+		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(
 				new SetType(collectionType));
 
 		IType collectionSubType = mock(IType.class);
@@ -138,7 +138,7 @@ public class TypeTreeTest extends TestCase {
 		when(typeHelperRouter.resolveSignature(collectionType, "LAbcd;"))
 				.thenReturn(collectionSubType);
 		when(typeHelperRouter.findSetterMethods(collectionSubType))
-				.thenReturn(Collections.<IType, Collection<IMethod>> emptyMap());
+				.thenReturn(Collections.<IType, TypeMethods> emptyMap());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
@@ -169,14 +169,14 @@ public class TypeTreeTest extends TestCase {
 			throws Exception {
 		IType complexPointedType = mock(IType.class);
 
-		when(typeHelperRouter.resolveSetterSetType(method)).thenReturn(new SetType(complexPointedType));
+		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(new SetType(complexPointedType));
 
 		when(complexPointedType.isBinary()).thenReturn(false);
 		when(complexPointedType.isClass()).thenReturn(true);
 		when(complexPointedType.getFullyQualifiedName()).thenReturn("");
 
 		when(typeHelperRouter.findSetterMethods(complexPointedType))
-				.thenReturn(Collections.<IType, Collection<IMethod>> emptyMap());
+				.thenReturn(Collections.<IType, TypeMethods> emptyMap());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 

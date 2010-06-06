@@ -42,8 +42,8 @@ public class ModelHelper {
 
     private final SignatureResolver typeResolver = new SignatureResolver();
 
-    public Map<IType, Collection<IMethod>> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
-        final Map<IType, Collection<IMethod>> result = new HashMap<IType, Collection<IMethod>>();
+    public Map<IType, TypeMethods> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
+        final Map<IType, TypeMethods> result = new HashMap<IType, TypeMethods>();
         final Set<IType> typesDone = new HashSet<IType>();
         final Set<IType> types = new HashSet<IType>();
 
@@ -57,7 +57,7 @@ public class ModelHelper {
             typesDone.add(nextType);
             findSetterMethods(nextType, new MethodInspector() {
                     public void nextMethod(IType methodOwnerType, IMethod method,
-                        Map<String, String> parameterSubstitution) throws Exception {
+                            Map<String, String> parameterSubstitution) throws Exception {
                         String parameterTypeSignature = method.getParameterTypes()[0];
                         String qualifiedParameterTypeSignature = typeResolver.resolveTypeWithParameterMapping(
                                 methodOwnerType, parameterTypeSignature, parameterSubstitution);
@@ -71,18 +71,18 @@ public class ModelHelper {
                             newType = typeResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
                         }
 
-                        inspectSetter(nextType, method, newType);
+                        inspectSetter(nextType, method, newType, parameterSubstitution);
                     }
 
-                    private void inspectSetter(final IType nextType, IMethod method, IType newType) {
-                        Collection<IMethod> methods = result.get(nextType);
+                    private void inspectSetter(final IType nextType, IMethod method, IType newType, Map<String, String> parameterSubstitution) {
+                        TypeMethods methods = result.get(nextType);
 
                         if (methods == null) {
-                            methods = new ArrayList<IMethod>();
+                            methods = new TypeMethods(new ArrayList<IMethod>(), parameterSubstitution);
                             result.put(nextType, methods);
                         }
 
-                        methods.add(method);
+                        methods.methods.add(method);
 
                         if (newType != null && !typesDone.contains(newType)) {
                             types.add(newType);
@@ -270,5 +270,23 @@ public class ModelHelper {
     public static interface TypeInspector {
         public void nextSuperType(String fullSignature, IType superType, Map<String, String> parameterSubstitution)
             throws Exception;
+    }
+
+    public static class TypeMethods {
+        private final Collection<IMethod> methods;
+        private final Map<String, String> parameterSubstitution;
+
+        public TypeMethods(Collection<IMethod> methods, Map<String, String> parameterSubstitution) {
+            this.methods = methods;
+            this.parameterSubstitution = parameterSubstitution;
+        }
+
+        public Collection<IMethod> getMethods() {
+            return methods;
+        }
+
+        public Map<String, String> getParameterSubstitution() {
+            return parameterSubstitution;
+        }
     }
 }

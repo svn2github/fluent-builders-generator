@@ -1,6 +1,5 @@
 package com.sabre.buildergenerator.ui;
 
-import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.jdt.core.IMethod;
@@ -9,6 +8,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import com.sabre.buildergenerator.javamodelhelper.ModelHelper;
+import com.sabre.buildergenerator.javamodelhelper.ModelHelper.TypeMethods;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
@@ -44,7 +44,7 @@ public class TypeHelperRouter {
 		return false;
 	}
 
-	public Map<IType, Collection<IMethod>> findSetterMethods(IType type) throws Exception {
+	public Map<IType, TypeMethods> findSetterMethods(IType type) throws Exception {
 		return modelHelper.findSetterMethodsForAllTypesReferenced(type);
 	}
 
@@ -61,10 +61,10 @@ public class TypeHelperRouter {
 	// return SignatureResolver.resolveType(owningType, signature);
 	// }
 
-	public SetType resolveSetterSetType(IMethod method) throws Exception {
+	public SetType resolveSetterSetType(IMethod method, Map<String, String> parameterSubstitution) throws Exception {
 		String typeUnresolvedSignature = method.getParameterTypes()[0];
 		IType owningType = method.getDeclaringType();
-        String typeSignature = signatureResolver.resolveSignature(owningType, typeUnresolvedSignature);
+		String typeSignature = signatureResolver.resolveTypeWithParameterMapping(owningType, typeUnresolvedSignature, parameterSubstitution);
 
 		if (isSimpleTypeSignature(typeSignature)) {
 			return new SetType();

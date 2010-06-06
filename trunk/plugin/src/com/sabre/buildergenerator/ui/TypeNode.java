@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.IType;
  * Created: Mar 19, 2010<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
@@ -66,7 +66,7 @@ public class TypeNode extends TreeNode<IType> {
 		boolean active = false;
 
 		for (MethodNode node : methodNodesPointingAtMe) {
-			if (node.isSelected() && node.getParentNode().isActive()) {
+			if (node.isSelected() && (node.getParentNode() == this || node.getParentNode().isActive())) {
 				active = true;
 				break;
 			}
@@ -83,7 +83,8 @@ public class TypeNode extends TreeNode<IType> {
 		return Collections.unmodifiableCollection(methodNodesPointingAtMe);
 	}
 
-	public void setSelected(boolean b) {
+	@Override
+    public void setSelected(boolean b) {
 		if (!isActive()) {
 			throw new IllegalStateException(
 					"Can't be selected while being inactive");
@@ -106,7 +107,8 @@ public class TypeNode extends TreeNode<IType> {
 				"No such method node for that method");
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return getElement().getFullyQualifiedName().toString();
 	}
 }

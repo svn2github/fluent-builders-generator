@@ -14,10 +14,11 @@
 package com.sabre.buildergenerator.ui;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +27,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import com.sabre.buildergenerator.javamodelhelper.ModelHelper.TypeMethods;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
 
@@ -35,7 +37,7 @@ import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
  * Created: Mar 19, 2010<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
@@ -48,7 +50,8 @@ public class TypeTree {
 			+ "java\\.util\\.LinkedList|java\\.util\\.TreeSet)\\<.*$";
 	private final Map<IType, TypeNode> typeNodes;
 	private final TypeHelperRouter typeHelperRouter;
-	private final Map<IType, Collection<IMethod>> setterMethods;
+	private final Map<IType, TypeMethods> setterMethods;
+    private final Set<IType> typesAlreadyProcessed;
 
 	/**
 	 * @param aType
@@ -60,13 +63,14 @@ public class TypeTree {
 		this.typeNodes = new LinkedHashMap<IType, TypeNode>();
 		this.typeHelperRouter = typeHelperRouter;
 		this.setterMethods = typeHelperRouter.findSetterMethods(aType);
+		this.typesAlreadyProcessed = new HashSet<IType>();
 
-        processType(new RootTypeNode(aType, setterMethods.get(aType)));
+        processType(new RootTypeNode(aType, setterMethods.get(aType).getMethods()), setterMethods.get(aType).getParameterSubstitution());
 
 		for (TypeNode typeNode : typeNodes.values()) {
 			for (MethodNode methodNode : typeNode.getMethodNodes()) {
 				SetType setType = typeHelperRouter
-						.resolveSetterSetType(methodNode.getElement());
+						.resolveSetterSetType(methodNode.getElement(), setterMethods.get(aType).getParameterSubstitution());
 				if (!setType.isSimpleType()) {
 					TypeNode setTypeNode = getNodeFor(setType.getType());
 					if (setTypeNode != null) {
@@ -77,19 +81,21 @@ public class TypeTree {
 		}
 	}
 
-	private void processType(TypeNode typeNode) throws JavaModelException,
+	private void processType(TypeNode typeNode, Map<String, String> parameterSubstitution) throws JavaModelException,
 			SignatureParserException, Exception {
 		typeNodes.put(typeNode.getElement(), typeNode);
 		for (TreeNode<IMethod> setterNode : typeNode.getMethodNodes()) {
 			SetType setType = typeHelperRouter.resolveSetterSetType(setterNode
-					.getElement());
+					.getElement(), parameterSubstitution);
 			if (!setType.isSimpleType()) {
 				IType setIType = setType.getType();
-				if (setType.getType().isClass() && !setIType.isBinary()) {
-					if (!isCollection(setIType)) {
-						processType(createTypeNode(setIType));
+				if (!typesAlreadyProcessed.contains(setIType) && setType.getType().isClass() && !setIType.isBinary()) {
+				    typesAlreadyProcessed.add(setIType);
+
+				    if (!isCollection(setIType)) {
+						processType(createTypeNode(setIType), parameterSubstitution);
 					} else {
-						processCollection(setIType);
+						processCollection(setIType, parameterSubstitution);
 					}
 				}
 			}
@@ -97,10 +103,10 @@ public class TypeTree {
 	}
 
 	private TypeNode createTypeNode(IType setType) throws Exception {
-		return new TypeNode(setType, setterMethods.get(setType));
+		return new TypeNode(setType, setterMethods.get(setType).getMethods());
 	}
 
-	private void processCollection(IType setType) throws Exception {
+	private void processCollection(IType setType, Map<String, String> parameterSubstitution) throws Exception {
 		String typeFullyQualifiedName = setType.getFullyQualifiedName();
 		String typeSignature = Signature.createTypeSignature(
 				typeFullyQualifiedName, true);
@@ -108,7 +114,7 @@ public class TypeTree {
 		if (innerTypeSignature != null) {
 			IType innerType = typeHelperRouter.resolveSignature(setType,
 					innerTypeSignature);
-			processType(createTypeNode(innerType));
+			processType(createTypeNode(innerType), parameterSubstitution);
 		}
 	}
 
@@ -153,9 +159,9 @@ public class TypeTree {
 
 		return activeTypes.toArray(new IType[activeTypes.size()]);
 	}
-	
+
 	public TypeNode [] getSortedTypesNodes() {
 		return typeNodes.values().toArray(new TypeNode[typeNodes.size()]);
 	}
-	
+
 }

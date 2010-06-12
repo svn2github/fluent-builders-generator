@@ -734,6 +734,8 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 	private void transferTreeModelToUI(final TypeTree settersTypeTree) {
 		selectedSettersTreeViewer.refresh();
+		settersTypeTree.populateStateChange();		
+		selectedSettersTreeViewer.refresh();
 		transferClickedNodes(settersTypeTree);
 		selectedSettersTreeViewer.refresh();
 		transferCollapsedNodes(settersTypeTree);

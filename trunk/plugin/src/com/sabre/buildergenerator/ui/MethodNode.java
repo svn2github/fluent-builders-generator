@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.IMethod;
 
 public class MethodNode extends TreeNode<IMethod> {
 
+	private TypeNode pointedTypeNode;
+	
 	/**
 	 * @param aElement
 	 *  a eclipse jdt model element	
@@ -36,6 +38,14 @@ public class MethodNode extends TreeNode<IMethod> {
 		super(aElement, parentTypeNode);
 	}
 
+	public TypeNode getPointedTypeNode() {
+		return pointedTypeNode;
+	}
+	
+	void setPointedTypeNode(TypeNode pointedTypeNode) {
+		this.pointedTypeNode = pointedTypeNode;
+	}
+	
 	@Override
 	public String toString() {
 		return getParentNode().toString() + "#" + getElement().getElementName();

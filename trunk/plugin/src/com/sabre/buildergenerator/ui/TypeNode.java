@@ -35,6 +35,7 @@ public class TypeNode extends TreeNode<IType> {
 
 	private final HashSet<MethodNode> methodNodes;
 	private final HashSet<MethodNode> methodNodesPointingAtMe;
+	private boolean active = true;
 
 	/**
 	 * @param type
@@ -61,18 +62,16 @@ public class TypeNode extends TreeNode<IType> {
 	public Set<MethodNode> getMethodNodes() {
 		return methodNodes;
 	}
+	
+	
+	
+	private boolean isActive(Set<TypeNode> checkedNodes) {
+		return active;
+	}
 
 	public boolean isActive() {
-		boolean active = false;
-
-		for (MethodNode node : methodNodesPointingAtMe) {
-			if (node.isSelected() && (node.getParentNode() == this || node.getParentNode().isActive())) {
-				active = true;
-				break;
-			}
-		}
-
-		return active;
+		Set<TypeNode> checkedNodes = new HashSet<TypeNode>();
+		return isActive(checkedNodes);
 	}
 
 	public void addPointingMethodNode(MethodNode methodNode) {
@@ -110,5 +109,23 @@ public class TypeNode extends TreeNode<IType> {
 	@Override
     public String toString() {
 		return getElement().getFullyQualifiedName().toString();
+	}
+
+	public void deactivate() {
+		active = false;
+		
+	}
+
+	public void populateStateChange() {
+		active = true;
+		
+		for (MethodNode methodNode : getMethodNodes()) {
+			if (methodNode.isSelected()) {
+				TypeNode pointedTypeNode = methodNode.getPointedTypeNode();
+				if (pointedTypeNode != null && !pointedTypeNode.isActive()) {
+					pointedTypeNode.populateStateChange();
+				}
+			}
+		}
 	}
 }

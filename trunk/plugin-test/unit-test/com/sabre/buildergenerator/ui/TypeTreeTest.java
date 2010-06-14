@@ -148,23 +148,6 @@ public class TypeTreeTest extends TestCase {
 		// String sig = Signature.createSignature(fullQName, true);
 	}
 
-	public void testCollectionRegexShouldMatchTheCollectionSignatures() {
-		String[] collectionSignatures = new String[] {
-				"java.util.Collection<A>", "java.util.List<A>",
-				"java.util.ArrayList<A>", "java.util.LinkedList<A>",
-				"java.util.HashSet<A>", "java.util.Set<A>" };
-		for (String sig : collectionSignatures) {
-			String collectionRegex = TypeTree.COLLECTIONS_REGEX;
-			assertTrue("Cant match with " + sig + " with regex "
-					+ collectionRegex, sig.matches(collectionRegex));
-		}
-	}
-
-	public void testShouldGetTheInnerSignatureFromTypedCollection() {
-		String signature = "Ljava.util.List<LString;>;";
-		assertEquals("LString;", TypeTree.getInnerTypeSignature(signature));
-	}
-
 	public void testAfterTreeInitializationAllPointingMethodNodesShouldBeAttachedToTargetTypeNodes()
 			throws Exception {
 		IType complexPointedType = mock(IType.class);

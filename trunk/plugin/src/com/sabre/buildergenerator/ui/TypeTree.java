@@ -19,14 +19,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-
 import com.sabre.buildergenerator.javamodelhelper.ModelHelper.TypeMethods;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
@@ -37,17 +32,13 @@ import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
  * Created: Mar 19, 2010<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
 
 public class TypeTree {
 
-	public static final String COLLECTIONS_REGEX = "^(java\\.util\\.Collection|"
-			+ "java\\.util\\.Set|java\\.util\\.HashSet|"
-			+ "java\\.util\\.List|java\\.util\\.ArrayList|"
-			+ "java\\.util\\.LinkedList|java\\.util\\.TreeSet)\\<.*$";
 	private final Map<IType, TypeNode> typeNodes;
 	private final TypeHelperRouter typeHelperRouter;
 	private final Map<IType, TypeMethods> setterMethods;
@@ -98,12 +89,8 @@ public class TypeTree {
 						&& setType.getType().isClass() && !setIType.isBinary()) {
 					typesAlreadyProcessed.add(setIType);
 
-					if (!isCollection(setIType)) {
-						processType(createTypeNode(setIType),
-								parameterSubstitution);
-					} else {
-						processCollection(setIType, parameterSubstitution);
-					}
+					Map<String, String> newParameterSubstitution = setterMethods.get(setIType).getParameterSubstitution();
+					processType(createTypeNode(setIType), newParameterSubstitution);
 				}
 			}
 		}
@@ -111,35 +98,6 @@ public class TypeTree {
 
 	private TypeNode createTypeNode(IType setType) throws Exception {
 		return new TypeNode(setType, setterMethods.get(setType).getMethods());
-	}
-
-	private void processCollection(IType setType,
-			Map<String, String> parameterSubstitution) throws Exception {
-		String typeFullyQualifiedName = setType.getFullyQualifiedName();
-		String typeSignature = Signature.createTypeSignature(
-				typeFullyQualifiedName, true);
-		String innerTypeSignature = getInnerTypeSignature(typeSignature);
-		if (innerTypeSignature != null) {
-			IType innerType = typeHelperRouter.resolveSignature(setType,
-					innerTypeSignature);
-			processType(createTypeNode(innerType), parameterSubstitution);
-		}
-	}
-
-	static String getInnerTypeSignature(String collectionSignature) {
-		Pattern p = Pattern.compile("L[\\w\\.]+\\<(L[\\w\\.]+;)\\>.*;");
-		Matcher matcher = p.matcher(collectionSignature);
-		if (matcher.matches()) {
-			return matcher.group(1);
-		} else {
-			return null;
-		}
-	}
-
-	private boolean isCollection(IType setType) {
-		String fullyQName = setType.getFullyQualifiedName();
-
-		return fullyQName.matches(COLLECTIONS_REGEX);
 	}
 
 	/**
@@ -176,7 +134,7 @@ public class TypeTree {
 		for (TypeNode typeNode : typeNodes.values()) {
 			typeNode.deactivate();
 		}
-		
+
 		TypeNode rootNode = typeNodes.values().iterator().next();
 		rootNode.populateStateChange();
 	}

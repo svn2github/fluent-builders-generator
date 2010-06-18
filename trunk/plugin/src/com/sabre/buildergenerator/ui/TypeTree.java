@@ -56,23 +56,24 @@ public class TypeTree {
 		this.setterMethods = typeHelperRouter.findSetterMethods(aType);
 		this.typesAlreadyProcessed = new HashSet<IType>();
 
-		processType(new RootTypeNode(aType, setterMethods.get(aType)
-				.getMethods()), setterMethods.get(aType)
-				.getParameterSubstitution());
-
-		for (TypeNode typeNode : typeNodes.values()) {
-			for (MethodNode methodNode : typeNode.getMethodNodes()) {
-				SetType setType = typeHelperRouter.resolveSetterSetType(
-						methodNode.getElement(), setterMethods.get(aType)
-								.getParameterSubstitution());
-				if (!setType.isSimpleType()) {
-					TypeNode setTypeNode = getNodeFor(setType.getType());
-					if (setTypeNode != null) {
-						setTypeNode.addPointingMethodNode(methodNode);
-						methodNode.setPointedTypeNode(setTypeNode);
-					}
-				}
-			}
+		TypeMethods typeMethods = setterMethods.get(aType);
+		if (typeMethods != null) {
+            processType(new RootTypeNode(aType, typeMethods.getMethods()),
+                    typeMethods.getParameterSubstitution());
+    
+    		for (TypeNode typeNode : typeNodes.values()) {
+    			for (MethodNode methodNode : typeNode.getMethodNodes()) {
+    				SetType setType = typeHelperRouter.resolveSetterSetType(
+    						methodNode.getElement(), typeMethods.getParameterSubstitution());
+    				if (!setType.isSimpleType()) {
+    					TypeNode setTypeNode = getNodeFor(setType.getType());
+    					if (setTypeNode != null) {
+    						setTypeNode.addPointingMethodNode(methodNode);
+    						methodNode.setPointedTypeNode(setTypeNode);
+    					}
+    				}
+    			}
+    		}
 		}
 	}
 
@@ -85,11 +86,12 @@ public class TypeTree {
 					.getElement(), parameterSubstitution);
 			if (!setType.isSimpleType()) {
 				IType setIType = setType.getType();
-				if (!typesAlreadyProcessed.contains(setIType)
-						&& setType.getType().isClass() && !setIType.isBinary()) {
+				TypeMethods newTypeMethods = setterMethods.get(setIType);
+				if (!typesAlreadyProcessed.contains(setIType) && newTypeMethods != null
+				        && setType.getType().isClass() && !setIType.isBinary()) {
 					typesAlreadyProcessed.add(setIType);
 
-					Map<String, String> newParameterSubstitution = setterMethods.get(setIType).getParameterSubstitution();
+                    Map<String, String> newParameterSubstitution = newTypeMethods.getParameterSubstitution();
 					processType(createTypeNode(setIType), newParameterSubstitution);
 				}
 			}

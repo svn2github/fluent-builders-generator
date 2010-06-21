@@ -32,6 +32,7 @@ public class BuilderSourceGenerator {
     private static final String SETTER_PREFIX = "set";
     private static final String BUILDER_BASE_SUFFIX = "BuilderBase";
     private static final String FIELD_BUILDER_SUFFIX = "Builder";
+    private static final String COLLECTION_ELEMENT_BUILDER_PREFIX = "Added";
 
     private String setterPrefix = "with";
     private String collectionElementSetterPrefix = "withAdded";
@@ -320,7 +321,7 @@ public class BuilderSourceGenerator {
         String elementUType = imports.getUnqualified(elementType, nonTypeNames, builderPackage);
         String fieldClassName = getClassName(elementType);
         String innerBuilderName = fieldClassName + BUILDER_BASE_SUFFIX;
-        String fieldBuilderName = toUpperCaseStart(elementName + fieldClassName + FIELD_BUILDER_SUFFIX);
+        String fieldBuilderName = toUpperCaseStart(prefixed(COLLECTION_ELEMENT_BUILDER_PREFIX, elementName) + fieldClassName + FIELD_BUILDER_SUFFIX);
         String methodName = prefixed(collectionElementSetterPrefix, elementName);
         for (int i = 0; i < typeArgs.length;i++) {
             typeArgs[i] = imports.getUnqualified(typeArgs[i], nonTypeNames, builderPackage);

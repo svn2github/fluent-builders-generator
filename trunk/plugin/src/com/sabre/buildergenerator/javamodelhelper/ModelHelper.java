@@ -155,7 +155,7 @@ public class ModelHelper {
                                                                                       : fieldTypeArgumentSignature;
         }
 
-        return null;
+        return "Ljava.lang.Object;";
     }
 
     public Collection<IMethod> findSetterMethods(IType type) throws JavaModelException {

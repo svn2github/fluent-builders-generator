@@ -1,8 +1,8 @@
 #summary List of planned features.
 #labels Featured
 
-  * generate imports and strip packages from class names
-  * generate inner builders for parametrized types
+  * ~~ generate imports and strip packages from class names~~
+  * ~~generate inner builders for parametrized types~~
   * withParentXxxx()
   * add the observer support to the source generator so the progress of the generation could be displayed
   * ~~ get all the classes w/setters affected by generation to pass it to the gui, so the user can decide whether he/she wants it to be supported or not ~~

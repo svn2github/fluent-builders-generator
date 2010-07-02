@@ -15,6 +15,7 @@
       </viewerContribution>
       
       <!-- contributrion for quick source menu -->
+      <!--
       <viewerContribution
             id="builder-generator-eclipse-plugin.editorQuickContribution"
             targetID="#CompilationUnitEditorContext">
@@ -25,6 +26,7 @@
                menubarPath="org.eclipse.jdt.ui.edit.text.java.source.quickMenu/generateGroup">
          </action>
       </viewerContribution>
+      -->
       
       <objectContribution
             adaptable="false"
@@ -69,7 +71,7 @@
    </extension>
    <extension
          id="com.sabre.buildergenerator.generateBuilder"
-         name="Generate Builder"
+         name="Generate Fluent Builder"
          point="org.eclipse.ui.commands">
       <command
             id="com.sabre.buildergenerator.generateBuilder"

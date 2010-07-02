@@ -2,7 +2,7 @@
 <feature
       id="builder_generator_eclipse_feature"
       label="Fluent builders generator"
-      version="1.0.7">
+      version="1.0.8">
 
    <description url="http://code.google.com/p/fluent-builders-generator-eclipse-plugin/">
       An Eclipse plugin that allows the developer to generate fluent builders based on a complex POJO&apos;s structure.
@@ -192,7 +192,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
          id="builder_generator_eclipse_plugin"
          download-size="0"
          install-size="0"
-         version="1.0.7"
+         version="1.0.8"
          unpack="false"/>
 
 </feature>

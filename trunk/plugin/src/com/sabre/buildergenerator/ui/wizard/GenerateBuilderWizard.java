@@ -27,7 +27,7 @@ import java.net.URL;
  * Created: Dec 9, 2009<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
@@ -41,7 +41,7 @@ public class GenerateBuilderWizard extends Wizard {
 				properties);
 
 		this.addPage(generateBuilderWizardPage);
-		this.setWindowTitle("Generate builder");
+		this.setWindowTitle("Generate Fluent Builder");
 		this.setDefaultPageImageDescriptor(createLogoDescriptor());
 	}
 
@@ -71,13 +71,13 @@ public class GenerateBuilderWizard extends Wizard {
 
 	/**
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
 	 */
 	@Override
 	public boolean performFinish() {
 		boolean finish = false;
-		
+
 		if (generateBuilderWizardPage.isValid()) {
 			if (!generateBuilderWizardPage.builderFQNameIsUnique()) {
 				finish = MessageDialog
@@ -86,8 +86,8 @@ public class GenerateBuilderWizard extends Wizard {
 			} else {
 				finish = true;
 			}
-		} 
-		
+		}
+
 		return finish;
 	}
 }

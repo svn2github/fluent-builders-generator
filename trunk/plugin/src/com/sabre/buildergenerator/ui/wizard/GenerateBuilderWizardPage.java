@@ -61,7 +61,7 @@ import com.sabre.buildergenerator.ui.TypeTree;
  * Created: Dec 9, 2009<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- * 
+ *
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
@@ -138,7 +138,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 		this.properties = properties;
 
-		this.setTitle("Generate builder");
+		this.setTitle("Generate Fluent Builder");
 		this.setDescription("Generates builder for supplied class using it's properties");
 
 		this.errorCreator = new ErrorCreator();
@@ -148,7 +148,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 	/**
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite aParent) {
@@ -734,7 +734,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 	private void transferTreeModelToUI(final TypeTree settersTypeTree) {
 		selectedSettersTreeViewer.refresh();
-		settersTypeTree.populateStateChange();		
+		settersTypeTree.populateStateChange();
 		selectedSettersTreeViewer.refresh();
 		transferClickedNodes(settersTypeTree);
 		selectedSettersTreeViewer.refresh();

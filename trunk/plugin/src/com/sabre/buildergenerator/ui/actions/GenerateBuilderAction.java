@@ -184,10 +184,10 @@ public class GenerateBuilderAction {
         MethodProvider methodProvider = new MethodProvider() {
                 public void process(MethodConsumer consumer) {
                     if (selectedSetters != null) {
-                        for (IType selectedType : selectedSetters.getSortedActiveTypes()) {
-                            TypeNode typeNode = selectedSetters.getNodeFor(selectedType);
+                        for (TypeNode typeNode : selectedSetters.getSortedTypesNodes()) {
+                            IType selectedType = typeNode.getElement();
 
-                            if (typeNode.isSelected()) {
+                            if (typeNode.isActive()) {
                                 for (TreeNode<IMethod> methodNode : typeNode.getMethodNodes()) {
                                     if (methodNode.isSelected()) {
                                         IMethod selectedMethod = methodNode.getElement();

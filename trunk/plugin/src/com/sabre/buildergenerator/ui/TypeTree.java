@@ -13,10 +13,8 @@
 
 package com.sabre.buildergenerator.ui;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.jdt.core.IMethod;
@@ -60,7 +58,7 @@ public class TypeTree {
 		if (typeMethods != null) {
             processType(new RootTypeNode(aType, typeMethods.getMethods()),
                     typeMethods.getParameterSubstitution());
-    
+
     		for (TypeNode typeNode : typeNodes.values()) {
     			for (MethodNode methodNode : typeNode.getMethodNodes()) {
     				SetType setType = typeHelperRouter.resolveSetterSetType(
@@ -108,24 +106,6 @@ public class TypeTree {
 	 */
 	public TypeNode getNodeFor(IType aBaseType) {
 		return typeNodes.get(aBaseType);
-	}
-
-	@Deprecated
-	public IType[] getSortedTypes() {
-		return typeNodes.keySet().toArray(new IType[typeNodes.keySet().size()]);
-	}
-
-	@Deprecated
-	public IType[] getSortedActiveTypes() {
-		List<IType> activeTypes = new ArrayList<IType>(typeNodes.keySet()
-				.size());
-		for (IType type : typeNodes.keySet()) {
-			if (typeNodes.get(type).isActive()) {
-				activeTypes.add(type);
-			}
-		}
-
-		return activeTypes.toArray(new IType[activeTypes.size()]);
 	}
 
 	public TypeNode[] getSortedTypesNodes() {

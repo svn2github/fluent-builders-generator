@@ -61,9 +61,8 @@ public class TypeHelperRouter {
 	// return SignatureResolver.resolveType(owningType, signature);
 	// }
 
-	public SetType resolveSetterSetType(IMethod method, Map<String, String> parameterSubstitution) throws Exception {
+	public SetType resolveSetterSetType(IType owningType, IMethod method, Map<String, String> parameterSubstitution) throws Exception {
 		String typeUnresolvedSignature = method.getParameterTypes()[0];
-		IType owningType = method.getDeclaringType();
 		String typeSignature = signatureResolver.resolveTypeWithParameterMapping(owningType, typeUnresolvedSignature, parameterSubstitution);
 
 		if (isSimpleTypeSignature(typeSignature)) {

@@ -11,10 +11,12 @@
 
 package com.sabre.buildergenerator.javamodelhelper;
 
+import com.sabre.buildergenerator.Activator;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -40,8 +42,6 @@ public class ModelHelper {
     private static final String SETTER_PREFIX = "set";
     private final SignatureResolver signatureResolver = new SignatureResolver();
 
-    private final SignatureResolver typeResolver = new SignatureResolver();
-
     public Map<IType, TypeMethods> findSetterMethodsForAllTypesReferenced(IType type) throws Exception {
         final Map<IType, TypeMethods> result = new HashMap<IType, TypeMethods>();
         final Set<IType> typesDone = new HashSet<IType>();
@@ -57,33 +57,36 @@ public class ModelHelper {
             typesDone.add(nextType);
             findSetterMethods(nextType, new MethodInspector() {
                     public void nextMethod(IType methodOwnerType, IMethod method,
-                            Map<String, String> parameterSubstitution) throws Exception {
+                        Map<String, String> parameterSubstitution) throws Exception {
                         String parameterTypeSignature = method.getParameterTypes()[0];
-                        String qualifiedParameterTypeSignature = typeResolver.resolveTypeWithParameterMapping(
-                                methodOwnerType, parameterTypeSignature, parameterSubstitution);
+                        String qualifiedParameterTypeSignature = signatureResolver.resolveTypeWithParameterMapping(
+                                nextType, parameterTypeSignature, parameterSubstitution);
                         IType newType = null;
 
-                        if (isCollection(methodOwnerType, qualifiedParameterTypeSignature)) {
+                        if (isCollection(nextType, qualifiedParameterTypeSignature)) {
                             String innerTypeSignature = getTypeParameterSignature(qualifiedParameterTypeSignature);
 
-                            newType = typeResolver.resolveType(methodOwnerType, innerTypeSignature);
+                            newType = signatureResolver.resolveType(nextType, innerTypeSignature);
                         } else {
-                            newType = typeResolver.resolveType(methodOwnerType, qualifiedParameterTypeSignature);
+                            newType = signatureResolver.resolveType(nextType, qualifiedParameterTypeSignature);
                         }
 
-                        inspectSetter(nextType, method, newType, parameterSubstitution);
-                    }
-
-                    private void inspectSetter(final IType nextType, IMethod method, IType newType, Map<String, String> parameterSubstitution) {
                         TypeMethods methods = result.get(nextType);
-
+                        
                         if (methods == null) {
                             methods = new TypeMethods(new ArrayList<IMethod>(), parameterSubstitution);
                             result.put(nextType, methods);
                         }
-
+                        
                         methods.methods.add(method);
-
+                        if (Activator.debug) {
+                            String parameterType = signatureResolver.signatureToTypeName(method.getParameterTypes()[0]);
+                            String newTypeName = newType != null ? newType.getFullyQualifiedName() : "<null>";
+                            Activator.logDebug("found setter method: " + nextType.getFullyQualifiedName()
+                                    + "." + method.getElementName() + "(" + parameterType + ")"
+                                    + ", new type=" + newTypeName);
+                        }
+                        
                         if (newType != null && !typesDone.contains(newType)) {
                             types.add(newType);
                         }
@@ -103,7 +106,7 @@ public class ModelHelper {
     }
 
     public boolean implementsInterface(IType owningType, String typeSignature, String interfaceName) throws Exception {
-        IType type = typeResolver.resolveType(owningType, typeSignature);
+        IType type = signatureResolver.resolveType(owningType, typeSignature);
 
         return type != null ? implementsInterface(type, interfaceName) : false;
     }
@@ -122,7 +125,7 @@ public class ModelHelper {
     }
 
     public boolean hasSuperType(IType owningType, String typeSignature, String superTypeName) throws Exception {
-        IType type = typeResolver.resolveType(owningType, typeSignature);
+        IType type = signatureResolver.resolveType(owningType, typeSignature);
 
         return type != null ? hasSuperType(type, superTypeName) : false;
     }
@@ -213,9 +216,9 @@ public class ModelHelper {
         IType superType = type;
 
         while ((superclassTypeSignature = superType.getSuperclassTypeSignature()) != null) {
-            String resolvedTypeSignature = typeResolver.resolveSignature(superType, superclassTypeSignature);
+            String resolvedTypeSignature = signatureResolver.resolveSignature(superType, superclassTypeSignature);
 
-            superType = typeResolver.resolveType(superType, Signature.getTypeErasure(resolvedTypeSignature));
+            superType = signatureResolver.resolveType(superType, Signature.getTypeErasure(resolvedTypeSignature));
 
             if (superType == null) {
                 break;
@@ -254,9 +257,9 @@ public class ModelHelper {
         for (ITypeParameter typeParameter : type.getTypeParameters()) {
             final String resolvedSignature = signatureResolver.resolveSignature(type, typeArguments[i++]);
 
-//            if (resolvedSignature != null) {
-                typeParameterMapping.put(typeParameter.getElementName(), resolvedSignature);
-//            }
+            //            if (resolvedSignature != null) {
+            typeParameterMapping.put(typeParameter.getElementName(), resolvedSignature);
+            //            }
         }
 
         return typeParameterMapping;

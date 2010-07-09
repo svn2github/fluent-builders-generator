@@ -62,7 +62,7 @@ public class TypeTree {
     		for (TypeNode typeNode : typeNodes.values()) {
     			for (MethodNode methodNode : typeNode.getMethodNodes()) {
     				SetType setType = typeHelperRouter.resolveSetterSetType(
-    						methodNode.getElement(), typeMethods.getParameterSubstitution());
+    				        typeNode.getElement(), methodNode.getElement(), typeMethods.getParameterSubstitution());
     				if (!setType.isSimpleType()) {
     					TypeNode setTypeNode = getNodeFor(setType.getType());
     					if (setTypeNode != null) {
@@ -80,8 +80,8 @@ public class TypeTree {
 			throws JavaModelException, SignatureParserException, Exception {
 		typeNodes.put(typeNode.getElement(), typeNode);
 		for (TreeNode<IMethod> setterNode : typeNode.getMethodNodes()) {
-			SetType setType = typeHelperRouter.resolveSetterSetType(setterNode
-					.getElement(), parameterSubstitution);
+			SetType setType = typeHelperRouter.resolveSetterSetType(typeNode.getElement(), setterNode
+                    		.getElement(), parameterSubstitution);
 			if (!setType.isSimpleType()) {
 				IType setIType = setType.getType();
 				TypeMethods newTypeMethods = setterMethods.get(setIType);

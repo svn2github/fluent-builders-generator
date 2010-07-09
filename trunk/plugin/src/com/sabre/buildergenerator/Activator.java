@@ -11,6 +11,8 @@
 
 package com.sabre.buildergenerator;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.osgi.framework.BundleContext;
@@ -25,6 +27,8 @@ public class Activator extends AbstractUIPlugin {
 
     // The shared instance
     private static Activator plugin;
+
+    public static boolean debug = false;
 
     /**
      * The constructor
@@ -57,5 +61,11 @@ public class Activator extends AbstractUIPlugin {
      */
     public static Activator getDefault() {
         return plugin;
+    }
+
+    public static void logDebug(String msg) {
+        if (debug) {
+            plugin.getLog().log(new Status(IStatus.OK, PLUGIN_ID, msg));
+        }
     }
 }

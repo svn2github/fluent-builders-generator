@@ -48,9 +48,8 @@ public class BuilderGenerator {
     private final ModelHelper typeHelper = new ModelHelper();
     private final SignatureResolver typeResolver = new SignatureResolver();
 
-    private final Set<String> typesAlradyGeneratedInnerBuilders = new HashSet<String>();
+    final ClassesToProcess classesToProcess = new ClassesToProcess();
     private Map<String, Set<String>> typesAndFieldsToGenerate;
-    private final Set<String> typesToGenerateInnerBuilders = new HashSet<String>();
 
     public String generateSource(final IType type, String packageName, String builderName,
         MethodProvider methodProvider, String setterPrefix, String collectionSetterPrefix, String endPrefix,
@@ -85,7 +84,8 @@ public class BuilderGenerator {
         String typeQName = type.getFullyQualifiedName();
 
         generator.generateBuilderClass(type, typeQName, packageName, builderName, typeParamNames, typeParamBounds);
-        typesAlradyGeneratedInnerBuilders.add(Signature.createTypeSignature(typeQName, false));
+        String typeSignature = Signature.createTypeSignature(typeQName, false);
+        classesToProcess.markAsAlreadyProcessed(typeSignature);
 
         generateBuilderBaseClass(generator, typeQName, type, true);
 
@@ -155,14 +155,7 @@ public class BuilderGenerator {
         return builderSource;
     }
 
-    private void addTypeToGenerateInnerBuilder(String elementTypeSignature) {
-        if ((isBuilderRequestedForType(elementTypeSignature))
-                && !typesAlradyGeneratedInnerBuilders.contains(elementTypeSignature)) {
-            typesToGenerateInnerBuilders.add(elementTypeSignature);
-        }
-    }
-
-    private boolean isBuilderRequestedForType(String elementTypeSignature) {
+    boolean isBuilderRequestedForType(String elementTypeSignature) {
         return typesAndFieldsToGenerate == null || typesAndFieldsToGenerate.get(elementTypeSignature) != null;
     }
 
@@ -181,9 +174,8 @@ public class BuilderGenerator {
 
     private void generateBuilderBaseClasses(final BuilderSourceGenerator generator, final IType enclosingType)
         throws Exception {
-        while (!typesToGenerateInnerBuilders.isEmpty()) {
-            String typeSgn = typesToGenerateInnerBuilders.iterator().next();
-
+        String typeSgn = null;
+        while ((typeSgn = classesToProcess.nextClassToProcess()) != null) {
             final IType resolvedType = typeResolver.resolveType(enclosingType, typeSgn);
 
             if (resolvedType != null) {
@@ -192,9 +184,6 @@ public class BuilderGenerator {
 
                 generateBuilderBaseClass(generator, typeSpec, resolvedType, false);
             }
-
-            typesToGenerateInnerBuilders.remove(typeSgn);
-            typesAlradyGeneratedInnerBuilders.add(typeSgn);
         }
     }
 
@@ -287,7 +276,7 @@ public class BuilderGenerator {
                 String[] exceptionTypes = signaturesToTypes(exceptionSignatures);
 
                 generator.addCollectionElementBuilder(elementName, elementType, exceptionTypes, typeArgs);
-                addTypeToGenerateInnerBuilder(Signature.getTypeErasure(elementTypeSignature));
+                classesToProcess.addForProcessing(Signature.getTypeErasure(elementTypeSignature));
             }
         }
     }
@@ -309,7 +298,7 @@ public class BuilderGenerator {
             String[] exceptionTypes = signaturesToTypes(exceptionSignatures);
 
             generator.addFieldBuilder(fieldName, fieldType, exceptionTypes, typeArgs);
-            addTypeToGenerateInnerBuilder(Signature.getTypeErasure(resolvedFieldTypeSignature));
+            classesToProcess.addForProcessing(Signature.getTypeErasure(resolvedFieldTypeSignature));
         }
     }
 

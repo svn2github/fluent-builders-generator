@@ -85,9 +85,9 @@ public class BuilderGenerator {
         String typeQName = type.getFullyQualifiedName();
 
         generator.generateBuilderClass(type, typeQName, packageName, builderName, typeParamNames, typeParamBounds);
+        typesAlradyGeneratedInnerBuilders.add(Signature.createTypeSignature(typeQName, false));
 
         generateBuilderBaseClass(generator, typeQName, type, true);
-        typesAlradyGeneratedInnerBuilders.add(Signature.createTypeSignature(typeQName, false));
 
         generateBuilderBaseClasses(generator, type);
         generator.finish();

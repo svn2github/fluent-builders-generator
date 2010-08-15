@@ -1221,4 +1221,49 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
         assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
                 null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
     }
+
+    public void testGenerateBuilderForCyclicReference() throws Exception {
+        // given
+        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+            .withSourceLine("package testpkg;")
+            .withSourceLine("")
+            .withSourceLine("public class MyClass {")
+            .withSourceLine("    private MyClass field;")
+            .withSourceLine("")
+            .withSourceLine("    public MyClass getField() {")
+            .withSourceLine("        return field;")
+            .withSourceLine("    }")
+            .withSourceLine("")
+            .withSourceLine("    public void setField(MyClass aField) {")
+            .withSourceLine("        field = aField;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+
+        // when
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+
+        // then
+        buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
+            .withSourceLine(builderSource)
+            .buildType();
+
+        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+            .withSourceLine("package test;")
+            .withSourceLine("")
+            .withSourceLine("import testpkg.MyClass;")
+            .withSourceLine("import builderpkg.GeneratedBuilder;")
+            .withSourceLine("")
+            .withSourceLine("public class MainClass {")
+            .withSourceLine("    public static void main(String[] args) {")
+            .withSourceLine("        MyClass obj = GeneratedBuilder.myClass().withField().withField()")
+            .withSourceLine("                .endField().endField().build();")
+            .withSourceLine("        assert obj.getField().getField() != null;")
+            .withSourceLine("    }")
+            .withSourceLine("}")
+            .buildType();
+
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+    }
 }

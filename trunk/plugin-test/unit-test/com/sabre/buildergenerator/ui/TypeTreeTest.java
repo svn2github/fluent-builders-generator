@@ -15,6 +15,7 @@ package com.sabre.buildergenerator.ui;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.isA;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -82,7 +83,7 @@ public class TypeTreeTest extends TestCase {
 			throws Exception {
 		IType complexType = mock(IType.class);
 
-		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(new SetType(complexType));
+		when(typeHelperRouter.resolveSetterSetType(isA(IType.class), method, Collections.<String, String> emptyMap())).thenReturn(new SetType(complexType));
 		when(complexType.isClass()).thenReturn(true);
 		when(complexType.getFullyQualifiedName()).thenReturn("A");
 
@@ -96,7 +97,7 @@ public class TypeTreeTest extends TestCase {
 
 	public void testShouldExposeSimpleTypesSettersOfTheTypeAsMethodNode()
 			throws Exception {
-		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(new SetType());
+		when(typeHelperRouter.resolveSetterSetType(isA(IType.class), method, Collections.<String, String> emptyMap())).thenReturn(new SetType());
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
@@ -110,7 +111,7 @@ public class TypeTreeTest extends TestCase {
 		IType binaryType = mock(IType.class);
 		when(binaryType.isClass()).thenReturn(true);
 		when(binaryType.isBinary()).thenReturn(true);
-		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(new SetType(binaryType));
+		when(typeHelperRouter.resolveSetterSetType(isA(IType.class), method, Collections.<String, String> emptyMap())).thenReturn(new SetType(binaryType));
 
 		TypeTree typeTree = new TypeTree(baseType, typeHelperRouter);
 
@@ -128,7 +129,7 @@ public class TypeTreeTest extends TestCase {
 		when(collectionType.getFullyQualifiedName()).thenReturn(
 				collectionFullyQName);
 
-		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(
+		when(typeHelperRouter.resolveSetterSetType(isA(IType.class), method, Collections.<String, String> emptyMap())).thenReturn(
 				new SetType(collectionType));
 
 		IType collectionSubType = mock(IType.class);
@@ -152,7 +153,7 @@ public class TypeTreeTest extends TestCase {
 			throws Exception {
 		IType complexPointedType = mock(IType.class);
 
-		when(typeHelperRouter.resolveSetterSetType(method, Collections.<String, String> emptyMap())).thenReturn(new SetType(complexPointedType));
+		when(typeHelperRouter.resolveSetterSetType(isA(IType.class), method, Collections.<String, String> emptyMap())).thenReturn(new SetType(complexPointedType));
 
 		when(complexPointedType.isBinary()).thenReturn(false);
 		when(complexPointedType.isClass()).thenReturn(true);

@@ -37,25 +37,22 @@ import org.eclipse.text.edits.TextEdit;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 
 public class BuilderGenerator {
-    static final String SETTER_PREFIX = "set";
+    private static final String SETTER_PREFIX = "set";
+
     private final ModelHelper typeHelper = new ModelHelper();
     private final SignatureResolver typeResolver = new SignatureResolver();
-
-    final ClassesToProcess classesToProcess = new ClassesToProcess();
-    private Map<String, Set<String>> typesAndFieldsToGenerate;
+    private final ClassesToProcess classesToProcess = new ClassesToProcess();
+    private final MarkedFields typesAndFieldsToGenerate = new MarkedFields();
 
     public String generateSource(final IType type, String packageName, String builderName,
         MethodProvider methodProvider, String setterPrefix, String collectionSetterPrefix, String endPrefix,
         boolean doFormat) throws Exception {
         // find classes and fields to generate
-        typesAndFieldsToGenerate = retrieveTypesAndFieldsToGenerate(methodProvider);
+        typesAndFieldsToGenerate.retrieveTypesAndFieldsToGenerate(methodProvider);
 
         // create source builder
         final BuilderSourceGenerator generator = new BuilderSourceGenerator();
@@ -103,34 +100,6 @@ public class BuilderGenerator {
         return builderSource;
     }
 
-    private Map<String, Set<String>> retrieveTypesAndFieldsToGenerate(MethodProvider methodProvider) {
-        if (methodProvider != null) {
-            final Map<String, Set<String>> typesAndFieldsToGenerate = new HashMap<String, Set<String>>();
-
-            methodProvider.process(new MethodConsumer() {
-                    public void nextMethod(IType selectedType, IMethod selectedMethod) {
-                        String typeName = selectedType.getFullyQualifiedName();
-                        String typeSignature = Signature.createTypeSignature(typeName, false);
-
-                        Set<String> fieldNames = typesAndFieldsToGenerate.get(typeSignature);
-
-                        if (fieldNames == null) {
-                            fieldNames = new HashSet<String>();
-                            typesAndFieldsToGenerate.put(typeSignature, fieldNames);
-                        }
-
-                        String fieldName = fieldNameFromSetter(selectedMethod);
-
-                        fieldNames.add(fieldName);
-                    }
-                });
-
-            return typesAndFieldsToGenerate;
-        }
-
-        return null;
-    }
-
     private String formatSource(String builderSource) {
         TextEdit text = ToolFactory.createCodeFormatter(null).format(CodeFormatter.K_COMPILATION_UNIT, builderSource, 0,
                 builderSource.length(), 0, "\n");
@@ -153,23 +122,6 @@ public class BuilderGenerator {
         }
 
         return builderSource;
-    }
-
-    boolean isBuilderRequestedForType(String elementTypeSignature) {
-        return typesAndFieldsToGenerate == null || typesAndFieldsToGenerate.get(elementTypeSignature) != null;
-    }
-
-    private boolean isSetterRequestedForField(String elementTypeSignature, String fieldName) {
-        return typesAndFieldsToGenerate == null
-            || typesAndFieldsToGenerate.get(elementTypeSignature) != null && typesAndFieldsToGenerate.get(
-                elementTypeSignature).contains(fieldName);
-    }
-
-    private boolean isSetterRequestedForField(IType enclosingType, String fieldName) {
-        String enclosingTypeFullyQualifiedName = enclosingType.getFullyQualifiedName('.');
-        String enclosingTypeSignature = Signature.createTypeSignature(enclosingTypeFullyQualifiedName, false);
-
-        return isSetterRequestedForField(enclosingTypeSignature, fieldName);
     }
 
     private void generateBuilderBaseClasses(final BuilderSourceGenerator generator, final IType enclosingType)
@@ -208,7 +160,7 @@ public class BuilderGenerator {
                                     exceptionSignatures[i], parameterSubstitution);
                         }
 
-                        if (isSetterRequestedForField(resolvedType, fieldName)) {
+                        if (typesAndFieldsToGenerate.isSetterRequestedForField(resolvedType, fieldName)) {
                             generateSimpleSetter(generator, methodOwnerType, exceptionSignatures, fieldName,
                                 qualifiedParameterTypeSignature);
                             generateCollectionAdder(generator, methodOwnerType, exceptionSignatures, fieldName,
@@ -272,7 +224,7 @@ public class BuilderGenerator {
                 typeArgs[i] = typeResolver.signatureToTypeName(sig);
             }
 
-            if (isSourceClass(enclosingType, elementTypeSignature) && isBuilderRequestedForType(elementTypeSignature)) {
+            if (isSourceClass(enclosingType, elementTypeSignature) && typesAndFieldsToGenerate.isBuilderRequestedForType(elementTypeSignature)) {
                 String[] exceptionTypes = signaturesToTypes(exceptionSignatures);
 
                 generator.addCollectionElementBuilder(elementName, elementType, exceptionTypes, typeArgs);
@@ -294,7 +246,7 @@ public class BuilderGenerator {
         }
 
         if (isSourceClass(enclosingType, resolvedFieldTypeSignature)
-                && isBuilderRequestedForType(resolvedFieldTypeSignature)) {
+                && typesAndFieldsToGenerate.isBuilderRequestedForType(resolvedFieldTypeSignature)) {
             String[] exceptionTypes = signaturesToTypes(exceptionSignatures);
 
             generator.addFieldBuilder(fieldName, fieldType, exceptionTypes, typeArgs);
@@ -337,11 +289,11 @@ public class BuilderGenerator {
         return type != null && type.isClass() && type.isStructureKnown() && !type.isBinary();
     }
 
-    private String fieldNameFromSetter(IMethod method) {
+    public static String fieldNameFromSetter(IMethod method) {
         return fieldNameFromSetterName(method.getElementName());
     }
 
-    private String fieldNameFromSetterName(String setterName) {
+    private static String fieldNameFromSetterName(String setterName) {
         String fieldName = setterName.substring(SETTER_PREFIX.length());
 
         return Character.toLowerCase(fieldName.charAt(0)) + fieldName.substring(1);

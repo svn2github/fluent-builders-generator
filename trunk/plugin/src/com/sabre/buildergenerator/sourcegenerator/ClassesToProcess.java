@@ -5,28 +5,28 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class ClassesToProcess {
-    private final Set<String> typesAlradyGeneratedInnerBuilders = new HashSet<String>();
-    private final Set<String> typesToGenerateInnerBuilders = new HashSet<String>();
+    private final Set<String> typesAlradyGenerated = new HashSet<String>();
+    private final Set<String> typesToGenerate = new HashSet<String>();
 
     public void addForProcessing(String typeSignature) {
-        if (!typesAlradyGeneratedInnerBuilders.contains(typeSignature)) {
-            typesToGenerateInnerBuilders.add(typeSignature);
+        if (!typesAlradyGenerated.contains(typeSignature)) {
+            typesToGenerate.add(typeSignature);
         }
     }
 
     public void markAsAlreadyProcessed(String typeSignature) {
-        typesAlradyGeneratedInnerBuilders.add(typeSignature);
+        typesAlradyGenerated.add(typeSignature);
+        typesToGenerate.remove(typeSignature);
     }
 
     public String nextClassToProcess() {
-        String typeSgn = null;
-        Iterator<String> iterator = typesToGenerateInnerBuilders.iterator();
+        String typeSignature = null;
+        Iterator<String> iterator = typesToGenerate.iterator();
         if (iterator.hasNext()) {
-            typeSgn = iterator.next();
-            typesToGenerateInnerBuilders.remove(typeSgn);
-            markAsAlreadyProcessed(typeSgn);
+            typeSignature = iterator.next();
+            markAsAlreadyProcessed(typeSignature);
         }
 
-        return typeSgn;
+        return typeSignature;
     }
 }

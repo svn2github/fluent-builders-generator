@@ -28,13 +28,10 @@ import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
  * Title: TypeTree.java<br>
  * Description: <br>
  * Created: Mar 19, 2010<br>
- * Copyright: Copyright (c) 2007<br>
- * Company: Sabre Holdings Corporation
  *
- * @author Jakub Janczak sg0209399
+ * @author Jakub Janczak
  * @version $Rev$: , $Date$: , $Author$:
  */
-
 public class TypeTree {
 
 	private final Map<IType, TypeNode> typeNodes;
@@ -44,8 +41,11 @@ public class TypeTree {
 
 	/**
 	 * @param aType
+	 *  a root type
 	 * @param typeHelperRouter
+	 *  a helper router
 	 * @throws Exception
+	 *  an exception thrown sometimes
 	 */
 	public TypeTree(IType aType, TypeHelperRouter typeHelperRouter)
 			throws Exception {

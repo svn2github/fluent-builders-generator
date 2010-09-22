@@ -112,6 +112,6 @@ public class SettersContentTreeProvider implements ITreeContentProvider {
      * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
      */
     public void inputChanged(Viewer aViewer, Object aOldInput, Object aNewInput) {
-    	System.out.println("Input changed : " + aViewer + " oldINput" + aOldInput + " new input " + aNewInput);
+//    	System.out.println("Input changed : " + aViewer + " oldINput" + aOldInput + " new input " + aNewInput);
     }
 }

@@ -48,6 +48,19 @@ public class BuilderGenerator {
     private final ClassesToProcess classesToProcess = new ClassesToProcess();
     private final MarkedFields typesAndFieldsToGenerate = new MarkedFields();
 
+    /**
+     * @param type
+     * @param packageName
+     * @param builderName
+     * @param methodProvider
+     * @param setterPrefix
+     * @param collectionSetterPrefix
+     * @param endPrefix
+     * @param doFormat
+     *  perform formatting ?
+     * @return
+     * @throws Exception
+     */
     public String generateSource(final IType type, String packageName, String builderName,
         MethodProvider methodProvider, String setterPrefix, String collectionSetterPrefix, String endPrefix,
         boolean doFormat) throws Exception {

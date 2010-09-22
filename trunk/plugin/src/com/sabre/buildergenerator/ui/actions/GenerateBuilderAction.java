@@ -11,40 +11,36 @@
 
 package com.sabre.buildergenerator.ui.actions;
 
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodConsumer;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvider;
-import com.sabre.buildergenerator.ui.TreeNode;
-import com.sabre.buildergenerator.ui.TypeNode;
-import com.sabre.buildergenerator.ui.TypeTree;
-import com.sabre.buildergenerator.ui.actions.support.CompliantCompilationUnitTester;
-import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
+import java.io.PrintWriter;
+import java.io.StringBufferInputStream;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
-
 import org.eclipse.swt.widgets.Shell;
 
-import java.io.PrintWriter;
-import java.io.StringBufferInputStream;
-import java.io.StringWriter;
-
-import java.lang.reflect.InvocationTargetException;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodConsumer;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvider;
+import com.sabre.buildergenerator.ui.MethodNode;
+import com.sabre.buildergenerator.ui.TypeNode;
+import com.sabre.buildergenerator.ui.TypeTree;
+import com.sabre.buildergenerator.ui.actions.support.CompliantCompilationUnitTester;
+import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
 
 
 /**
@@ -90,20 +86,8 @@ public class GenerateBuilderAction {
 
                             IPackageFragmentRoot selectedSourceFolder = properties.getSourceFolder();
 
-                            // IPackageFragment selectedPackage =
-                            // properties.getPackage();
                             String packageName = properties.getPackageName();
-                            String setterPrefix = properties.getMethodsPrefix();
-                            String collectionSetterPrefix = properties.getCollectionAddPrefix();
-                            String endPrefix = properties.getEndPrefix();
                             String builderClassName = properties.getBuilderClassName();
-                            TypeTree selectedSetters = properties.getSettersTypeTree();
-                            boolean formatCode = properties.isFormatCode();
-
-                            // generate source code
-
-                            // String packageName =
-                            // selectedPackage.getElementName();
 
                             aMonitor.worked(1);
 
@@ -112,8 +96,7 @@ public class GenerateBuilderAction {
                                 selectedSourceFolder.createPackageFragment(packageName, false, aMonitor);
                             }
 
-                            String source = generateSource(new BuilderGenerator(), type, packageName, builderClassName,
-                                    selectedSetters, setterPrefix, collectionSetterPrefix, endPrefix, formatCode);
+                            String source = generateSource(new BuilderGenerator(), properties);
 
                             aMonitor.worked(2);
 
@@ -178,18 +161,18 @@ public class GenerateBuilderAction {
         return true;
     }
 
-    private String generateSource(BuilderGenerator builderGenerator, final IType type, String packageName,
-        String builderName, final TypeTree selectedSetters, String setterPrefix, String collectionSetterPrefix,
-        String endPrefix, boolean doFormat) throws Exception {
+    private String generateSource(BuilderGenerator builderGenerator, final BuilderGenerationProperties properties) throws Exception {
+    	
+    	final TypeTree typeTree = properties.getSettersTypeTree();
         MethodProvider methodProvider = new MethodProvider() {
                 public void process(MethodConsumer consumer) {
-                    if (selectedSetters != null) {
-                        for (TypeNode typeNode : selectedSetters.getSortedTypesNodes()) {
+                    if (typeTree != null) {
+                        for (TypeNode typeNode : typeTree.getSortedTypesNodes()) {
                             IType selectedType = typeNode.getElement();
 
                             if (typeNode.isActive()) {
-                                for (TreeNode<IMethod> methodNode : typeNode.getMethodNodes()) {
-                                    if (methodNode.isSelected()) {
+                                for (MethodNode methodNode : typeNode.getMethodNodes()) {
+                                    if (methodNode.isSelected() && methodNode.isAccessibleFromPackage(properties.getPackageName())) {
                                         IMethod selectedMethod = methodNode.getElement();
 
                                         consumer.nextMethod(selectedType, selectedMethod);
@@ -201,7 +184,7 @@ public class GenerateBuilderAction {
                 }
             };
 
-        return builderGenerator.generateSource(type, packageName, builderName, methodProvider, setterPrefix,
-                collectionSetterPrefix, endPrefix, doFormat);
+        return builderGenerator.generateSource(properties.getType(), properties.getPackageName(), properties.getBuilderClassName(), methodProvider, properties.getMethodsPrefix(),
+                properties.getCollectionAddPrefix(), properties.getEndPrefix(), properties.isFormatCode());
     }
 }

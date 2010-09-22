@@ -172,7 +172,7 @@ public class ModelHelper {
         List<IMethod> setterMethods = new ArrayList<IMethod>();
 
         for (IMethod method : methods) {
-            if (isSetterMethod(method)) {
+            if (isReachableSetterMethod(method)) {
                 setterMethods.add(method);
             }
         }
@@ -180,10 +180,14 @@ public class ModelHelper {
         return setterMethods;
     }
 
-    private boolean isSetterMethod(IMethod method) throws JavaModelException {
-        return method.getElementName().startsWith(SETTER_PREFIX) && method.getReturnType().equals(Signature.SIG_VOID)
-            && method.getParameterTypes().length == 1 && Flags.isPublic(method.getFlags());
+    private boolean isReachableSetterMethod(IMethod method) throws JavaModelException {
+        return isSetterMethod(method) && !Flags.isPrivate(method.getFlags());
     }
+
+	private boolean isSetterMethod(IMethod method) throws JavaModelException {
+		return method.getElementName().startsWith(SETTER_PREFIX) && method.getReturnType().equals(Signature.SIG_VOID)
+            && method.getParameterTypes().length == 1;
+	}
 
     private Collection<IMethod> findAllMethods(IType type) throws JavaModelException {
         List<IMethod> methods = new ArrayList<IMethod>(Arrays.asList(type.getMethods()));
@@ -235,7 +239,7 @@ public class ModelHelper {
                     Map<String, String> typeParameterMapping) throws Exception {
                     try {
                         for (IMethod method : superType.getMethods()) {
-                            if (isSetterMethod(method)) {
+                            if (isReachableSetterMethod(method)) {
                                 inspector.nextMethod(superType, method, typeParameterMapping);
                             }
                         }

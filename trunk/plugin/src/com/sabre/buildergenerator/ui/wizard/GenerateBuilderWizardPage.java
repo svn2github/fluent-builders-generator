@@ -16,8 +16,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -61,30 +63,24 @@ import com.sabre.buildergenerator.ui.TypeTree;
  * Created: Dec 9, 2009<br>
  * Copyright: Copyright (c) 2007<br>
  * Company: Sabre Holdings Corporation
- *
+ * 
  * @author Jakub Janczak sg0209399
  * @version $Rev$: , $Date$: , $Author$:
  */
 class GenerateBuilderWizardPage extends NewElementWizardPage {
 	private final class SettersTypeTreeCheckStateListener implements
 			ICheckStateListener {
-		private final TypeTree settersTypeTree;
 
-		private SettersTypeTreeCheckStateListener(TypeTree settersTypeTree) {
-			this.settersTypeTree = settersTypeTree;
-		}
-
-		public void checkStateChanged(
-				CheckStateChangedEvent event) {
+		public void checkStateChanged(CheckStateChangedEvent event) {
 
 			((TreeNode<?>) ((TreeNode<?>) event.getElement()))
 					.setSelected(event.getChecked());
 
-			transferTreeModelToUI(settersTypeTree);
+			transferTreeModelToUI();
 		}
 	}
 
-	private final class SettersTypeTreeExpansionListener implements
+	private class SettersTypeTreeExpansionListener implements
 			ITreeViewerListener {
 		private TreeNode<?> getTreeNode(TreeExpansionEvent event) {
 			return (TreeNode<?>) event.getElement();
@@ -99,20 +95,23 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 		}
 	}
 
-	private final class AcitveTypeNodesViewerFilter extends ViewerFilter {
+	private class AcitveTypeNodesViewerFilter extends ViewerFilter {
 		@Override
 		public boolean select(Viewer viewer, Object parentElement,
 				Object element) {
 			if (element instanceof TypeNode) {
 				return ((TypeNode) element).isActive();
+			} else if (element instanceof MethodNode) {
+				return ((MethodNode) element)
+						.isAccessibleFromPackage(properties.getPackageName());
 			}
 			return true;
 		}
 	}
 
-	ErrorCreator errorCreator;
+	private ErrorCreator errorCreator;
 
-	final BuilderGenerationProperties properties;
+	private final BuilderGenerationProperties properties;
 
 	private Text builderClassNameText;
 
@@ -139,7 +138,8 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 		this.properties = properties;
 
 		this.setTitle("Generate Fluent Builder");
-		this.setDescription("Generates builder for supplied class using it's properties");
+		this
+				.setDescription("Generates builder for supplied class using it's properties");
 
 		this.errorCreator = new ErrorCreator();
 		this.typeNameValidator = new TypeNameValidator(getJavaProject(),
@@ -148,7 +148,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 
 	/**
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite aParent) {
@@ -296,7 +296,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 					.addTreeListener(new SettersTypeTreeExpansionListener());
 
 			selectedSettersTreeViewer
-					.addCheckStateListener(new SettersTypeTreeCheckStateListener(settersTypeTree));
+					.addCheckStateListener(new SettersTypeTreeCheckStateListener());
 
 			Object someInput = new Object();
 
@@ -339,7 +339,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 						typeNode.setSelected(true);
 					}
 
-					transferTreeModelToUI(settersTypeTree);
+					transferTreeModelToUI();
 				}
 
 				public void widgetDefaultSelected(SelectionEvent e) {
@@ -354,7 +354,7 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 				public void widgetSelected(SelectionEvent e) {
 					settersTypeTree.getSortedTypesNodes()[0].setSelected(false);
 
-					transferTreeModelToUI(settersTypeTree);
+					transferTreeModelToUI();
 				}
 
 				public void widgetDefaultSelected(SelectionEvent e) {
@@ -630,6 +630,8 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 				Text text = (Text) aE.widget;
 
 				properties.setPackageName(text.getText());
+				System.out.println(text.getText());
+				transferTreeModelToUI();
 			}
 		});
 		new AutoCompleteField(packageNameText, new TextContentAdapter(),
@@ -732,13 +734,13 @@ class GenerateBuilderWizardPage extends NewElementWizardPage {
 		return properties;
 	}
 
-	private void transferTreeModelToUI(final TypeTree settersTypeTree) {
+	private void transferTreeModelToUI() {
 		selectedSettersTreeViewer.refresh();
-		settersTypeTree.populateStateChange();
+		properties.getSettersTypeTree().populateStateChange();
 		selectedSettersTreeViewer.refresh();
-		transferClickedNodes(settersTypeTree);
+		transferClickedNodes(properties.getSettersTypeTree());
 		selectedSettersTreeViewer.refresh();
-		transferCollapsedNodes(settersTypeTree);
+		transferCollapsedNodes(properties.getSettersTypeTree());
 		selectedSettersTreeViewer.refresh();
 	}
 }

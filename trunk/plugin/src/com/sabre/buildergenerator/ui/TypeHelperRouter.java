@@ -48,19 +48,6 @@ public class TypeHelperRouter {
 		return modelHelper.findSetterMethodsForAllTypesReferenced(type);
 	}
 
-	// public String resolveSetTypeSignature(IMethod method)
-	// throws JavaModelException, SignatureParserException {
-	// String unresolvedSetTypeSig = method.getParameterTypes()[0];
-	// return SignatureResolver.resolveSignature(method.getDeclaringType(),
-	// unresolvedSetTypeSig);
-	// }
-	//
-	// public IType resolveTypeSignatureToIType(String signature, IType
-	// owningType)
-	// throws JavaModelException, SignatureParserException {
-	// return SignatureResolver.resolveType(owningType, signature);
-	// }
-
 	public SetType resolveSetterSetType(IType owningType, IMethod method, Map<String, String> parameterSubstitution) throws Exception {
 		String typeUnresolvedSignature = method.getParameterTypes()[0];
 		String typeSignature = signatureResolver.resolveTypeWithParameterMapping(owningType, typeUnresolvedSignature, parameterSubstitution);

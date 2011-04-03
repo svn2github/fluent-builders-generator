@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
-import com.sabre.buildergenerator.javamodelhelper.ModelHelper.TypeMethods;
+import com.sabre.buildergenerator.javamodel.eclipse.ModelHelper.TypeMethods;
 import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
 
 /**

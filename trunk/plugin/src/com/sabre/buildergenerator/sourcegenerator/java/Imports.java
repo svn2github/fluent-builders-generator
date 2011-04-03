@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.sabre.buildergenerator.typeutils.TypeResolver;
+import com.sabre.buildergenerator.typeutils.TypeUtil;
 
 public class Imports {
     private static final Set<String> simpleTypes = new HashSet<String>();
@@ -45,7 +45,7 @@ public class Imports {
      */
     public String getUnqualified(String qualifiedTypeName, Set<String> nonTypeNames, String packageName) {
         // remove spaces
-        qualifiedTypeName = TypeResolver.normalizeType(qualifiedTypeName);
+        qualifiedTypeName = TypeUtil.normalizeType(qualifiedTypeName);
 
         return doGetUnqualified(qualifiedTypeName, nonTypeNames, packageName);
     }
@@ -55,7 +55,7 @@ public class Imports {
      */
     public String doGetUnqualified(String qualifiedTypeName, final Set<String> nonTypeNames, final String packageName) {
         String classname = register(qualifiedTypeName, nonTypeNames, packageName);
-        return TypeResolver.processTypeParams(classname, new TypeResolver.TypeProcessor() {
+        return TypeUtil.processTypeParams(classname, new TypeUtil.TypeProcessor() {
 
             public String processType(String param) {
                 StringBuilder buf = new StringBuilder();

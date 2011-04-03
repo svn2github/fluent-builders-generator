@@ -1,4 +1,4 @@
-package com.sabre.buildergenerator.javamodelhelper;
+package com.sabre.buildergenerator.javamodel.eclipse;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;

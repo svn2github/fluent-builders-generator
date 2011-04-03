@@ -9,12 +9,12 @@ import com.sabre.buildergenerator.javamodel.IModelHelper;
 import com.sabre.buildergenerator.javamodel.ISignatureResolver;
 import com.sabre.buildergenerator.javamodel.ITypeAccessor;
 import com.sabre.buildergenerator.javamodel.ITypeResolver;
-import com.sabre.buildergenerator.javamodelhelper.ModelHelper;
-import com.sabre.buildergenerator.javamodelhelper.TypeAccessor;
-import com.sabre.buildergenerator.signatureutils.SignatureResolver;
+import com.sabre.buildergenerator.javamodel.eclipse.ModelHelper;
+import com.sabre.buildergenerator.javamodel.eclipse.SignatureResolver;
+import com.sabre.buildergenerator.javamodel.eclipse.TypeAccessor;
+import com.sabre.buildergenerator.javamodel.eclipse.TypeResolver;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 import com.sabre.buildergenerator.sourcegenerator.MarkedFields;
-import com.sabre.buildergenerator.typeutils.TypeResolver;
 
 public class EclipseBuilderGenerator extends BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException> {
     public EclipseBuilderGenerator() {

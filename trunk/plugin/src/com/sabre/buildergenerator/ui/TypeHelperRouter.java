@@ -7,10 +7,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import com.sabre.buildergenerator.javamodelhelper.ModelHelper;
-import com.sabre.buildergenerator.javamodelhelper.ModelHelper.TypeMethods;
+import com.sabre.buildergenerator.javamodel.eclipse.ModelHelper;
+import com.sabre.buildergenerator.javamodel.eclipse.SignatureResolver;
+import com.sabre.buildergenerator.javamodel.eclipse.ModelHelper.TypeMethods;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
-import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
 /**
  * Non static class that routes the methods into the static methods of

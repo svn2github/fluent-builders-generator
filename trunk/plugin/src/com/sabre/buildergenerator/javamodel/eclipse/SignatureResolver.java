@@ -9,10 +9,15 @@
  *    Sabre Polska sp. z o.o. - initial implementation during Hackday
  */
 
-package com.sabre.buildergenerator.signatureutils;
+package com.sabre.buildergenerator.javamodel.eclipse;
 
 import com.sabre.buildergenerator.Activator;
 import com.sabre.buildergenerator.javamodel.ISignatureResolver;
+import com.sabre.buildergenerator.signatureutils.ExceptionWrapper;
+import com.sabre.buildergenerator.signatureutils.SignatureBuilder;
+import com.sabre.buildergenerator.signatureutils.SignatureParser;
+import com.sabre.buildergenerator.signatureutils.SignatureParserException;
+import com.sabre.buildergenerator.signatureutils.SignatureUtil;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

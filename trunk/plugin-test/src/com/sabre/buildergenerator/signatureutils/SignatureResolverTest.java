@@ -4,6 +4,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
 import com.sabre.buildergenerator.JdtTestCase;
+import com.sabre.buildergenerator.javamodel.eclipse.SignatureResolver;
 
 public class SignatureResolverTest extends JdtTestCase {
     private SignatureResolver typeResolver;

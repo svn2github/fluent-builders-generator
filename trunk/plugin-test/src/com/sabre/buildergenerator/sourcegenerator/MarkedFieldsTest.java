@@ -2,17 +2,18 @@ package com.sabre.buildergenerator.sourcegenerator;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
 import com.sabre.buildergenerator.JdtTestCase;
 
 public class MarkedFieldsTest  extends JdtTestCase {
-    private MarkedFields<IType, IMethod, JavaModelException> markedFields;
+    private MarkedFields<IType, ITypeParameter, IMethod, JavaModelException> markedFields;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        markedFields = new MarkedFields<IType, IMethod, JavaModelException>();
+        markedFields = new MarkedFields<IType, ITypeParameter, IMethod, JavaModelException>();
     }
 
     @Override

@@ -32,7 +32,7 @@ public class BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException
     private ISignatureResolver<IType, JavaModelException> signatureResolver;
     private ITypeResolver<IType, JavaModelException> typeResolver;
     private ITypeAccessor<IType, ITypeParameter, IMethod, JavaModelException> typeAccessor;
-    private MarkedFields<IType, IMethod, JavaModelException> typesAndFieldsToGenerate;
+    private MarkedFields<IType, ITypeParameter, IMethod, JavaModelException> typesAndFieldsToGenerate;
     private final ClassesToProcess classesToProcess = new ClassesToProcess();
 
     /**
@@ -308,7 +308,7 @@ public class BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException
         this.typeAccessor = typeAccessor;
     }
 
-    public void setTypesAndFieldsToGenerate(MarkedFields<IType, IMethod, JavaModelException> typesAndFieldsToGenerate) {
+    public void setTypesAndFieldsToGenerate(MarkedFields<IType, ITypeParameter, IMethod, JavaModelException> typesAndFieldsToGenerate) {
         this.typesAndFieldsToGenerate = typesAndFieldsToGenerate;
     }
 

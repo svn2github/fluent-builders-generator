@@ -5,13 +5,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.core.ITypeParameter;
-import org.eclipse.jdt.core.Signature;
-
 import com.sabre.buildergenerator.javamodel.ITypeAccessor;
+import com.sabre.buildergenerator.signatureutils.SignatureUtil;
 
 
-public class MarkedFields<IType, IMethod, JavaModelException extends Exception> {
+public class MarkedFields<IType, ITypeParameter, IMethod, JavaModelException extends Exception> {
     private static final String SETTER_PREFIX = "set";
 
     public Map<String, Set<String>> typesAndFieldsToGenerate;
@@ -32,7 +30,7 @@ public class MarkedFields<IType, IMethod, JavaModelException extends Exception> 
 
     public boolean isSetterRequestedForField(IType enclosingType, String fieldName) {
         String enclosingTypeFullyQualifiedName = typeAccessor.getFullyQualifiedName(enclosingType, '.');
-        String enclosingTypeSignature = Signature.createTypeSignature(enclosingTypeFullyQualifiedName, false);
+        String enclosingTypeSignature = SignatureUtil.createTypeSignature(enclosingTypeFullyQualifiedName);
 
         return isSetterRequestedForField(enclosingTypeSignature, fieldName);
     }
@@ -44,7 +42,7 @@ public class MarkedFields<IType, IMethod, JavaModelException extends Exception> 
             methodProvider.process(new MethodConsumer<IType, IMethod>() {
                     public void nextMethod(IType selectedType, IMethod selectedMethod) {
                         String typeName = typeAccessor.getFullyQualifiedName(selectedType);
-                        String typeSignature = Signature.createTypeSignature(typeName, false);
+                        String typeSignature = SignatureUtil.createTypeSignature(typeName);
 
                         Set<String> fieldNames = typesAndFieldsToGenerate.get(typeSignature);
 

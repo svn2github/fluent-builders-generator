@@ -1,4 +1,4 @@
-package com.sabre.buildergenerator.ui.actions;
+package com.sabre.buildergenerator.javamodel.eclipse;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -9,17 +9,13 @@ import com.sabre.buildergenerator.javamodel.IModelHelper;
 import com.sabre.buildergenerator.javamodel.ISignatureResolver;
 import com.sabre.buildergenerator.javamodel.ITypeAccessor;
 import com.sabre.buildergenerator.javamodel.ITypeResolver;
-import com.sabre.buildergenerator.javamodel.eclipse.ModelHelper;
-import com.sabre.buildergenerator.javamodel.eclipse.SignatureResolver;
-import com.sabre.buildergenerator.javamodel.eclipse.TypeAccessor;
-import com.sabre.buildergenerator.javamodel.eclipse.TypeResolver;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 import com.sabre.buildergenerator.sourcegenerator.MarkedFields;
 
 public class EclipseBuilderGenerator extends BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException> {
     public EclipseBuilderGenerator() {
         ITypeAccessor<IType, ITypeParameter, IMethod, JavaModelException> typeAccessor = new TypeAccessor();
-        MarkedFields<IType, IMethod, JavaModelException> typesAndFieldsToGenerate = new MarkedFields<IType, IMethod, JavaModelException>();
+        MarkedFields<IType, ITypeParameter, IMethod, JavaModelException> typesAndFieldsToGenerate = new MarkedFields<IType, ITypeParameter, IMethod, JavaModelException>();
         IModelHelper<IType, IMethod, JavaModelException> typeHelper = new ModelHelper();
         ISignatureResolver<IType, JavaModelException> signatureResolver = new SignatureResolver();
         ITypeResolver<IType, JavaModelException> typeResolver = new TypeResolver();

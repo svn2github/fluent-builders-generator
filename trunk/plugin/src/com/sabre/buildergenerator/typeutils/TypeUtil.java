@@ -1,7 +1,7 @@
 package com.sabre.buildergenerator.typeutils;
 
 public class TypeUtil {
-
+    // TODO non static methods
     public static String normalizeType(String qualifiedTypeName) {
         return qualifiedTypeName
             .replaceAll(" +extends +", "=extends=")

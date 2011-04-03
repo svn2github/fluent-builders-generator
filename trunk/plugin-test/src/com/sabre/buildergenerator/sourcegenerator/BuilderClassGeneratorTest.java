@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import com.sabre.buildergenerator.JdtTestCase;
 import com.sabre.buildergenerator.TestHelper;
-import com.sabre.buildergenerator.ui.actions.EclipseBuilderGenerator;
+import com.sabre.buildergenerator.javamodel.eclipse.EclipseBuilderGenerator;
 
 import java.io.OutputStreamWriter;
 

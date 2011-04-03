@@ -10,6 +10,8 @@ import static org.eclipse.jdt.core.Signature.C_LONG;
 import static org.eclipse.jdt.core.Signature.C_SHORT;
 import static org.eclipse.jdt.core.Signature.C_VOID;
 
+import org.eclipse.jdt.core.Signature;
+
 public class SignatureUtil {
     // TODO non static methods
     public static String signatureToTypeName(String typeSignature) {
@@ -116,5 +118,10 @@ public class SignatureUtil {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static String createTypeSignature(String type) {
+        // TODO don't use org.eclipse.jdt.core.Signature class
+        return Signature.createTypeSignature(type, false);
     }
 }

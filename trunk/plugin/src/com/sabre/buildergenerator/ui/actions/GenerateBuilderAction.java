@@ -24,18 +24,25 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodConsumer;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvider;
+import com.sabre.buildergenerator.sourcegenerator.MethodConsumer;
+import com.sabre.buildergenerator.sourcegenerator.MethodProvider;
 import com.sabre.buildergenerator.ui.MethodNode;
 import com.sabre.buildergenerator.ui.TypeNode;
 import com.sabre.buildergenerator.ui.TypeTree;
@@ -47,14 +54,12 @@ import com.sabre.buildergenerator.ui.wizard.GenerateBuilderWizard;
  * Title: GenerateBuilderAction.java<br>
  * Description: <br>
  * Created: Dec 9, 2009<br>
- * Copyright: Copyright (c) 2007<br>
- * Company: Sabre Holdings Corporation
  *
- * @author Jakub Janczak sg0209399
- * @version $Rev$: , $Date$: , $Author$:
+ * @author Jakub Janczak
  */
 public class GenerateBuilderAction {
     private final CompliantCompilationUnitTester compilationUnitTester = new CompliantCompilationUnitTester();
+    private final EclipseBuilderGenerator builderGenerator = new EclipseBuilderGenerator();
 
     /**
      * Starts the generation procedure for the type
@@ -96,7 +101,7 @@ public class GenerateBuilderAction {
                                 selectedSourceFolder.createPackageFragment(packageName, false, aMonitor);
                             }
 
-                            String source = generateSource(new BuilderGenerator(), properties);
+                            String source = generateSource(builderGenerator, properties);
 
                             aMonitor.worked(2);
 
@@ -161,11 +166,11 @@ public class GenerateBuilderAction {
         return true;
     }
 
-    private String generateSource(BuilderGenerator builderGenerator, final BuilderGenerationProperties properties) throws Exception {
-    	
-    	final TypeTree typeTree = properties.getSettersTypeTree();
-        MethodProvider methodProvider = new MethodProvider() {
-                public void process(MethodConsumer consumer) {
+    private String generateSource(BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException> builderGenerator, final BuilderGenerationProperties properties) throws Exception {
+
+        final TypeTree typeTree = properties.getSettersTypeTree();
+        MethodProvider<IType, IMethod> methodProvider = new MethodProvider<IType, IMethod>() {
+                public void process(MethodConsumer<IType, IMethod> consumer) {
                     if (typeTree != null) {
                         for (TypeNode typeNode : typeTree.getSortedTypesNodes()) {
                             IType selectedType = typeNode.getElement();
@@ -184,7 +189,36 @@ public class GenerateBuilderAction {
                 }
             };
 
-        return builderGenerator.generateSource(properties.getType(), properties.getPackageName(), properties.getBuilderClassName(), methodProvider, properties.getMethodsPrefix(),
-                properties.getCollectionAddPrefix(), properties.getEndPrefix(), properties.isFormatCode());
+        String builderSource = builderGenerator.generateSource(properties.getType(), properties.getPackageName(), properties.getBuilderClassName(), methodProvider, properties.getMethodsPrefix(),
+                properties.getCollectionAddPrefix(), properties.getEndPrefix());
+        if (properties.isFormatCode()) {
+            builderSource = formatSource(builderSource);
+        }
+
+        return builderSource;
+    }
+
+    private String formatSource(String sourceCode) {
+        TextEdit text = ToolFactory.createCodeFormatter(null).format(CodeFormatter.K_COMPILATION_UNIT, sourceCode, 0,
+                sourceCode.length(), 0, "\n");
+
+        // text is null if source cannot be formatted
+        if (text != null) {
+            Document simpleDocument = new Document(sourceCode);
+
+            try {
+                text.apply(simpleDocument);
+            } catch (MalformedTreeException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (BadLocationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                sourceCode = simpleDocument.get();
+            }
+        }
+
+        return sourceCode;
     }
 }

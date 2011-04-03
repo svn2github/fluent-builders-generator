@@ -3,11 +3,11 @@ package com.sabre.buildergenerator.typeutils;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import com.sabre.buildergenerator.javamodel.ITypeResolver;
 import com.sabre.buildergenerator.signatureutils.SignatureResolver;
 
-public class TypeResolver {
-    // TODO: nonstatic methods
-    public static String resolveType(IType owningType, String type) throws JavaModelException {
+public class TypeResolver implements ITypeResolver<IType, JavaModelException> {
+    public String resolveType(IType owningType, String type) throws JavaModelException {
         type = normalizeType(type);
         return doResolveType(owningType, type);
     }

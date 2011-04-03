@@ -11,10 +11,35 @@
 
 package com.sabre.buildergenerator.signatureutils;
 
-import static org.eclipse.jdt.core.Signature.*;
-
 public class SignatureParser {
-    private static final char C_SLASH = '/';
+    public static final char C_BOOLEAN = 'Z';
+    public static final char C_BYTE = 'B';
+    public static final char C_CHAR = 'C';
+    public static final char C_DOUBLE = 'D';
+    public static final char C_FLOAT = 'F';
+    public static final char C_INT = 'I';
+    public static final char C_SEMICOLON = ';';
+    public static final char C_COLON = ':';
+    public static final char C_LONG = 'J';
+    public static final char C_SHORT = 'S';
+    public static final char C_VOID = 'V';
+    public static final char C_TYPE_VARIABLE = 'T';
+    public static final char C_STAR = '*';
+    public static final char C_EXCEPTION_START = '^';
+    public static final char C_EXTENDS = '+';
+    public static final char C_SUPER = '-';
+    public static final char C_DOT = '.';
+    public static final char C_SLASH = '/';
+    public static final char C_DOLLAR = '$';
+    public static final char C_ARRAY = '[';
+    public static final char C_RESOLVED = 'L';
+    public static final char C_UNRESOLVED = 'Q';
+    public static final char C_NAME_END = ';';
+    public static final char C_PARAM_START = '(';
+    public static final char C_PARAM_END = ')';
+    public static final char C_GENERIC_START = '<';
+    public static final char C_GENERIC_END = '>';
+    public static final char C_CAPTURE = '!';
 
     String input;
     int pos;

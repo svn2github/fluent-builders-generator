@@ -12,8 +12,10 @@
 package com.sabre.buildergenerator.javamodelhelper;
 
 import com.sabre.buildergenerator.Activator;
+import com.sabre.buildergenerator.javamodel.IModelHelper;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.signatureutils.SignatureResolver;
+import com.sabre.buildergenerator.signatureutils.SignatureUtil;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -36,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class ModelHelper {
+public class ModelHelper implements IModelHelper<IType, IMethod, JavaModelException> {
     private static final String OBJECT_SIGNATURE = "Qjava.lang.Object;";
     private static final String COLLECTION_INTERFACE_NAME = "java.util.Collection";
     private static final String SETTER_PREFIX = "set";
@@ -55,7 +57,7 @@ public class ModelHelper {
 
             iterator.remove();
             typesDone.add(nextType);
-            findSetterMethods(nextType, new MethodInspector() {
+            findSetterMethods(nextType, new IMethodInspector<IType, IMethod>() {
                     public void nextMethod(IType methodOwnerType, IMethod method,
                         Map<String, String> parameterSubstitution) throws Exception {
                         String parameterTypeSignature = method.getParameterTypes()[0];
@@ -72,21 +74,21 @@ public class ModelHelper {
                         }
 
                         TypeMethods methods = result.get(nextType);
-                        
+
                         if (methods == null) {
                             methods = new TypeMethods(new ArrayList<IMethod>(), parameterSubstitution);
                             result.put(nextType, methods);
                         }
-                        
+
                         methods.methods.add(method);
                         if (Activator.debug) {
-                            String parameterType = signatureResolver.signatureToTypeName(method.getParameterTypes()[0]);
+                            String parameterType = SignatureUtil.signatureToTypeName(method.getParameterTypes()[0]);
                             String newTypeName = newType != null ? newType.getFullyQualifiedName() : "<null>";
                             Activator.logDebug("found setter method: " + nextType.getFullyQualifiedName()
                                     + "." + method.getElementName() + "(" + parameterType + ")"
                                     + ", new type=" + newTypeName);
                         }
-                        
+
                         if (newType != null && !typesDone.contains(newType)) {
                             types.add(newType);
                         }
@@ -210,7 +212,7 @@ public class ModelHelper {
         return methods;
     }
 
-    public void walkHierarchyTree(IType type, TypeInspector inspector) throws Exception {
+    public void walkHierarchyTree(IType type, ITypeInspector<IType> inspector) throws Exception {
         Map<String, String> typeParameterMapping = new HashMap<String, String>();
 
         inspector.nextSuperType(Signature.createTypeSignature(type.getFullyQualifiedName(), true), type,
@@ -233,8 +235,8 @@ public class ModelHelper {
         }
     }
 
-    public void findSetterMethods(IType type, final MethodInspector inspector) throws Exception {
-        walkHierarchyTree(type, new TypeInspector() {
+    public void findSetterMethods(IType type, final IMethodInspector<IType, IMethod> inspector) throws Exception {
+        walkHierarchyTree(type, new ITypeInspector<IType>() {
                 public void nextSuperType(String fullSignature, IType superType,
                     Map<String, String> typeParameterMapping) throws Exception {
                     try {
@@ -269,18 +271,8 @@ public class ModelHelper {
         return typeParameterMapping;
     }
 
-    public static interface MethodInspector {
-        public void nextMethod(IType methodOwnerType, IMethod method, Map<String, String> parameterSubstitution)
-            throws Exception;
-    }
-
-    public static interface TypeInspector {
-        public void nextSuperType(String fullSignature, IType superType, Map<String, String> parameterSubstitution)
-            throws Exception;
-    }
-
-    public static class TypeMethods {
-        private final Collection<IMethod> methods;
+    public static class TypeMethods implements ITypeMethods<IMethod> {
+        final Collection<IMethod> methods;
         private final Map<String, String> parameterSubstitution;
 
         public TypeMethods(Collection<IMethod> methods, Map<String, String> parameterSubstitution) {

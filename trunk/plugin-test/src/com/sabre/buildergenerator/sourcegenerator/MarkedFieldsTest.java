@@ -2,18 +2,17 @@ package com.sabre.buildergenerator.sourcegenerator;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import com.sabre.buildergenerator.JdtTestCase;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodConsumer;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvider;
 
 public class MarkedFieldsTest  extends JdtTestCase {
-    private MarkedFields markedFields;
+    private MarkedFields<IType, IMethod, JavaModelException> markedFields;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        markedFields = new MarkedFields();
+        markedFields = new MarkedFields<IType, IMethod, JavaModelException>();
     }
 
     @Override
@@ -53,9 +52,9 @@ public class MarkedFieldsTest  extends JdtTestCase {
         final IMethod method = type.getMethod("setField", new String[]{"i"});
 
         // when
-        markedFields.retrieveTypesAndFieldsToGenerate(new MethodProvider() {
+        markedFields.retrieveTypesAndFieldsToGenerate(new MethodProvider<IType, IMethod>() {
 
-            public void process(MethodConsumer consumer) {
+            public void process(MethodConsumer<IType, IMethod> consumer) {
                 consumer.nextMethod(type, method);
             }
 

@@ -6,7 +6,9 @@ import java.io.StringWriter;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -42,10 +44,10 @@ public abstract class JdtTestCase extends TestCase {
     }
 
 
-    protected static IType generateBuilder(BuilderGenerator generator, IType buildClass, String packageName, String builderName)
+    protected static IType generateBuilder(BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException> generator, IType buildClass, String packageName, String builderName)
             throws Exception {
         String builderSource = generator.generateSource(buildClass, packageName, builderName, null, "with",
-                "withAdded", "end", false);
+                "withAdded", "end");
         ICompilationUnit compilationUnit = createCompilationUnit(createJavaFile(buildClass.getJavaProject(),
                 packageName, packageName, builderSource));
         return compilationUnit.getType(builderName);

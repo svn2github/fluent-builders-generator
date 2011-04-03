@@ -11,23 +11,22 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import com.sabre.buildergenerator.JdtTestCase;
 import com.sabre.buildergenerator.TestHelper;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodConsumer;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvider;
+import com.sabre.buildergenerator.ui.actions.EclipseBuilderGenerator;
 
 import java.io.OutputStreamWriter;
 
 public class BuilderClassGeneratorTest extends JdtTestCase {
-    private BuilderGenerator generator;
+    private EclipseBuilderGenerator generator;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        generator = new BuilderGenerator();
+        generator = new EclipseBuilderGenerator();
     }
 
     @Override
@@ -45,7 +44,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -89,7 +88,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -133,7 +132,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -183,7 +182,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildFile();
 
         // when
-        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(buildClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -230,7 +229,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -287,7 +286,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildFile();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -348,7 +347,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildFile();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -420,7 +419,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildFile();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -481,7 +480,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildFile();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -568,7 +567,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildFile();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -652,7 +651,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildFile();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -723,7 +722,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -781,7 +780,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -860,7 +859,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildFile();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -1005,9 +1004,9 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("    }")
             .withSourceLine("}")
             .buildType();
-        MethodProvider methodProvider = new BuilderGenerator.MethodProvider() {
+        MethodProvider<IType, IMethod> methodProvider = new MethodProvider<IType, IMethod>() {
 
-            public void process(MethodConsumer consumer) {
+            public void process(MethodConsumer<IType, IMethod> consumer) {
                 consumer.nextMethod(companyClass, companyClass.getMethod("setName", new String[]{"Qjava.lang.String;"}));
                 consumer.nextMethod(companyClass, companyClass.getMethod("setLocation", new String[]{"Qtestpkg.Address;"}));
                 consumer.nextMethod(companyClass, companyClass.getMethod("setEmployees", new String[]{"Qjava.util.List<Qtestpkg.Person;>;"}));
@@ -1024,7 +1023,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
         };
 
         // when
-        String builderSource = generator.generateSource(companyClass, "builderpkg", "GeneratedBuilder", methodProvider, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(companyClass, "builderpkg", "GeneratedBuilder", methodProvider, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -1103,7 +1102,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -1188,7 +1187,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")
@@ -1241,7 +1240,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .buildType();
 
         // when
-        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end", false);
+        String builderSource = generator.generateSource(builderClass, "builderpkg", "GeneratedBuilder", null, "with", "withAdded", "end");
 
         // then
         buildJavaSource().forPackage("builderpkg").forClassName("GeneratedBuilder")

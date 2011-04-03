@@ -16,17 +16,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeParameter;
-import org.eclipse.jdt.core.JavaModelException;
+import com.sabre.buildergenerator.javamodel.ITypeAccessor;
+import com.sabre.buildergenerator.javamodel.ITypeResolver;
 import com.sabre.buildergenerator.sourcegenerator.java.Imports;
 import com.sabre.buildergenerator.sourcegenerator.java.IndentWriter;
 import com.sabre.buildergenerator.sourcegenerator.java.JavaSource;
 import com.sabre.buildergenerator.sourcegenerator.java.JavaSourceBuilder;
-import com.sabre.buildergenerator.typeutils.TypeResolver;
 
 
-public class BuilderSourceGenerator {
+public class BuilderSourceGenerator<IType, ITypeParameter, IMethod, JavaModelException extends Exception> {
     private static final String BUILDER_TYPE_ARG_NAME = "GeneratorT";
     private static final String GETTER_PREFIX = "get";
     private static final String SETTER_PREFIX = "set";
@@ -56,6 +54,9 @@ public class BuilderSourceGenerator {
 
     private Set<String> nonTypeNames = null;
     private String builderPackage;
+
+    private ITypeResolver<IType, JavaModelException> typeResolver;
+    private ITypeAccessor<IType, ITypeParameter, IMethod, JavaModelException> typeAccessor;
 
     public BuilderSourceGenerator() {
         javaSourceBuilder = JavaSourceBuilder.javaSource();
@@ -124,7 +125,7 @@ public class BuilderSourceGenerator {
                 typeParams[i] += toString(" & ", bounds, new StringRetriever<String>() {
                     public String toString(String bound) {
                         try {
-                            bound = TypeResolver.resolveType(owningType, bound);
+                            bound = typeResolver.resolveType(owningType, bound);
                             return imports.getUnqualified(bound, nonTypeNames, builderPackage);
                         } catch(Exception e) {
                             return "";
@@ -179,11 +180,11 @@ public class BuilderSourceGenerator {
 
     // TODO: remove usage of IType
     public void generateBuilderBaseClass(String buildClassType, IType type, boolean isTopLevel) throws JavaModelException {
-        ITypeParameter[] typeParameters = type.getTypeParameters();
+        ITypeParameter[] typeParameters = typeAccessor.getTypeParameters(type);
 
         nonTypeNames = new HashSet<String>();
         for(ITypeParameter typeParam : typeParameters) {
-            nonTypeNames.add(typeParam.getElementName());
+            nonTypeNames.add(typeAccessor.getTypeParameterName(typeParam));
         }
 
         innerBuildClassName = getClassName(buildClassType);
@@ -216,7 +217,7 @@ public class BuilderSourceGenerator {
         if (typeParameters != null && typeParameters.length > 0) {
             typeArgList += toString(", ", typeParameters, new StringRetriever<ITypeParameter>() {
                 public String toString(ITypeParameter typeParam) {
-                    return typeParam.getElementName();
+                    return typeAccessor.getTypeParameterName(typeParam);
                 }
             });
         }
@@ -226,14 +227,14 @@ public class BuilderSourceGenerator {
                 + (typeArgList.length() > 0 ? ", " + typeArgList : "") + ">";
         innerClassBuilderBase.withName(innerBuilderClassName).withTypeArg(typeArg);
         for (ITypeParameter typeParam : typeParameters) {
-            String param = typeParam.getElementName();
-            String[] bounds = typeParam.getBounds();
+            String param = typeAccessor.getTypeParameterName(typeParam);
+            String[] bounds = typeAccessor.getTypeParameterBounds(typeParam);
             if (bounds != null && bounds.length > 0) {
                 param += " extends ";
                 param += toString(" & ", bounds, new StringRetriever<String>() {
                     public String toString(String bound) {
                         try {
-                            bound = TypeResolver.resolveType(type, bound);
+                            bound = typeResolver.resolveType(type, bound);
                             return imports.getUnqualified(bound, nonTypeNames, builderPackage);
                         } catch(Exception e) {
                             return "";
@@ -465,5 +466,13 @@ public class BuilderSourceGenerator {
         int b = aType.lastIndexOf('.', e) + 1;
 
         return aType.substring(b, e);
+    }
+
+    public void setTypeResolver(ITypeResolver<IType, JavaModelException> typeResolver) {
+        this.typeResolver = typeResolver;
+    }
+
+    public void setTypeAccessor(ITypeAccessor<IType, ITypeParameter, IMethod, JavaModelException> typeAccessor) {
+        this.typeAccessor = typeAccessor;
     }
 }

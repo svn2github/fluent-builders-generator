@@ -5,15 +5,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.Signature;
 
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodConsumer;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator.MethodProvider;
+import com.sabre.buildergenerator.javamodel.ITypeAccessor;
 
-public class MarkedFields {
+
+public class MarkedFields<IType, IMethod, JavaModelException extends Exception> {
+    private static final String SETTER_PREFIX = "set";
+
     public Map<String, Set<String>> typesAndFieldsToGenerate;
+    private ITypeAccessor<IType, ITypeParameter, IMethod, JavaModelException> typeAccessor;
 
     public MarkedFields() {
     }
@@ -29,19 +31,19 @@ public class MarkedFields {
     }
 
     public boolean isSetterRequestedForField(IType enclosingType, String fieldName) {
-        String enclosingTypeFullyQualifiedName = enclosingType.getFullyQualifiedName('.');
+        String enclosingTypeFullyQualifiedName = typeAccessor.getFullyQualifiedName(enclosingType, '.');
         String enclosingTypeSignature = Signature.createTypeSignature(enclosingTypeFullyQualifiedName, false);
 
         return isSetterRequestedForField(enclosingTypeSignature, fieldName);
     }
 
-    public void retrieveTypesAndFieldsToGenerate(MethodProvider methodProvider) {
+    public void retrieveTypesAndFieldsToGenerate(MethodProvider<IType, IMethod> methodProvider) {
         if (methodProvider != null) {
             typesAndFieldsToGenerate = new HashMap<String, Set<String>>();
 
-            methodProvider.process(new MethodConsumer() {
+            methodProvider.process(new MethodConsumer<IType, IMethod>() {
                     public void nextMethod(IType selectedType, IMethod selectedMethod) {
-                        String typeName = selectedType.getFullyQualifiedName();
+                        String typeName = typeAccessor.getFullyQualifiedName(selectedType);
                         String typeSignature = Signature.createTypeSignature(typeName, false);
 
                         Set<String> fieldNames = typesAndFieldsToGenerate.get(typeSignature);
@@ -51,11 +53,27 @@ public class MarkedFields {
                             typesAndFieldsToGenerate.put(typeSignature, fieldNames);
                         }
 
-                        String fieldName = BuilderGenerator.fieldNameFromSetter(selectedMethod);
+                        String fieldName = fieldNameFromSetter(selectedMethod);
 
                         fieldNames.add(fieldName);
                     }
                 });
         }
+    }
+
+    // TODO move to helper
+    public String fieldNameFromSetter(IMethod method) {
+        return fieldNameFromSetterName(typeAccessor.getMethodName(method));
+    }
+
+    // TODO move to helper
+    private String fieldNameFromSetterName(String setterName) {
+        String fieldName = setterName.substring(SETTER_PREFIX.length());
+
+        return Character.toLowerCase(fieldName.charAt(0)) + fieldName.substring(1);
+    }
+
+    public void setTypeAccessor(ITypeAccessor<IType, ITypeParameter, IMethod, JavaModelException> typeAccessor) {
+        this.typeAccessor = typeAccessor;
     }
 }

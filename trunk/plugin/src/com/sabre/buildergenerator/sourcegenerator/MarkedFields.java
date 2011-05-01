@@ -29,7 +29,7 @@ public class MarkedFields<IType, ITypeParameter, IMethod, JavaModelException ext
     }
 
     public boolean isSetterRequestedForField(IType enclosingType, String fieldName) {
-        String enclosingTypeFullyQualifiedName = typeAccessor.getFullyQualifiedName(enclosingType, '.');
+        String enclosingTypeFullyQualifiedName = typeAccessor.getFullyQualifiedName(enclosingType);
         String enclosingTypeSignature = SignatureUtil.createTypeSignature(enclosingTypeFullyQualifiedName);
 
         return isSetterRequestedForField(enclosingTypeSignature, fieldName);

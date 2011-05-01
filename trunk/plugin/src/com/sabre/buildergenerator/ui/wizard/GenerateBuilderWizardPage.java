@@ -50,12 +50,12 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.sabre.buildergenerator.Activator;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
 import com.sabre.buildergenerator.ui.MethodNode;
 import com.sabre.buildergenerator.ui.TreeNode;
 import com.sabre.buildergenerator.ui.TypeHelperRouter;
 import com.sabre.buildergenerator.ui.TypeNode;
 import com.sabre.buildergenerator.ui.TypeTree;
+import com.sabre.buildergenerator.ui.actions.BuilderGenerationProperties;
 
 /**
  * Title: GenerateBuilderWizardPage.java<br>

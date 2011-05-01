@@ -12,7 +12,7 @@
 package com.sabre.buildergenerator.ui.wizard;
 
 import com.sabre.buildergenerator.Activator;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
+import com.sabre.buildergenerator.ui.actions.BuilderGenerationProperties;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;

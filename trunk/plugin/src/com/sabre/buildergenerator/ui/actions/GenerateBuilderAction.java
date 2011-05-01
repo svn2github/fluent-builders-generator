@@ -40,7 +40,6 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import com.sabre.buildergenerator.javamodel.eclipse.EclipseBuilderGenerator;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerationProperties;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 import com.sabre.buildergenerator.sourcegenerator.MethodConsumer;
 import com.sabre.buildergenerator.sourcegenerator.MethodProvider;

@@ -1,14 +1,14 @@
 package com.sabre.buildergenerator.signatureutils;
 
-import static org.eclipse.jdt.core.Signature.C_BOOLEAN;
-import static org.eclipse.jdt.core.Signature.C_BYTE;
-import static org.eclipse.jdt.core.Signature.C_CHAR;
-import static org.eclipse.jdt.core.Signature.C_DOUBLE;
-import static org.eclipse.jdt.core.Signature.C_FLOAT;
-import static org.eclipse.jdt.core.Signature.C_INT;
-import static org.eclipse.jdt.core.Signature.C_LONG;
-import static org.eclipse.jdt.core.Signature.C_SHORT;
-import static org.eclipse.jdt.core.Signature.C_VOID;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_BOOLEAN;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_BYTE;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_CHAR;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_DOUBLE;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_FLOAT;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_INT;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_LONG;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_SHORT;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_VOID;
 
 import org.eclipse.jdt.core.Signature;
 

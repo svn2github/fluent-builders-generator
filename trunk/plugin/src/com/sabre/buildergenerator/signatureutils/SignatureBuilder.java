@@ -11,10 +11,22 @@
 
 package com.sabre.buildergenerator.signatureutils;
 
-import org.eclipse.jdt.core.Signature;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_ARRAY;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_CAPTURE;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_DOT;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_EXTENDS;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_GENERIC_END;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_GENERIC_START;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_NAME_END;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_RESOLVED;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_STAR;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_SUPER;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_TYPE_VARIABLE;
+import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_UNRESOLVED;
 
 public class SignatureBuilder implements SignatureHandler {
     StringBuilder out;
+
 
     public SignatureBuilder(StringBuilder aOut) {
         out = aOut;
@@ -25,54 +37,54 @@ public class SignatureBuilder implements SignatureHandler {
     }
 
     public void startResolvedType(String identifier) throws ExceptionWrapper {
-        out.append(Signature.C_RESOLVED);
+        out.append(C_RESOLVED);
         out.append(identifier);
     }
 
     public void startUnresolvedType(String identifier) throws ExceptionWrapper {
-        out.append(Signature.C_UNRESOLVED);
+        out.append(C_UNRESOLVED);
         out.append(identifier);
     }
 
     public void startTypeArguments() throws ExceptionWrapper {
-        out.append(Signature.C_GENERIC_START);
+        out.append(C_GENERIC_START);
     }
 
     public void endTypeArguments() throws ExceptionWrapper {
-        out.append(Signature.C_GENERIC_END);
+        out.append(C_GENERIC_END);
     }
 
     public void endType() throws ExceptionWrapper {
-        out.append(Signature.C_NAME_END);
+        out.append(C_NAME_END);
     }
 
     public void typeVariable(String identifier) throws ExceptionWrapper {
-        out.append(Signature.C_TYPE_VARIABLE);
+        out.append(C_TYPE_VARIABLE);
         out.append(identifier);
     }
 
     public void wildcardAny() throws ExceptionWrapper {
-        out.append(Signature.C_STAR);
+        out.append(C_STAR);
     }
 
     public void wildcardExtends() throws ExceptionWrapper {
-        out.append(Signature.C_EXTENDS);
+        out.append(C_EXTENDS);
     }
 
     public void wildcardSuper() throws ExceptionWrapper {
-        out.append(Signature.C_SUPER);
+        out.append(C_SUPER);
     }
 
     public void array() throws ExceptionWrapper {
-        out.append(Signature.C_ARRAY);
+        out.append(C_ARRAY);
     }
 
     public void captureOf() throws ExceptionWrapper {
-        out.append(Signature.C_CAPTURE);
+        out.append(C_CAPTURE);
     }
 
     public void innerType(String identifier) throws ExceptionWrapper {
-        out.append(Signature.C_DOT);
+        out.append(C_DOT);
         out.append(identifier);
     }
 

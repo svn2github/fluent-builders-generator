@@ -124,4 +124,9 @@ public class SignatureUtil {
         // TODO don't use org.eclipse.jdt.core.Signature class
         return Signature.createTypeSignature(type, false);
     }
+
+    public static String[] getTypeArguments(String signature) {
+        // TODO don't use org.eclipse.jdt.core.Signature class
+        return Signature.getTypeArguments(signature);
+    }
 }

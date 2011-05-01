@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.sabre.buildergenerator.javamodel.eclipse.ModelHelper.TypeMethods;
+import com.sabre.buildergenerator.eclipsejavamodel.ModelHelper.TypeMethods;
 import com.sabre.buildergenerator.signatureutils.SignatureParserException;
 import com.sabre.buildergenerator.ui.TypeHelperRouter.SetType;
 

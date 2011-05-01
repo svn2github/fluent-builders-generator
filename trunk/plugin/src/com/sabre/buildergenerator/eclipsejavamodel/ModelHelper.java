@@ -9,7 +9,7 @@
  *    Sabre Polska sp. z o.o. - initial implementation during Hackday
  */
 
-package com.sabre.buildergenerator.javamodel.eclipse;
+package com.sabre.buildergenerator.eclipsejavamodel;
 
 import com.sabre.buildergenerator.Activator;
 import com.sabre.buildergenerator.javamodel.IModelHelper;

@@ -258,8 +258,7 @@ public class BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException
         SignatureParserException {
         IType type = signatureResolver.resolveType(enclosingType, typeSignature);
 
-        boolean isClassFromSource = typeAccessor.isClassFromSource(type);
-        return type != null && isClassFromSource;
+        return type != null && typeAccessor.isClassFromSource(type);
     }
 
     // TODO move to helper

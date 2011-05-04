@@ -10,8 +10,6 @@ import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_LONG;
 import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_SHORT;
 import static com.sabre.buildergenerator.signatureutils.SignatureParser.C_VOID;
 
-import org.eclipse.jdt.core.Signature;
-
 public class SignatureUtil {
     // TODO non static methods
     public static String signatureToTypeName(String typeSignature) {
@@ -120,13 +118,15 @@ public class SignatureUtil {
         }
     }
 
-    public static String createTypeSignature(String type) {
-        // TODO don't use org.eclipse.jdt.core.Signature class
-        return Signature.createTypeSignature(type, false);
-    }
-
-    public static String[] getTypeArguments(String signature) {
-        // TODO don't use org.eclipse.jdt.core.Signature class
-        return Signature.getTypeArguments(signature);
+    public static String typeNameToSignature(String typeName) {
+        StringBuilder out = new StringBuilder();
+        SignatureHandler handler = new SignatureBuilder(out);
+        TypenameParser parser = new TypenameParser(typeName, handler);
+        try {
+            parser.parse();
+            return out.toString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

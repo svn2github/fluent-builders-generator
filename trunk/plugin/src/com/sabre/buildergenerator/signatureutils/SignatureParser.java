@@ -18,7 +18,6 @@ public class SignatureParser {
     public static final char C_DOUBLE = 'D';
     public static final char C_FLOAT = 'F';
     public static final char C_INT = 'I';
-    public static final char C_SEMICOLON = ';';
     public static final char C_COLON = ':';
     public static final char C_LONG = 'J';
     public static final char C_SHORT = 'S';

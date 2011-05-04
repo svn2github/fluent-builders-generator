@@ -120,4 +120,22 @@ public class SignatureUtilTest extends TestCase {
         // then
         assertEquals("Wrong type source", "MyClass<String[]>.MyInnerClass<String[]>", type);
     }
+
+    public void testShouldTypeNameToSignatureResolveInt() throws Exception {
+        // given
+        String type = "int";
+        // when
+        String signature = SignatureUtil.typeNameToSignature(type);
+        // then
+        assertEquals("Wrong type source", "I", signature);
+    }
+
+    public void testShouldTypeNameToSignatureResolveMultipleTypeParameters() throws Exception {
+        // given
+        String type = "Map<Integer,String>";
+        // when
+        String signature = SignatureUtil.typeNameToSignature(type);
+        // then
+        assertEquals("Wrong type source", "LMap<LInteger;LString;>;", signature);
+    }
 }

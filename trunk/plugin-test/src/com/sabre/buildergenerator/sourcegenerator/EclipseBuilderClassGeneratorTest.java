@@ -1,4 +1,8 @@
-package com.sabre.buildergenerator;
+package com.sabre.buildergenerator.sourcegenerator;
+
+import static com.sabre.buildergenerator.TestHelper.createCompilationUnit;
+import static com.sabre.buildergenerator.TestHelper.createJavaFile;
+import static com.sabre.buildergenerator.TestHelper.createJavaProject;
 
 import java.io.OutputStreamWriter;
 
@@ -13,13 +17,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import com.sabre.buildergenerator.TestHelper;
 import com.sabre.buildergenerator.eclipsejavamodel.EclipseBuilderGenerator;
-import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 
-
-import static com.sabre.buildergenerator.TestHelper.*;
-
-public abstract class JdtTestCase extends TestBase<IType, ITypeParameter, IMethod, JavaModelException, ICompilationUnit, IFile> {
+public class EclipseBuilderClassGeneratorTest extends BuilderClassGeneratorTestBase<IType, ITypeParameter, IMethod, JavaModelException, ICompilationUnit, IFile> {
     private IJavaProject javaProject;
 
     public IJavaProject getJavaProject() {
@@ -30,10 +31,14 @@ public abstract class JdtTestCase extends TestBase<IType, ITypeParameter, IMetho
     protected void setUp() throws Exception {
         javaProject = createJavaProject("test-project", "src", null, JavaCore.VERSION_1_5);
         javaProject.open(null);
+
+        super.setUp();
     }
 
     @Override
     protected void tearDown() throws Exception {
+        super.tearDown();
+
         javaProject.close();
         TestHelper.deleteJavaProject(javaProject);
     }
@@ -42,7 +47,6 @@ public abstract class JdtTestCase extends TestBase<IType, ITypeParameter, IMetho
     protected JavaBuilder buildJavaSource() {
         return new JavaBuilder();
     }
-
 
     @Override
     protected IType generateBuilder(BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException> generator, IType buildClass, String packageName, String builderName)
@@ -93,23 +97,6 @@ public abstract class JdtTestCase extends TestBase<IType, ITypeParameter, IMetho
         .withSourceLine("");
     }
 
-    @Override
-    public BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException> createGenerator() {
-        return new EclipseBuilderGenerator();
-    }
-
-    @Override
-    public int runJavaFile(IType mainClass) throws CoreException, InterruptedException {
-        int runJavaFile = TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err));
-        return runJavaFile;
-    }
-
-    @Override
-    protected IMethod findMethod(IType classType, String methodName, String[] parameterTypeSignatures) {
-        return classType.getMethod(methodName, parameterTypeSignatures);
-    }
-
     protected class JavaBuilder extends JavaBuilderBase<JavaBuilder> {
         @Override
         public IFile buildFile() throws Exception {
@@ -125,5 +112,22 @@ public abstract class JdtTestCase extends TestBase<IType, ITypeParameter, IMetho
         public IType buildType() throws Exception {
             return buildCompilationUnit().getTypes()[0];
         }
+    }
+
+    @Override
+    public BuilderGenerator<IType, ITypeParameter, IMethod, JavaModelException> createGenerator() {
+        return new EclipseBuilderGenerator();
+    }
+
+    @Override
+    public int runJavaFile(IType mainClass) throws CoreException, InterruptedException {
+        int runJavaFile = TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
+                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err));
+        return runJavaFile;
+    }
+
+    @Override
+    public IMethod findMethod(final IType classType, String methodName, String[] parameterTypeSignatures) {
+        return classType.getMethod(methodName, parameterTypeSignatures);
     }
 }

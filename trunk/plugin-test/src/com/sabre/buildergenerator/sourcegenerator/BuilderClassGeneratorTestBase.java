@@ -11,22 +11,16 @@
 
 package com.sabre.buildergenerator.sourcegenerator;
 
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import com.sabre.buildergenerator.JdtTestCase;
-import com.sabre.buildergenerator.TestHelper;
-import com.sabre.buildergenerator.javamodel.eclipse.EclipseBuilderGenerator;
+import com.sabre.buildergenerator.TestBase;
 
-import java.io.OutputStreamWriter;
-
-public class BuilderClassGeneratorTest extends JdtTestCase {
-    private EclipseBuilderGenerator generator;
+public abstract class BuilderClassGeneratorTestBase<Type, TypeParameter, Method, JavaModelException extends Exception, CompilationUnit, File> extends TestBase<Type, TypeParameter, Method, JavaModelException, CompilationUnit, File> {
+    private BuilderGenerator<Type, TypeParameter, Method, JavaModelException> generator;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        generator = new EclipseBuilderGenerator();
+        generator = createGenerator();
     }
 
     @Override
@@ -36,7 +30,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
 
     public void testGenerateEmptyBuilder() throws Exception {
         // given
-        IType buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -51,7 +45,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -65,13 +59,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateSimplePrimitiveSetter() throws Exception {
         // given
-        IType buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -95,7 +88,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -109,13 +102,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateSimpleObjectSetter() throws Exception {
         // given
-        IType buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -139,7 +131,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -153,13 +145,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateSimpleObjectSetterWithForeignPackage() throws Exception {
         // given
-        IType buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type buildClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -189,7 +180,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -205,13 +196,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateCollectionSetter() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("import java.util.List;")
             .withSourceLine("")
@@ -236,7 +226,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -257,13 +247,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateFieldBuilder() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -293,7 +282,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -308,13 +297,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateCollectionFieldBuilder() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("import java.util.List;")
             .withSourceLine("")
@@ -354,7 +342,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -381,13 +369,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateInnerBuilderWithSimpleSetter() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -426,7 +413,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -441,13 +428,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateInnerBuilderWithCollectionSetter() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -487,7 +473,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import java.util.Arrays;")
@@ -514,13 +500,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateInnerBuilderWithFieldBuilder() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -574,7 +559,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -597,13 +582,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateInnerBuilderWithCollectionFieldBuilder() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -658,7 +642,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -688,8 +672,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateBuilderForClassExtendingGeneric() throws Exception {
@@ -714,7 +697,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("    }")
             .withSourceLine("}")
             .buildFile();
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass extends MyBase<String, MyException> {")
@@ -729,7 +712,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -743,8 +726,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateParametrizedTypeFieldSetter() throws Exception {
@@ -763,7 +745,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("    }")
             .withSourceLine("}")
             .buildFile();
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -787,7 +769,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -805,13 +787,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateBuilderForParametrizedTypes() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -866,7 +847,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -896,13 +877,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testShouldBuildAllRequestedSetters() throws Exception {
         // given
-        final IType companyClass = buildJavaSource().forPackage("testpkg").forClassName("Company")
+        final Type companyClass = buildJavaSource().forPackage("testpkg").forClassName("Company")
             .withSourceLine("package testpkg;")
             .withSourceLine("import java.util.List;")
             .withSourceLine("")
@@ -937,7 +917,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("")
             .withSourceLine("}")
             .buildType();
-        final IType personClass = buildJavaSource().forPackage("testpkg").forClassName("Person")
+        final Type personClass = buildJavaSource().forPackage("testpkg").forClassName("Person")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class Person {")
@@ -971,7 +951,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("")
             .withSourceLine("}")
             .buildType();
-        final IType addressClass = buildJavaSource().forPackage("testpkg").forClassName("Address")
+        final Type addressClass = buildJavaSource().forPackage("testpkg").forClassName("Address")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class Address {")
@@ -1004,20 +984,20 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("    }")
             .withSourceLine("}")
             .buildType();
-        MethodProvider<IType, IMethod> methodProvider = new MethodProvider<IType, IMethod>() {
+        MethodProvider<Type, Method> methodProvider = new MethodProvider<Type, Method>() {
 
-            public void process(MethodConsumer<IType, IMethod> consumer) {
-                consumer.nextMethod(companyClass, companyClass.getMethod("setName", new String[]{"Qjava.lang.String;"}));
-                consumer.nextMethod(companyClass, companyClass.getMethod("setLocation", new String[]{"Qtestpkg.Address;"}));
-                consumer.nextMethod(companyClass, companyClass.getMethod("setEmployees", new String[]{"Qjava.util.List<Qtestpkg.Person;>;"}));
+            public void process(MethodConsumer<Type, Method> consumer) {
+                consumer.nextMethod(companyClass, findMethod(companyClass, "setName", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(companyClass, findMethod(companyClass, "setLocation", new String[]{"Qtestpkg.Address;"}));
+                consumer.nextMethod(companyClass, findMethod(companyClass, "setEmployees", new String[]{"Qjava.util.List<Qtestpkg.Person;>;"}));
 
-                consumer.nextMethod(personClass, personClass.getMethod("setFirstName", new String[]{"Qjava.lang.String;"}));
-                consumer.nextMethod(personClass, personClass.getMethod("setLastName", new String[]{"Qjava.lang.String;"}));
-                consumer.nextMethod(personClass, personClass.getMethod("setAddress", new String[]{"Qtestpkg.Address;"}));
+                consumer.nextMethod(personClass, findMethod(personClass, "setFirstName", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(personClass, findMethod(personClass, "setLastName", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(personClass, findMethod(personClass, "setAddress", new String[]{"Qtestpkg.Address;"}));
 
-                consumer.nextMethod(addressClass, addressClass.getMethod("setCity", new String[]{"Qjava.lang.String;"}));
-                consumer.nextMethod(addressClass, addressClass.getMethod("setStreet", new String[]{"Qjava.lang.String;"}));
-                consumer.nextMethod(addressClass, addressClass.getMethod("setNumber", new String[]{"I"}));
+                consumer.nextMethod(addressClass, findMethod(addressClass, "setCity", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(addressClass, findMethod(addressClass, "setStreet", new String[]{"Qjava.lang.String;"}));
+                consumer.nextMethod(addressClass, findMethod(addressClass, "setNumber", new String[]{"I"}));
             }
 
         };
@@ -1030,7 +1010,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import java.util.List;")
@@ -1078,13 +1058,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateBuilderForGeneric() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("Generic")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("Generic")
             .withSourceLine("package testpkg;")
             .withSourceLine("import java.util.List;")
             .withSourceLine("")
@@ -1109,7 +1088,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.Generic;")
@@ -1123,8 +1102,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateBuilderForGenericComplex() throws Exception {
@@ -1169,7 +1147,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("    }")
             .withSourceLine("}")
             .buildType();
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("Property")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("Property")
             .withSourceLine("package testpkg;")
             .withSourceLine("import java.util.List;")
             .withSourceLine("")
@@ -1194,7 +1172,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.Property;")
@@ -1217,13 +1195,12 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 
     public void testGenerateBuilderForCyclicReference() throws Exception {
         // given
-        IType builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
+        Type builderClass = buildJavaSource().forPackage("testpkg").forClassName("MyClass")
             .withSourceLine("package testpkg;")
             .withSourceLine("")
             .withSourceLine("public class MyClass {")
@@ -1247,7 +1224,7 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine(builderSource)
             .buildType();
 
-        IType mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
+        Type mainClass = buildJavaSource().forPackage("test").forClassName("MainClass")
             .withSourceLine("package test;")
             .withSourceLine("")
             .withSourceLine("import testpkg.MyClass;")
@@ -1262,7 +1239,6 @@ public class BuilderClassGeneratorTest extends JdtTestCase {
             .withSourceLine("}")
             .buildType();
 
-        assertEquals("Internal test failed for builder:\n" + builderSource, 0, TestHelper.runJavaFile(getJavaProject(), mainClass.getFullyQualifiedName('.'),
-                null, new OutputStreamWriter(System.out), new OutputStreamWriter(System.err)));
+        assertEquals("Internal test failed for builder:\n" + builderSource, 0, runJavaFile(mainClass));
     }
 }

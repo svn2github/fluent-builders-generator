@@ -3,8 +3,6 @@ package com.sabre.buildergenerator;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.eclipse.core.runtime.CoreException;
-
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 
 import junit.framework.TestCase;
@@ -33,7 +31,7 @@ public abstract class TestBase<Type, TypeParameter, Method, JavaModelException e
 
     protected abstract JavaBuilderBase<?> buildBuilderSource(String aPackage, String aBuilderName) throws Exception;
 
-    protected abstract int runJavaFile(Type mainClass) throws CoreException, InterruptedException;
+    protected abstract int runJavaFile(Type mainClass) throws Exception, InterruptedException;
 
     protected abstract BuilderGenerator<Type, TypeParameter, Method, JavaModelException> createGenerator();
 

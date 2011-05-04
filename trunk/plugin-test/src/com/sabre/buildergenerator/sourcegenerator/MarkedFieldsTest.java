@@ -6,14 +6,18 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
 import com.sabre.buildergenerator.JdtTestCase;
+import com.sabre.buildergenerator.javamodel.ISignatureUtils;
+import com.sabre.buildergenerator.javamodel.reflection.SignatureUtils;
 
-public class MarkedFieldsTest  extends JdtTestCase {
+public class MarkedFieldsTest extends JdtTestCase {
     private MarkedFields<IType, ITypeParameter, IMethod, JavaModelException> markedFields;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         markedFields = new MarkedFields<IType, ITypeParameter, IMethod, JavaModelException>();
+        ISignatureUtils signatureUtils = new SignatureUtils();
+        markedFields.setSignatureUtils(signatureUtils);
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.sabre.buildergenerator.javamodel.IModelHelper;
 import com.sabre.buildergenerator.javamodel.ISignatureResolver;
+import com.sabre.buildergenerator.javamodel.ISignatureUtils;
 import com.sabre.buildergenerator.javamodel.ITypeAccessor;
 import com.sabre.buildergenerator.javamodel.ITypeResolver;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
@@ -20,6 +21,8 @@ public class EclipseBuilderGenerator extends BuilderGenerator<IType, ITypeParame
         ISignatureResolver<IType, JavaModelException> signatureResolver = new SignatureResolver();
         ITypeResolver<IType, JavaModelException> typeResolver = new TypeResolver();
         typesAndFieldsToGenerate.setTypeAccessor(typeAccessor);
+        ISignatureUtils signatureUtils = new SignatureUtils();
+        typesAndFieldsToGenerate.setSignatureUtils(signatureUtils);
         setTypeAccessor(typeAccessor);
         setTypeHelper(typeHelper);
         setTypeResolver(typeResolver);

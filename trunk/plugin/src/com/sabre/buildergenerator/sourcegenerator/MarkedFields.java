@@ -5,15 +5,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.sabre.buildergenerator.javamodel.ISignatureUtils;
 import com.sabre.buildergenerator.javamodel.ITypeAccessor;
-import com.sabre.buildergenerator.signatureutils.SignatureUtil;
-
 
 public class MarkedFields<IType, ITypeParameter, IMethod, JavaModelException extends Exception> {
     private static final String SETTER_PREFIX = "set";
 
     public Map<String, Set<String>> typesAndFieldsToGenerate;
     private ITypeAccessor<IType, ITypeParameter, IMethod, JavaModelException> typeAccessor;
+    private ISignatureUtils signatureUtils;
 
     public MarkedFields() {
     }
@@ -30,7 +30,7 @@ public class MarkedFields<IType, ITypeParameter, IMethod, JavaModelException ext
 
     public boolean isSetterRequestedForField(IType enclosingType, String fieldName) {
         String enclosingTypeFullyQualifiedName = typeAccessor.getFullyQualifiedName(enclosingType);
-        String enclosingTypeSignature = SignatureUtil.createTypeSignature(enclosingTypeFullyQualifiedName);
+        String enclosingTypeSignature = signatureUtils.createTypeSignature(enclosingTypeFullyQualifiedName, false);
 
         return isSetterRequestedForField(enclosingTypeSignature, fieldName);
     }
@@ -42,7 +42,7 @@ public class MarkedFields<IType, ITypeParameter, IMethod, JavaModelException ext
             methodProvider.process(new MethodConsumer<IType, IMethod>() {
                     public void nextMethod(IType selectedType, IMethod selectedMethod) {
                         String typeName = typeAccessor.getFullyQualifiedName(selectedType);
-                        String typeSignature = SignatureUtil.createTypeSignature(typeName);
+                        String typeSignature = signatureUtils.createTypeSignature(typeName, false);
 
                         Set<String> fieldNames = typesAndFieldsToGenerate.get(typeSignature);
 
@@ -73,5 +73,9 @@ public class MarkedFields<IType, ITypeParameter, IMethod, JavaModelException ext
 
     public void setTypeAccessor(ITypeAccessor<IType, ITypeParameter, IMethod, JavaModelException> typeAccessor) {
         this.typeAccessor = typeAccessor;
+    }
+
+    public void setSignatureUtils(ISignatureUtils signatureUtils) {
+        this.signatureUtils = signatureUtils;
     }
 }

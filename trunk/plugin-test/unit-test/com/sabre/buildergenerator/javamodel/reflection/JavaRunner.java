@@ -6,6 +6,7 @@ import static javax.tools.StandardLocation.SOURCE_OUTPUT;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,12 +75,25 @@ public class JavaRunner {
     }
 
     public void run(String className, String methodName) throws Exception {
+        Class<?> thisClass = loadClass(className);
+        run(thisClass, methodName);
+    }
+
+    public void run(Class<?> clazz, String methodName) throws InstantiationException, IllegalAccessException,
+            NoSuchMethodException, InvocationTargetException {
         Class<?> params[] = {};
         Object paramsObj[] = {};
-        Class<?> thisClass = loadClass(className);
-        Object iClass = thisClass.newInstance();
-        Method thisMethod = thisClass.getDeclaredMethod(methodName, params);
+        Object iClass = clazz.newInstance();
+        Method thisMethod = clazz.getDeclaredMethod(methodName, params);
         thisMethod.invoke(iClass, paramsObj);
+    }
+
+    public void runMain(Class<?> clazz) throws InstantiationException, IllegalAccessException,
+            NoSuchMethodException, InvocationTargetException {
+        Class<?> params[] = { String[].class };
+        Object paramsObj[] = { new String[0] };
+        Method thisMethod = clazz.getDeclaredMethod("main", params);
+        thisMethod.invoke(null, paramsObj);
     }
 
     public Class<?> loadClass(String className) throws ClassNotFoundException {

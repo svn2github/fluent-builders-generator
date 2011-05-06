@@ -1,4 +1,4 @@
-package com.sabre.buildergenerator.signatureutils;
+package com.sabre.buildergenerator.eclipsejavamodel;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;

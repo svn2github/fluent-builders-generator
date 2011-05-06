@@ -9,9 +9,8 @@ public class SignatureUtils implements ISignatureUtils {
         return SignatureUtil.typeNameToSignature(typeName);
     }
 
-    public String[] getTypeArguments(String resolvedFieldTypeSignature) {
-        // TODO Auto-generated method stub
-        return null;
+    public String[] getTypeArguments(String signature) {
+        throw new UnsupportedOperationException("getTypeArguments");
     }
 
 }

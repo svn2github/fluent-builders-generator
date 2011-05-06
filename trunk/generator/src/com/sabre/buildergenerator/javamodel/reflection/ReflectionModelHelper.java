@@ -68,12 +68,12 @@ public class ReflectionModelHelper implements IModelHelper<Type, Method, Excepti
                     Class<?> c = (Class<?>) actualTypeArgument;
                     parameterSubstitution.put(rawType.getTypeParameters()[i++].getName(), c.getName());
                 }
-                String signature = typeNameToSignature(rawType.getName());
+                String signature = signatureUtils.createTypeSignature(rawType.getName(), false);
                 inspector.nextSuperType(signature, type, parameterSubstitution);
                 walkHierarchyTree(rawType.getGenericSuperclass(), inspector);
             } else if (type instanceof Class) {
                 Class<?> clazz = (Class<?>) type;
-                String signature = typeNameToSignature(clazz.getName());
+                String signature = signatureUtils.createTypeSignature(clazz.getName(), false);
                 inspector.nextSuperType(signature, type, Collections.<String, String> emptyMap());
                 walkHierarchyTree(clazz.getGenericSuperclass(), inspector);
             }
@@ -94,11 +94,6 @@ public class ReflectionModelHelper implements IModelHelper<Type, Method, Excepti
                 }
             }
         });
-    }
-
-    public String typeNameToSignature(String typeName) {
-        // TODO
-        return signatureUtils.createTypeSignature(typeName, false);
     }
 
     private boolean isReachableSetterMethod(Method method) {

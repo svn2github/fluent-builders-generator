@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import com.sabre.buildergenerator.eclipsejavamodel.EclipseBuilderGenerator;
+import com.sabre.buildergenerator.functionaltest.TestBase;
 import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
 
 

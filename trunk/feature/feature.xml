@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="builder_generator_eclipse_feature"
-      label="Fluent builders generator"
-      version="1.0.9">
+      id="com.sabre.buildergenerator.feature"
+      label="Builder Generator Eclipse Plugin Feature"
+      version="1.0.10">
 
    <description url="http://code.google.com/p/fluent-builders-generator-eclipse-plugin/">
       An Eclipse plugin that allows the developer to generate fluent builders based on a complex POJO&apos;s structure.
@@ -189,10 +189,9 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </license>
 
    <plugin
-         id="builder_generator_eclipse_plugin"
+         id="com.sabre.buildergenerator.plugin"
          download-size="0"
          install-size="0"
-         version="1.0.9"
-         unpack="false"/>
+         version="1.0.10"/>
 
 </feature>

@@ -1,4 +1,4 @@
-package com.sabre.buildergenerator;
+package com.sabre.buildergenerator.functionaltest;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

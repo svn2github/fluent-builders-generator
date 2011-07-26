@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Builder Generator Core
+Bundle-SymbolicName: com.sabre.buildergenerator.core
+Bundle-Version: 1.0.0
+Bundle-ClassPath: .
+Export-Package: com.sabre.buildergenerator.functionaltest,
+ com.sabre.buildergenerator.javamodel,
+ com.sabre.buildergenerator.javamodel.reflection,
+ com.sabre.buildergenerator.signatureutils,
+ com.sabre.buildergenerator.sourcegenerator,
+ com.sabre.buildergenerator.sourcegenerator.java,
+ com.sabre.buildergenerator.typeutils
+Require-Bundle: org.junit;bundle-version="3.8.2"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

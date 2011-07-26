@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.Signature;
 
 import com.sabre.buildergenerator.TestHelper;
 import com.sabre.buildergenerator.eclipsejavamodel.EclipseBuilderGenerator;
+import com.sabre.buildergenerator.functionaltest.BuilderClassGeneratorTestBase;
 
 public class EclipseBuilderClassGeneratorTest extends BuilderClassGeneratorTestBase<IType, ITypeParameter, IMethod, JavaModelException, ICompilationUnit, IFile> {
     private IJavaProject javaProject;

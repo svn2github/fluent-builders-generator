@@ -9,9 +9,11 @@
  *    Sabre Polska sp. z o.o. - initial implementation during Hackday
  */
 
-package com.sabre.buildergenerator.sourcegenerator;
+package com.sabre.buildergenerator.functionaltest;
 
-import com.sabre.buildergenerator.TestBase;
+import com.sabre.buildergenerator.sourcegenerator.BuilderGenerator;
+import com.sabre.buildergenerator.sourcegenerator.MethodConsumer;
+import com.sabre.buildergenerator.sourcegenerator.MethodProvider;
 
 public abstract class BuilderClassGeneratorTestBase<Type, TypeParameter, Method, JavaModelException extends Exception, CompilationUnit, File> extends TestBase<Type, TypeParameter, Method, JavaModelException, CompilationUnit, File> {
     private BuilderGenerator<Type, TypeParameter, Method, JavaModelException> generator;

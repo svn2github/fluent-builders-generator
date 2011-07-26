@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
+import com.sabre.buildergenerator.functionaltest.BuilderClassGeneratorTestBase;
 import com.sabre.buildergenerator.javamodel.reflection.JavaRunner;
 import com.sabre.buildergenerator.javamodel.reflection.ReflectionBuilderGenerator;
 

@@ -4,11 +4,11 @@
    <extension
          point="org.eclipse.ui.popupMenus">
       <viewerContribution
-            id="builder-generator-eclipse-plugin.editorContribution"
+            id="com.sabre.buildergenerator.plugin.editorContribution"
             targetID="#CompilationUnitEditorContext">
          <action 
                class="com.sabre.buildergenerator.ui.actions.GenerateBuilderCompilationUnitEditorAction"
-               id="builder-generator-eclipse-plugin.generateBuilderCompliationUnitEditorPopupMenuAction"
+               id="com.sabre.buildergenerator.plugin.generateBuilderCompliationUnitEditorPopupMenuAction"
                label="Generate Fluent Builder..."
                menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup">
          </action>
@@ -17,11 +17,11 @@
       <!-- contributrion for quick source menu -->
       <!--
       <viewerContribution
-            id="builder-generator-eclipse-plugin.editorQuickContribution"
+            id="com.sabre.buildergenerator.plugin.editorQuickContribution"
             targetID="#CompilationUnitEditorContext">
          <action 
                class="com.sabre.buildergenerator.ui.actions.GenerateBuilderCompilationUnitEditorAction"
-               id="builder-generator-eclipse-plugin.generateBuilderCompliationUnitEditorQuickPopupMenuAction"
+               id="com.sabre.buildergenerator.plugin.generateBuilderCompliationUnitEditorQuickPopupMenuAction"
                label="Generate Fluent Builder..."
                menubarPath="org.eclipse.jdt.ui.edit.text.java.source.quickMenu/generateGroup">
          </action>
@@ -30,11 +30,11 @@
       
       <objectContribution
             adaptable="false"
-            id="builder-generator-eclipse-plugin.itypeContribution"
+            id="com.sabre.buildergenerator.plugin.itypeContribution"
             objectClass="org.eclipse.jdt.core.IType">
          <action
                class="com.sabre.buildergenerator.ui.actions.GenerateBuilderForITypeAction"
-               id="builder-generator-eclipse-plugin.itypeGenerateAction"
+               id="com.sabre.buildergenerator.plugin.itypeGenerateAction"
                label="Generate Fluent Builder..."
                menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup">
          </action>

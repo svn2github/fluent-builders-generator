@@ -1,11 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Builder_generator_eclipse_plugin_test Fragment
-Bundle-SymbolicName: builder_generator_eclipse_plugin_test
+Bundle-Name: Builder Generator Eclipse Plugin Test
+Bundle-SymbolicName: com.sabre.buildergenerator.test
 Bundle-Version: 1.0.0
-Fragment-Host: builder_generator_eclipse_plugin;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ClassPath: .,
+ lib/mockito-all-1.8.4.jar
+Fragment-Host: com.sabre.buildergenerator.plugin;bundle-version="1.0.0"
 Require-Bundle: org.junit;bundle-version="3.8.2",
  org.eclipse.jdt.launching;bundle-version="3.4.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.debug.core,
  org.eclipse.debug.core.model

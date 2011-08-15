@@ -33,7 +33,7 @@ public class SettersTypeTreeContentTreeProvider implements ITreeContentProvider 
 
 	public Object getParent(Object element) {
 		if (element instanceof MethodNode) {
-			return ((MethodNode) element).getParentNode();
+			return ((MethodNode) element).getParentTypeNode();
 		} else {
 			return null;
 		}

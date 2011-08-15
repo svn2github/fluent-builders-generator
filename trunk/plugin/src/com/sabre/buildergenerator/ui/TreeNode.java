@@ -27,7 +27,7 @@ public class TreeNode<ElementType> {
 	private boolean collapsed = false;
 	private ElementType element;
 
-	private TypeNode parentTypeNode;
+//	private TypeNode parentTypeNode;
 
 	private boolean selected = true;
 
@@ -39,7 +39,7 @@ public class TreeNode<ElementType> {
 	 */
 	public TreeNode(ElementType element, TypeNode parentTypeNode) {
 		this.element = element;
-		this.parentTypeNode = parentTypeNode;
+//		this.parentTypeNode = parentTypeNode;
 	}
 
 	/**
@@ -49,21 +49,8 @@ public class TreeNode<ElementType> {
 		return element;
 	}
 
-	public TypeNode getParentNode() {
-		return parentTypeNode;
-	}
-
 	public boolean isSelected() {
 		return selected;
-	}
-
-	public void setSelected(boolean b) {
-		if (getParentNode() != null && !getParentNode().isActive()) {
-			throw new IllegalStateException(
-					"Can't select setter of inactive type");
-		}
-
-		this.selected = b;
 	}
 
 	/**
@@ -86,11 +73,6 @@ public class TreeNode<ElementType> {
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof TreeNode<?>) {
 			TreeNode<ElementType> other = (TreeNode<ElementType>) obj;
-			if (getParentNode() != null
-					&& !getParentNode().equals(other.getParentNode())) {
-				return false;
-			}
-			
 			return other.getElement().equals(getElement());
 		}
 		return false;
@@ -103,7 +85,11 @@ public class TreeNode<ElementType> {
 	 */
 	@Override
 	public int hashCode() {
-		return (getParentNode() != null ? getParentNode().hashCode() : 0) + getElement().hashCode();
+		return getElement().hashCode();
 	}
+
+    public void setSelected(boolean b) {
+        this.selected = b;
+    }
 
 }

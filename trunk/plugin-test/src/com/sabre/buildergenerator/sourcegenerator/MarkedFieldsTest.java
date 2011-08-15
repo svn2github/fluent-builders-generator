@@ -1,11 +1,12 @@
 package com.sabre.buildergenerator.sourcegenerator;
 
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMethod; 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
 import com.sabre.buildergenerator.JdtTestCase;
+import com.sabre.buildergenerator.eclipsejavamodel.TypeAccessor;
 import com.sabre.buildergenerator.javamodel.ISignatureUtils;
 import com.sabre.buildergenerator.javamodel.reflection.SignatureUtils;
 
@@ -18,6 +19,7 @@ public class MarkedFieldsTest extends JdtTestCase {
         markedFields = new MarkedFields<IType, ITypeParameter, IMethod, JavaModelException>();
         ISignatureUtils signatureUtils = new SignatureUtils();
         markedFields.setSignatureUtils(signatureUtils);
+        markedFields.setTypeAccessor(new TypeAccessor());
     }
 
     @Override
@@ -66,7 +68,7 @@ public class MarkedFieldsTest extends JdtTestCase {
         });
 
         // then
-        assertEquals("", true, markedFields.isBuilderRequestedForType("Qtestpkg.MyClass;"));
-        assertEquals("", true, markedFields.isSetterRequestedForField("Qtestpkg.MyClass;", "field"));
+        assertEquals("", true, markedFields.isBuilderRequestedForType("Ltestpkg.MyClass;"));
+        assertEquals("", true, markedFields.isSetterRequestedForField("Ltestpkg.MyClass;", "field"));
     }
 }

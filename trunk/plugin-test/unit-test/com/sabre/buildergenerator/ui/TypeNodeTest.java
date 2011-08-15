@@ -1,11 +1,12 @@
 package com.sabre.buildergenerator.ui;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -14,129 +15,81 @@ import org.eclipse.jdt.core.IType;
 
 public class TypeNodeTest extends TestCase {
 
-	private IType type;
+    private IType type;
 
-	public void setUp() {
-		type = mock(IType.class);
-	}
+    public void setUp() {
+        type = mock(IType.class);
+    }
 
-	public void testShouldBeInactiveIfNoMethodNodeIsPointingAtIt() {
-		TypeNode typeNode = new TypeNode(type, Collections.<IMethod> emptySet());
+    public void testShouldBeActiveByDefault() {
+        TypeNode node = new TypeNode(type, Collections.<IMethod> emptySet());
+        assertTrue(node.isActive());
+    }
 
-		assertFalse(typeNode.isActive());
-	}
+    public void testShouldDeactivateIt() {
+        TypeNode node = new TypeNode(type, Collections.<IMethod> emptySet());
+        node.deactivate();
+        assertFalse(node.isActive());
+    }
 
-	public void testShouldBeActiveIfThereIsAtLeastOneSelectedMethodNodePointingAtIt() {
-		TypeNode typeNode = new TypeNode(type, Collections.<IMethod> emptySet());
+    public void testShouldAttachAMethodNodeForEachIMethodPassed() {
+        // given
+        IMethod method1 = mock(IMethod.class);
+        IMethod method2 = mock(IMethod.class);
 
-		TypeNode methodsParentTypeNode = mock(TypeNode.class);
-		when(methodsParentTypeNode.isActive()).thenReturn(true);
+        // when
+        TypeNode node = new TypeNode(type, asList(method1, method2));
 
-		MethodNode methodNode = mock(MethodNode.class);
-		when(methodNode.isSelected()).thenReturn(false);
-		when(methodNode.getParentNode()).thenReturn(methodsParentTypeNode);
-		typeNode.addPointingMethodNode(methodNode);
+        // then
+        assertEquals(2, node.getMethodNodes().size());
+        assertNotNull(node.getMethodNodeFor(method1));
+        assertNotNull(node.getMethodNodeFor(method2));
+    }
 
-		methodNode = mock(MethodNode.class);
-		when(methodNode.isSelected()).thenReturn(true);
-		when(methodNode.getParentNode()).thenReturn(methodsParentTypeNode
-				);
-		typeNode.addPointingMethodNode(methodNode);
+    public void testShouldPopulateStateChangeToSelectedMethodNodesInActiveAncestors() {
+        // given
+        IMethod method1 = mock(IMethod.class);
+        TypeNode pointedTypeNode = mock(TypeNode.class);
+        when(pointedTypeNode.isActive()).thenReturn(false);
+        TypeNode node = new TypeNode(type, asList(method1));
+        node.getMethodNodeFor(method1).setPointedTypeNode(pointedTypeNode);
 
-		assertTrue(typeNode.isActive());
-	}
+        // when
+        node.populateStateChange();
 
-	public void testShouldBeInactiveIfThereAreNoSelectedMethodNodesPointingAtIt() {
-		TypeNode typeNode = new TypeNode(type, Collections.<IMethod> emptySet());
-		MethodNode methodNode = mock(MethodNode.class);
-		when(methodNode.isSelected()).thenReturn(false);
+        // then
+        verify(pointedTypeNode).populateStateChange();
+    }
 
-		typeNode.addPointingMethodNode(methodNode);
+    public void testShouldNotPopulateStateChangeToSelectedMethodNodesActiveAncestors() {
+        // given
+        IMethod method1 = mock(IMethod.class);
+        TypeNode pointedTypeNode = mock(TypeNode.class);
+        when(pointedTypeNode.isActive()).thenReturn(true);
+        TypeNode node = new TypeNode(type, asList(method1));
+        node.getMethodNodeFor(method1).setPointedTypeNode(pointedTypeNode);
 
-		assertFalse(typeNode.isActive());
-	}
+        // when
+        node.populateStateChange();
 
-	public void testShouldNotAllowSelectingWhileBeingInactive() {
-		TypeNode typeNode = new TypeNode(type, Collections.<IMethod> emptySet());
-		try {
-			typeNode.setSelected(true);
-			assertTrue(false);
-		} catch (IllegalStateException ex) {
-			assertTrue(true);
-		}
-	}
+        // then
+        verify(pointedTypeNode).isActive();
+        verifyNoMoreInteractions(pointedTypeNode);
+    }
 
-	public void testSelectingTypeNodeShouldResultInSelectingAllMethodNodesWithin() {
-		IMethod method = mock(IMethod.class);
-		TypeNode typeNode = new TypeNode(type, createSet(method));
+    public void testShouldNotPopulateStateChangeToNotSelectedMethodNodesAncestors() {
+        // given
+        IMethod method1 = mock(IMethod.class);
+        TypeNode pointedTypeNode = mock(TypeNode.class);
+        when(pointedTypeNode.isActive()).thenReturn(true);
+        TypeNode node = new TypeNode(type, asList(method1));
+        node.getMethodNodeFor(method1).setPointedTypeNode(pointedTypeNode);
+        node.getMethodNodeFor(method1).setSelected(false);
 
-		TypeNode methodParentTypeNode = mock(TypeNode.class);
-		when(methodParentTypeNode.isActive()).thenReturn(true);
-		// ensure type node is active
-		MethodNode pointingMethodNode = mock(MethodNode.class);
-		when(pointingMethodNode.isSelected()).thenReturn(true);
-		when(pointingMethodNode.getParentNode()).thenReturn(methodParentTypeNode);
-		typeNode.addPointingMethodNode(pointingMethodNode);
+        // when
+        node.populateStateChange();
 
-		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {
-			node.setSelected(false);
-		}
-
-		typeNode.setSelected(true);
-
-		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {
-			assertTrue(node.isSelected());
-		}
-	}
-
-	public void testUnselectingTypeNodeShouldResultInUnselectingAllMethodNodesWithin() {
-		IMethod method = mock(IMethod.class);
-		TypeNode typeNode = new TypeNode(type, createSet(method));
-
-		// ensure type node is active
-		TypeNode methodParentTypeNode = mock(TypeNode.class);
-		when(methodParentTypeNode.isActive()).thenReturn(true);
-		
-		MethodNode pointingMethodNode = mock(MethodNode.class);
-		when(pointingMethodNode.isSelected()).thenReturn(true);
-		when(pointingMethodNode.getParentNode()).thenReturn(methodParentTypeNode);
-		typeNode.addPointingMethodNode(pointingMethodNode);
-
-		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {
-			node.setSelected(true);
-		}
-
-		typeNode.setSelected(false);
-
-		for (TreeNode<IMethod> node : typeNode.getMethodNodes()) {
-			assertFalse(node.isSelected());
-		}
-	}
-
-	public void testShouldReturnMethodNodeForIMethodPassed() {
-		IMethod method = mock(IMethod.class);
-		TypeNode typeNode = new TypeNode(type, createSet(method));
-
-		TreeNode<IMethod> methodNode = typeNode.getMethodNodeFor(method);
-
-		assertEquals(methodNode.getElement(), method);
-	}
-
-	public void testShouldFailWhenGettingMethodNodeForWrongMethod() {
-		IMethod method = mock(IMethod.class);
-		TypeNode typeNode = new TypeNode(type, Collections.<IMethod> emptySet());
-		try {
-			typeNode.getMethodNodeFor(method);
-			fail();
-		} catch (IllegalArgumentException ex) {
-			assertTrue(true);
-
-		}
-	}
-
-	private Set<IMethod> createSet(IMethod method) {
-		Set<IMethod> set = new HashSet<IMethod>();
-		set.add(method);
-		return set;
-	}
+        // then
+        verifyNoMoreInteractions(pointedTypeNode);
+    }
 }
